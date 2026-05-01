@@ -1,0 +1,8 @@
+
+package com.example.demo.cart.service;
+import com.example.demo.cart.enity.Cart;
+//import com.example.demo.cart.enity.CartItem;
+
+public interface CartService {
+    Cart addToCart(Long userId, Long productId, int quantity);
+}
