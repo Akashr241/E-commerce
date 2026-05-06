@@ -1,4 +1,6 @@
-package com.example.demo.cart.enity;
+package com.example.demo.cart.entity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 //import com.example.demo.cart.enity.Cart;
 import jakarta.persistence.*;
 
@@ -16,6 +18,7 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
+    @JsonBackReference
     private Cart cart;
 
     // getters and setters
