@@ -1,25 +1,19 @@
 package com.example.demo;
+import com.example.demo.cart.controller.CartController;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-//import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
- 
-@SpringBootApplication
-@RestController
-public class DemoApplication {
-	
 
-	//@RequestMapping("/")
+
+@SpringBootApplication
+public class DemoApplication {
 	public String home() {
 		return "Hello World from Spring Boot!";
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
 		System.out.println("helloworld");
-		      //  SpringApplication.run(EcommerceApplication.class, args);
-
+		SpringApplication.run(DemoApplication.class, args);
 	}
 
 }
