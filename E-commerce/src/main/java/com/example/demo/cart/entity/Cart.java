@@ -1,6 +1,9 @@
+ 
+package com.example.demo.cart.entity;
+import com.example.demo.cart.entity.Cart;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-package com.example.demo.cart.enity;
-import com.example.demo.cart.enity.Cart;
 //import jakarta.annotation.Generated;
 import jakarta.persistence.*;
 import java.util.*;
@@ -18,6 +21,7 @@ public class Cart {
     private Long userId;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<CartItem> items = new ArrayList<>();
 
     // getters and setters
@@ -28,4 +32,4 @@ public class Cart {
 
     public List<CartItem> getItems() { return items; }
     public void setItems(List<CartItem> items) { this.items = items; }
-}
+} 
