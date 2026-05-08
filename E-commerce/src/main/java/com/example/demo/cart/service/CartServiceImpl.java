@@ -29,21 +29,25 @@ public class CartServiceImpl implements CartService {
                     newCart.setUserId(userId);
                     return  newCart;
                 });
-         
-            cart = new Cart();
-            cart.setUserId(userId);
-           // System.out.println("productId: " + productId);
-           // System.out.println("quantity: " + quantity);
-        
 
-        // Create new CartItem
-        CartItem item = new CartItem();
-        item.setProductId(productId);
-        item.setQuantity(quantity);
-        item.setCart(cart);
 
-        cart.getItems().add(item);
 
-        return cartRepository.save(cart);
+                   for (CartItem item : cart.getItems()) {
+        if (item.getProductId().equals(productId)) {
+            // ✅ update quantity
+            item.setQuantity(item.getQuantity() + quantity);
+            return cartRepository.save(cart);
+        }
+    }
+
+    // ✅ If not exists → create new item
+    CartItem newItem = new CartItem();
+    newItem.setProductId(productId);
+    newItem.setQuantity(quantity);
+    newItem.setCart(cart);
+
+    cart.getItems().add(newItem);
+
+    return cartRepository.save(cart);
     }
 }        

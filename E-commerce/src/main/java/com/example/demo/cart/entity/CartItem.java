@@ -1,6 +1,6 @@
 package com.example.demo.cart.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+//import com.fasterxml.jackson.annotation.JsonIgnore;
 //import com.example.demo.cart.enity.Cart;
 import jakarta.persistence.*;
 
