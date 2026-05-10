@@ -18,36 +18,15 @@ public class CartServiceImpl implements CartService {
     private CartItemRepository cartItemRepository;
 
     @Override
-    public Cart addToCart(Long userId, Long productId, int quantity) {
+    public Cart updateCart(Long id, Cart updatedCart) {
 
-        System.out.println("INSIDE SERVICE");
+        Cart existingCart = cartRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
 
+        existingCart.setProductName(updatedCart.getProductName());
+        existingCart.setQuantity(updatedCart.getQuantity());
+        existingCart.setPrice(updatedCart.getPrice());
 
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> {
-                    Cart newCart = new Cart();
-                    newCart.setUserId(userId);
-                    return  newCart;
-                });
-
-
-
-                   for (CartItem item : cart.getItems()) {
-        if (item.getProductId().equals(productId)) {
-            // ✅ update quantity
-            item.setQuantity(item.getQuantity() + quantity);
-            return cartRepository.save(cart);
-        }
+        return cartRepository.save(existingCart);
     }
-
-    // ✅ If not exists → create new item
-    CartItem newItem = new CartItem();
-    newItem.setProductId(productId);
-    newItem.setQuantity(quantity);
-    newItem.setCart(cart);
-
-    cart.getItems().add(newItem);
-
-    return cartRepository.save(cart);
-    }
-}        
+}

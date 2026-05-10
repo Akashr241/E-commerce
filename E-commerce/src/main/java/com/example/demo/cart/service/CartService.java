@@ -4,5 +4,5 @@ import com.example.demo.cart.entity.Cart;
 //import com.example.demo.cart.enity.CartItem;
 
 public interface CartService {
-    Cart addToCart(Long userId, Long productId, int quantity);
+    Cart updateCart(Long id,Cart updateCart );
 }
