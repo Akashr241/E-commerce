@@ -1,33 +1,44 @@
 package com.example.demo.cart.dto;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public class CartRequest {
-    private Long userId;
-    private Long productId;
-    private int quantity;
 
-    // Getters & Setters
-    public Long getUserId() {
-        return userId;
+    @NotBlank(message = "Product name is required")
+    private String productName;
+
+    @NotNull(message = "Quantity is required")
+    @Positive(message = "Quantity must be greater than 0")
+    private Integer quantity;
+
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be greater than 0")
+    private Double price;
+
+    // GETTERS AND SETTERS
+
+    public String getProductName() {
+        return productName;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
-    public Long getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
-}
 
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+}
