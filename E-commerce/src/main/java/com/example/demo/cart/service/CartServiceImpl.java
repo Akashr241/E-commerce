@@ -1,6 +1,7 @@
 package com.example.demo.cart.service;
 
 import com.example.demo.cart.entity.Cart;
+import com.example.demo.cart.exception.ResourceNotFoundException;
 import com.example.demo.cart.repository.CartRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,38 +15,42 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private CartRepository cartRepository;
 
-    // CREATE
     @Override
     public Cart addToCart(Cart cart) {
-
         return cartRepository.save(cart);
     }
 
-    // READ
     @Override
     public List<Cart> getAllCartItems() {
-
         return cartRepository.findAll();
     }
 
-    // UPDATE
     @Override
-    public Cart updateCart(Long id, Cart updatedCart) {
+    public Cart getCartById(Long id) {
 
-        Cart cart = cartRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cart item not found"));
-
-        cart.setProductName(updatedCart.getProductName());
-        cart.setQuantity(updatedCart.getQuantity());
-        cart.setPrice(updatedCart.getPrice());
-
-        return cartRepository.save(cart);
+        return cartRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Cart item not found with id: " + id));
     }
 
-    // DELETE
+    @Override
+    public Cart updateCart(Long id, Cart cart) {
+
+        Cart existingCart = getCartById(id);
+
+        existingCart.setProductName(cart.getProductName());
+        existingCart.setQuantity(cart.getQuantity());
+        existingCart.setPrice(cart.getPrice());
+
+        return cartRepository.save(existingCart);
+    }
+
     @Override
     public void deleteCart(Long id) {
 
-        cartRepository.deleteById(id);
+        Cart existingCart = getCartById(id);
+
+        cartRepository.delete(existingCart);
     }
 }
