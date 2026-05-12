@@ -1,4 +1,5 @@
 package com.example.demo.cart.exception;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -8,9 +9,27 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Handle custom exception
+    // VALIDATION ERROR
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex) {
+
+        String errorMessage = ex.getBindingResult()
+                .getFieldErrors()
+                .get(0)
+                .getDefaultMessage();
+
+        ErrorResponse error = new ErrorResponse(
+                errorMessage,
+                HttpStatus.BAD_REQUEST.value()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    // RESOURCE NOT FOUND
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFound(
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
             ResourceNotFoundException ex) {
 
         ErrorResponse error = new ErrorResponse(
@@ -21,24 +40,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    // Handle validation exception
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(
-            MethodArgumentNotValidException ex) {
-
-        String message = ex.getBindingResult()
-                .getFieldError()
-                .getDefaultMessage();
-
-        ErrorResponse error = new ErrorResponse(
-                message,
-                HttpStatus.BAD_REQUEST.value()
-        );
-
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    // Handle all other exceptions
+    // GLOBAL ERROR
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(
             Exception ex) {
@@ -52,5 +54,3 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
-
-
