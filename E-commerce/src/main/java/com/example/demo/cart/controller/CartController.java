@@ -17,7 +17,7 @@ public class CartController {
     private CartService cartService;
 
     // CREATE
-    @PostMapping
+    @PostMapping("/add")
     public Cart addToCart(@Valid @RequestBody CartRequest request) {
         Cart cart = new Cart();
         cart.setProductName(request.getProductName());
@@ -26,15 +26,19 @@ public class CartController {
 
         return cartService.addToCart(cart);
     }
+    @GetMapping("/all")
+    public List<Cart> getAllCartItems() {
+        return cartService.getAllCartItems();
+    }
 
     // READ
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public Cart getCart(@PathVariable Long id) {
     return cartService.getCartById(id);
 }
 
     // UPDATE
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public Cart updateCart(
             @PathVariable Long id,
             @RequestBody Cart cart) {
