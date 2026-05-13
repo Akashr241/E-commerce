@@ -1,9 +1,10 @@
 package com.example.demo.cart.service;
-
+import com.example.demo.cart.dto.CartItemResponseDto;
+import com.example.demo.cart.dto.CartResponseDto;
 import com.example.demo.cart.entity.Cart;
 import com.example.demo.cart.exception.ResourceNotFoundException;
 import com.example.demo.cart.repository.CartRepository;
-
+import com.example.demo.cart.dto.CartRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,27 @@ public class CartServiceImpl implements CartService {
     private CartRepository cartRepository;
 
     @Override
-    public Cart addToCart(Cart cart) {
-        return cartRepository.save(cart);
-    }
+    public CartResponseDto addCart(Cart cart) {
+
+    Cart savedCart = cartRepository.save(cart);
+
+    List<CartItemResponseDto> itemDtos =
+            savedCart.getCartItems()
+                    .stream()
+                    .map(item -> new CartItemResponseDto(
+                            item.getId(),
+                            item.getProductName(),
+                            item.getQuantity(),
+                            item.getPrice()
+                    ))
+                    .toList();
+
+    return new CartResponseDto(
+            savedCart.getId(),
+            savedCart.getTotalPrice(),
+            itemDtos
+    );
+}
 
     @Override
     public List<Cart> getAllCartItems() {
