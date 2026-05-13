@@ -3,8 +3,12 @@ package com.example.demo.cart.controller;
 import com.example.demo.cart.entity.Cart;
 import com.example.demo.cart.service.CartService;
 import com.example.demo.cart.dto.CartRequest;
+import com.example.demo.cart.dto.CartResponseDto;
+
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,14 +22,16 @@ public class CartController {
 
     // CREATE
     @PostMapping("/add")
-    public Cart addToCart(@Valid @RequestBody CartRequest request) {
-        Cart cart = new Cart();
-        cart.setProductName(request.getProductName());
-        cart.setQuantity(request.getQuantity());
-        cart.setPrice(request.getPrice());
+    public ResponseEntity<CartResponseDto> addCart(
+        @RequestBody Cart cart) {
 
-        return cartService.addToCart(cart);
-    }
+    return new ResponseEntity<>(
+            cartService.addCart(cart),
+            HttpStatus.CREATED
+    );
+}
+
+    
     @GetMapping("/all")
     public List<Cart> getAllCartItems() {
         return cartService.getAllCartItems();
