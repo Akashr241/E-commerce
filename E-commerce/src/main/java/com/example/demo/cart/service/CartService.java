@@ -1,12 +1,13 @@
 package com.example.demo.cart.service;
 
+import com.example.demo.cart.dto.CartResponseDto;
 import com.example.demo.cart.entity.Cart;
 
 import java.util.List;
 
 public interface CartService {
 
-    Cart addToCart(Cart cart);
+    CartResponseDto addCart(Cart cart);
 
     List<Cart> getAllCartItems();
 
