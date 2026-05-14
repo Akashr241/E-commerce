@@ -5,6 +5,7 @@ import com.example.demo.cart.exception.ResourceNotFoundException;
 import com.example.demo.cart.repository.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.example.demo.cart.dto.CartRequestDto;
 
 import java.util.List;
 
@@ -15,7 +16,12 @@ public class CartServiceImpl implements CartService {
     private CartRepository cartRepository;
 
     @Override
-    public CartResponseDto addCart(Cart cart) {
+    public CartResponseDto addCart(CartRequestDto cartRequestDto) {
+
+        Cart cart = new Cart();
+        cart.setProductName(cartRequestDto.getProductName());
+        cart.setQuantity(cartRequestDto.getQuantity());
+        cart.setPrice(cartRequestDto.getPrice());
 
     Cart savedCart = cartRepository.save(cart);
     return new CartResponseDto(

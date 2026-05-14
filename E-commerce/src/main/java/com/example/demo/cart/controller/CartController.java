@@ -2,6 +2,10 @@ package com.example.demo.cart.controller;
 
 import com.example.demo.cart.entity.Cart;
 import com.example.demo.cart.service.CartService;
+
+import jakarta.validation.Valid;
+
+import com.example.demo.cart.dto.CartRequestDto;
 import com.example.demo.cart.dto.CartResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,10 +24,10 @@ public class CartController {
     // CREATE
     @PostMapping("/add")
     public ResponseEntity<CartResponseDto> addCart(
-        @RequestBody Cart cart) {
+    @Valid @RequestBody CartRequestDto cartRequestDto) {
 
     return new ResponseEntity<>(
-            cartService.addCart(cart),
+            cartService.addCart(cartRequestDto),
             HttpStatus.CREATED
     );
 }
