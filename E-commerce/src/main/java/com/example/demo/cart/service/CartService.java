@@ -1,5 +1,5 @@
 package com.example.demo.cart.service;
-
+import com.example.demo.cart.dto.CartRequestDto;
 import com.example.demo.cart.dto.CartResponseDto;
 import com.example.demo.cart.entity.Cart;
 
@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface CartService {
 
-    CartResponseDto addCart(Cart cart);
+    CartResponseDto addCart(CartRequestDto cartRequestDto);
 
     List<Cart> getAllCartItems();
 

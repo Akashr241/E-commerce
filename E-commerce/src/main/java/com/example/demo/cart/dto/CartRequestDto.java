@@ -1,19 +1,18 @@
 package com.example.demo.cart.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Min;
 
-public class CartRequest {
+public class CartRequestDto {
 
     @NotBlank(message = "Product name is required")
     private String productName;
 
     @NotNull(message = "Quantity is required")
-    @Positive(message = "Quantity must be greater than 0")
     private Integer quantity;
 
     @NotNull(message = "Price is required")
-    @Positive(message = "Price must be greater than 0")
+    @Min(value=1,message = "Price must be greater than 0")
     private Double price;
 
     // GETTERS AND SETTERS
