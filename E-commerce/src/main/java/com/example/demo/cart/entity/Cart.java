@@ -1,11 +1,7 @@
  
 package com.example.demo.cart.entity;
 import com.example.demo.cart.entity.Cart;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-//import jakarta.annotation.Generated;
 import jakarta.persistence.*;
-import java.util.*;
 import jakarta.persistence.Entity;
 
 

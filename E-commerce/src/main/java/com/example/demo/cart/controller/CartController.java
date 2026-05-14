@@ -2,10 +2,7 @@ package com.example.demo.cart.controller;
 
 import com.example.demo.cart.entity.Cart;
 import com.example.demo.cart.service.CartService;
-import com.example.demo.cart.dto.CartRequest;
 import com.example.demo.cart.dto.CartResponseDto;
-
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
