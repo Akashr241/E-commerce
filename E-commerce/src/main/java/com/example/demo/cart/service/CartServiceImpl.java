@@ -6,7 +6,7 @@ import com.example.demo.cart.repository.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.demo.cart.dto.CartRequestDto;
-
+import com.example.demo.cart.mapper.CartMapper;
 import java.util.List;
 
 @Service
@@ -18,18 +18,10 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartResponseDto addCart(CartRequestDto cartRequestDto) {
 
-        Cart cart = new Cart();
-        cart.setProductName(cartRequestDto.getProductName());
-        cart.setQuantity(cartRequestDto.getQuantity());
-        cart.setPrice(cartRequestDto.getPrice());
+        Cart cart = CartMapper.mapToCart(cartRequestDto);
 
     Cart savedCart = cartRepository.save(cart);
-    return new CartResponseDto(
-            savedCart.getId(),
-            savedCart.getProductName(),
-            savedCart.getQuantity(),
-            savedCart.getPrice()
-    );
+    return CartMapper.mapToCartResponseDto(savedCart);
 
 
     
