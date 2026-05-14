@@ -8,23 +8,83 @@ import org.springframework.stereotype.Service;
 import com.example.demo.cart.dto.CartRequestDto;
 import com.example.demo.cart.mapper.CartMapper;
 import java.util.List;
-
+import com.example.demo.cart.dto.AddProductToCartRequest;
+import com.example.demo.cart.entity.CartItem;
+import com.example.demo.cart.repository.CartItemRepository;
+import com.example.demo.product.entity.Product;
+import com.example.demo.product.repository.ProductRepository;
+import com.example.demo.product.service.ProductService;
 @Service
 public class CartServiceImpl implements CartService {
 
     @Autowired
     private CartRepository cartRepository;
 
-    @Override
-    public CartResponseDto addCart(CartRequestDto cartRequestDto) {
+    @Autowired
+    private CartItemRepository cartItemRepository;
 
-        Cart cart = CartMapper.mapToCart(cartRequestDto);
+    @Autowired
+    private ProductService productService;
 
-    Cart savedCart = cartRepository.save(cart);
-    return CartMapper.mapToCartResponseDto(savedCart);
-
+    @Autowired
+    private ProductRepository productRepository;
 
     
+@Override 
+public CartResponseDto addProductToCart(
+        AddProductToCartRequest request) {
+
+    Cart cart = cartRepository.findById(request.getCartId())
+            .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                            "Cart not found"));
+
+    Product product = productRepository
+            .findById(request.getProductId())
+            .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                            "Product not found"));
+
+    CartItem cartItem = new CartItem();
+
+    cartItem.setCart(cart);
+    cartItem.setProduct(product);
+    cartItem.setQuantity(request.getQuantity());
+
+    double subtotal =
+            product.getPrice() * request.getQuantity();
+
+    cartItem.setSubTotal(subtotal);
+
+    cartItemRepository.save(cartItem);
+
+    cart.getCartItems().add(cartItem);
+
+    double total =
+            cart.getCartItems()
+                    .stream()
+                    .mapToDouble(CartItem::getSubTotal)
+                    .sum();
+
+    cart.setTotalPrice(total);
+
+    cartRepository.save(cart);
+
+    return CartMapper.mapToCartResponseDto(cart);
+}
+        
+
+@Override
+public CartResponseDto addCart() {
+
+    Cart cart = new Cart();
+
+    cart.setTotalPrice(0);
+
+    Cart savedCart = cartRepository.save(cart);
+
+    return CartMapper
+            .mapToCartResponseDto(savedCart);
 }
 
     @Override
@@ -43,14 +103,10 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Cart updateCart(Long id, Cart cart) {
-
-        Cart existingCart = getCartById(id);
-
-        existingCart.setProductName(cart.getProductName());
-        existingCart.setQuantity(cart.getQuantity());
-        existingCart.setPrice(cart.getPrice());
-
-        return cartRepository.save(existingCart);
+        return cartRepository.findById(id)
+        .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Cart item not found with id: " + id));
     }
 
     @Override

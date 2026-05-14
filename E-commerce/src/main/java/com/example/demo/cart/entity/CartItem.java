@@ -1,35 +1,64 @@
 package com.example.demo.cart.entity;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-//import com.fasterxml.jackson.annotation.JsonIgnore;
-//import com.example.demo.cart.enity.Cart;
+
+import com.example.demo.product.entity.Product;
+
 import jakarta.persistence.*;
 
-import jakarta.persistence.Entity;
-
 @Entity
+@Table(name = "cart_items")
 public class CartItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long productId;
     private int quantity;
+
+    private double subTotal;
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
-    @JsonBackReference
     private Cart cart;
 
-    // getters and setters
-    public Long getId() { return id; }
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
-    public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
+    // getters setters
 
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public Long getId() {
+        return id;
+    }
 
-    public Cart getCart() { return cart; }
-    public void setCart(Cart cart) { this.cart = cart; }
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public double getSubTotal() {
+        return subTotal;
+    }
+
+    public void setSubTotal(double subTotal) {
+        this.subTotal = subTotal;
+    }
+
+    public Cart getCart() {
+        return cart;
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 }

@@ -1,9 +1,9 @@
- 
 package com.example.demo.cart.entity;
-import com.example.demo.cart.entity.Cart;
-import jakarta.persistence.*;
-import jakarta.persistence.Entity;
 
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "cart")
@@ -13,50 +13,35 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String productName;
+    private double totalPrice;
 
-    private int quantity;
+    @OneToMany(
+            mappedBy = "cart",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<CartItem> cartItems =
+            new ArrayList<>();
 
-    private double price;
-
-    public Cart() {
-    }
-
-    public Cart(String productName, int quantity, double price) {
-        this.productName = productName;
-        this.quantity = quantity;
-        this.price = price;
-    }
+    // getters setters
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public double getTotalPrice() {
+        return totalPrice;
     }
 
-    public String getProductName() {
-        return productName;
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
-    public void setProductName(String productName) {
-        this.productName = productName;
+    public List<CartItem> getCartItems() {
+        return cartItems;
     }
 
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
+    public void setCartItems(List<CartItem> cartItems) {
+        this.cartItems = cartItems;
     }
 }

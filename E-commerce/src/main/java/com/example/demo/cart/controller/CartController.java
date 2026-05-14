@@ -2,10 +2,9 @@ package com.example.demo.cart.controller;
 
 import com.example.demo.cart.entity.Cart;
 import com.example.demo.cart.service.CartService;
-
+//import com.example.demo.cart.dto.CartResponseDto;
 import jakarta.validation.Valid;
-
-import com.example.demo.cart.dto.CartRequestDto;
+import com.example.demo.cart.dto.AddProductToCartRequest;
 import com.example.demo.cart.dto.CartResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,13 +20,22 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    // CREATE
     @PostMapping("/add")
-    public ResponseEntity<CartResponseDto> addCart(
-    @Valid @RequestBody CartRequestDto cartRequestDto) {
+    public ResponseEntity<CartResponseDto> addCart() {
+        return new ResponseEntity <>(
+                cartService.addCart(),
+                HttpStatus.CREATED
+                
+        );
+    }
+ 
+    // CREATE
+    @PostMapping("/add-product")
+    public ResponseEntity<CartResponseDto> addProductToCart(
+             @RequestBody AddProductToCartRequest request) {
 
-    return new ResponseEntity<>(
-            cartService.addCart(cartRequestDto),
+        return new ResponseEntity<>(
+                cartService.addProductToCart(request),
             HttpStatus.CREATED
     );
 }
