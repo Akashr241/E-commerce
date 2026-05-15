@@ -79,21 +79,72 @@ public class CartServiceImpl implements CartService {
                                 "Cart not found with id: " + id));
     }
 
+    
     @Override
-    public Cart updateCart(Long id, Cart cart) {
+public CartResponseDto updateCartItemQuantity (
+        Long cartId,
+        Long cartItemId,
+        int quantity) {
 
-        Cart existingCart = getCartById(id);
+    Cart cart = cartRepository.findById(cartId)
+            .orElseThrow(() ->
+                    new RuntimeException("Cart not found"));
 
-        existingCart.setTotalPrice(cart.getTotalPrice());
+    CartItem cartItem = cart.getCartItems()
+            .stream()
+            .filter(item -> item.getId().equals(cartItemId))
+            .findFirst()
+            .orElseThrow(() ->
+                    new RuntimeException("Cart item with id " + cartItemId + " not found in cart"));
 
-        return cartRepository.save(existingCart);
-    }
+    cartItem.setQuantity(quantity);
 
-    @Override
-    public void deleteCart(Long id) {
+    double subTotal =
+            cartItem.getProduct().getPrice() * quantity;
 
-        Cart existingCart = getCartById(id);
+    cartItem.setSubTotal(subTotal);
+  updateCartTotal(cart);
+    
+    Cart savedCart = cartRepository.save(cart);
 
-        cartRepository.delete(existingCart);
-    }
+    return CartMapper.mapToCartResponseDto(savedCart);
 }
+
+    
+
+    @Override
+public void removeCartItem(Long cartId, Long cartItemId) {
+
+    Cart cart = cartRepository.findById(cartId)
+            .orElseThrow(() ->
+                    new RuntimeException("Cart not found"));
+
+    CartItem cartItem = cart.getCartItems()
+            .stream()
+            .filter(item -> item.getId().equals(cartItemId))
+            .findFirst()
+            .orElseThrow(() ->
+                    new RuntimeException("Cart item not found"));
+
+    cart.getCartItems().remove(cartItem);
+
+    double total = cart.getCartItems()
+            .stream()
+            .mapToDouble(CartItem::getSubTotal)
+            .sum();
+
+    cart.setTotalPrice(total);
+
+    cartRepository.save(cart);
+}
+private void updateCartTotal(Cart cart) {
+
+    double total = cart.getCartItems()
+            .stream()
+            .mapToDouble(CartItem::getSubTotal)
+            .sum();
+
+    cart.setTotalPrice(total);
+}
+
+    }

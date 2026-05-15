@@ -52,20 +52,24 @@ public class CartController {
 }
 
     // UPDATE
-    @PutMapping("/update/{id}")
-    public Cart updateCart(
-            @PathVariable Long id,
-            @RequestBody Cart cart) {
+    @PutMapping("/{cartId}/items/{cartItemId}")
+    public ResponseEntity<CartResponseDto> updateCartItemQuantity(
+            @PathVariable Long cartId,
+            @PathVariable Long cartItemId,
+            @RequestParam int quantity) {
+                CartResponseDto response = cartService.updateCartItemQuantity(cartId, cartItemId, quantity);
+        return ResponseEntity.ok(response);
 
-        return cartService.updateCart(id, cart);
     }
 
     // DELETE
-    @DeleteMapping("/{id}")
-    public String deleteCart(@PathVariable Long id) {
+    @DeleteMapping("/{cartId}/items/{cartItemId}")
+    public ResponseEntity<String> removeCartItem(
+            @PathVariable Long cartId,
+            @PathVariable Long cartItemId) {
 
-        cartService.deleteCart(id);
+        cartService.removeCartItem(cartId, cartItemId);
 
-        return "Cart item deleted successfully";
+        return ResponseEntity.ok("item removed successfully");
     }
 }

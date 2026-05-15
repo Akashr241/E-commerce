@@ -1,6 +1,6 @@
 package com.example.demo.cart.entity;
 import com.example.demo.cartitem.CartItem;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -19,8 +19,8 @@ public class Cart {
     @OneToMany(
             mappedBy = "cart",
             cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+            orphanRemoval = true)
+     @JsonBackReference       
     private List<CartItem> cartItems =
             new ArrayList<>();
 
