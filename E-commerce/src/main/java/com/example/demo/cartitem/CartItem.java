@@ -1,11 +1,10 @@
-package com.example.demo.cart.entity;
-
+package com.example.demo.cartitem;
+import com.example.demo.cart.entity.Cart;
 import com.example.demo.product.entity.Product;
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "cart_items")
 public class CartItem {
 
     @Id
@@ -24,10 +23,25 @@ public class CartItem {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    // getters setters
+    // Constructors
+    public CartItem() {
+    }
 
+    public CartItem(Long id, int quantity, double subTotal, Cart cart, Product product) {
+        this.id = id;
+        this.quantity = quantity;
+        this.subTotal = subTotal;
+        this.cart = cart;
+        this.product = product;
+    }
+
+    // Getters and Setters
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public int getQuantity() {

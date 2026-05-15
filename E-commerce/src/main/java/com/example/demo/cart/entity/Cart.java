@@ -1,4 +1,5 @@
 package com.example.demo.cart.entity;
+import com.example.demo.cartitem.CartItem;
 
 import jakarta.persistence.*;
 

@@ -3,7 +3,6 @@ package com.example.demo.cart.controller;
 import com.example.demo.cart.entity.Cart;
 import com.example.demo.cart.service.CartService;
 //import com.example.demo.cart.dto.CartResponseDto;
-import jakarta.validation.Valid;
 import com.example.demo.cart.dto.AddProductToCartRequest;
 import com.example.demo.cart.dto.CartResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
