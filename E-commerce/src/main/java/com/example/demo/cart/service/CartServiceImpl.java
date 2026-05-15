@@ -1,19 +1,19 @@
 package com.example.demo.cart.service;
+
+import com.example.demo.cart.dto.AddProductToCartRequest;
 import com.example.demo.cart.dto.CartResponseDto;
 import com.example.demo.cart.entity.Cart;
 import com.example.demo.cart.exception.ResourceNotFoundException;
+import com.example.demo.cart.mapper.CartMapper;
 import com.example.demo.cart.repository.CartRepository;
+import com.example.demo.cartitem.CartItem;
+import com.example.demo.cartitem.CartItemService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.example.demo.cart.dto.CartRequestDto;
-import com.example.demo.cart.mapper.CartMapper;
+
 import java.util.List;
-import com.example.demo.cart.dto.AddProductToCartRequest;
-import com.example.demo.cart.entity.CartItem;
-import com.example.demo.cart.repository.CartItemRepository;
-import com.example.demo.product.entity.Product;
-import com.example.demo.product.repository.ProductRepository;
-import com.example.demo.product.service.ProductService;
+
 @Service
 public class CartServiceImpl implements CartService {
 
@@ -21,71 +21,49 @@ public class CartServiceImpl implements CartService {
     private CartRepository cartRepository;
 
     @Autowired
-    private CartItemRepository cartItemRepository;
+    private CartItemService cartItemService;
 
-    @Autowired
-    private ProductService productService;
+    @Override
+    public CartResponseDto addProductToCart(
+            AddProductToCartRequest request) {
 
-    @Autowired
-    private ProductRepository productRepository;
+        Cart cart = cartRepository.findById(request.getCartId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Cart not found"));
 
-    
-@Override 
-public CartResponseDto addProductToCart(
-        AddProductToCartRequest request) {
+        CartItem cartItem =
+                cartItemService.addProductToCart(
+                        request.getCartId(),
+                        request.getProductId(),
+                        request.getQuantity());
 
-    Cart cart = cartRepository.findById(request.getCartId())
-            .orElseThrow(() ->
-                    new ResourceNotFoundException(
-                            "Cart not found"));
+        cart.getCartItems().add(cartItem);
 
-    Product product = productRepository
-            .findById(request.getProductId())
-            .orElseThrow(() ->
-                    new ResourceNotFoundException(
-                            "Product not found"));
+        double total =
+                cart.getCartItems()
+                        .stream()
+                        .mapToDouble(CartItem::getSubTotal)
+                        .sum();
 
-    CartItem cartItem = new CartItem();
+        cart.setTotalPrice(total);
 
-    cartItem.setCart(cart);
-    cartItem.setProduct(product);
-    cartItem.setQuantity(request.getQuantity());
+        cartRepository.save(cart);
 
-    double subtotal =
-            product.getPrice() * request.getQuantity();
+        return CartMapper.mapToCartResponseDto(cart);
+    }
 
-    cartItem.setSubTotal(subtotal);
+    @Override
+    public CartResponseDto addCart() {
 
-    cartItemRepository.save(cartItem);
+        Cart cart = new Cart();
 
-    cart.getCartItems().add(cartItem);
+        cart.setTotalPrice(0);
 
-    double total =
-            cart.getCartItems()
-                    .stream()
-                    .mapToDouble(CartItem::getSubTotal)
-                    .sum();
+        Cart savedCart = cartRepository.save(cart);
 
-    cart.setTotalPrice(total);
-
-    cartRepository.save(cart);
-
-    return CartMapper.mapToCartResponseDto(cart);
-}
-        
-
-@Override
-public CartResponseDto addCart() {
-
-    Cart cart = new Cart();
-
-    cart.setTotalPrice(0);
-
-    Cart savedCart = cartRepository.save(cart);
-
-    return CartMapper
-            .mapToCartResponseDto(savedCart);
-}
+        return CartMapper.mapToCartResponseDto(savedCart);
+    }
 
     @Override
     public List<Cart> getAllCartItems() {
@@ -98,15 +76,17 @@ public CartResponseDto addCart() {
         return cartRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Cart item not found with id: " + id));
+                                "Cart not found with id: " + id));
     }
 
     @Override
     public Cart updateCart(Long id, Cart cart) {
-        return cartRepository.findById(id)
-        .orElseThrow(() ->
-                new ResourceNotFoundException(
-                        "Cart item not found with id: " + id));
+
+        Cart existingCart = getCartById(id);
+
+        existingCart.setTotalPrice(cart.getTotalPrice());
+
+        return cartRepository.save(existingCart);
     }
 
     @Override
