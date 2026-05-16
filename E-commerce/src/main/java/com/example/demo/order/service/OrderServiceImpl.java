@@ -16,6 +16,12 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDto placeOrder(Long cartId) {
 
-        return null;
+        OrderResponseDto dto = new OrderResponseDto();
+
+        dto.setId(1L);
+        dto.setStatus("PLACED");
+        dto.setTotalAmount(255000.0);
+
+        return dto;
     }
 }
