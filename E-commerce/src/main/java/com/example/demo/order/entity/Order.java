@@ -18,6 +18,10 @@ public class Order {
 
     private String status;
 
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private String user;
+
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
@@ -63,5 +67,9 @@ public class Order {
 
     public void setOrderItems(List<OrderItem> orderItems) {
         this.orderItems = orderItems;
+    }
+
+    public void setUser(String user){
+        this.user=user;
     }
 }
