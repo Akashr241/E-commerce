@@ -2,7 +2,7 @@ package com.example.demo.cart.entity;
 import com.example.demo.cartitem.CartItem;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-
+import com.example.demo.security.user.entity.User;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +15,11 @@ public class Cart {
     private Long id;
 
     private double totalPrice;
+
+
+    @OneToOne
+    @JoinColumn(name="user_id")
+    private  User user;
 
     @OneToMany(
             mappedBy = "cart",
@@ -45,4 +50,12 @@ public class Cart {
     public void setCartItems(List<CartItem> cartItems) {
         this.cartItems = cartItems;
     }
+    public User getUser() {
+    return user;
+}
+
+public void setUser(User user) {
+    this.user = user;
+}
+ 
 }

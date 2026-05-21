@@ -11,6 +11,7 @@ public interface CartService {
     CartResponseDto addProductToCart(AddProductToCartRequest request);
 
     List<Cart> getAllCartItems();
+    CartResponseDto createCart();
 
     Cart getCartById(Long id);
     

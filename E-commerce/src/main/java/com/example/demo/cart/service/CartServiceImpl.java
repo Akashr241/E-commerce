@@ -10,10 +10,12 @@ import com.example.demo.cartitem.CartItem;
 import com.example.demo.cartitem.CartItemService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+ import com.example.demo.security.user.entity.User;
+import com.example.demo.security.user.repository.UserRepository;
 @Service
 public class CartServiceImpl implements CartService {
 
@@ -22,6 +24,10 @@ public class CartServiceImpl implements CartService {
 
     @Autowired
     private CartItemService cartItemService;
+
+    @Autowired
+    private UserRepository userRepository;
+
 
     @Override
     public CartResponseDto addProductToCart(
@@ -145,6 +151,29 @@ private void updateCartTotal(Cart cart) {
             .sum();
 
     cart.setTotalPrice(total);
+}
+@Override
+public CartResponseDto createCart() {
+
+    String email = SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() ->
+                    new RuntimeException("User not found"));
+
+    Cart cart = new Cart();
+
+    cart.setUser(user);
+
+    cart.setTotalPrice(0.0);
+
+    Cart savedCart = cartRepository.save(cart);
+
+    return CartMapper
+            .mapToCartResponseDto(savedCart);
 }
 
     }
