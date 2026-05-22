@@ -18,9 +18,9 @@ public class Order {
 
     private String status;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private String user;
+   // @OneToOne
+   // @JoinColumn(name = "user_id")
+    //private String user;
 
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
@@ -64,7 +64,7 @@ public class Order {
     public List<OrderItem> getOrderItems() {
         return orderItems;
     }
-
+/* 
     public void setOrderItems(List<OrderItem> orderItems) {
         this.orderItems = orderItems;
     }
@@ -72,4 +72,5 @@ public class Order {
     public void setUser(String user){
         this.user=user;
     }
+    */
 }
