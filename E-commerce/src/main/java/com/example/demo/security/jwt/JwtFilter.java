@@ -72,7 +72,26 @@ public class JwtFilter extends OncePerRequestFilter {
                         .setAuthentication(authToken);
             }
         }
+        System.out.println(authHeader);
+        System.out.println(jwtToken);
+        System.out.println(email);
 
         filterChain.doFilter(request, response);
+
+
+        if (authHeader != null
+        && authHeader.startsWith("Bearer ")) {
+
+    jwtToken = authHeader.substring(7);
+
+    try {
+
+        email = jwtService.extractEmail(jwtToken);
+
+    } catch (Exception e) {
+
+        System.out.println("JWT Error: " + e.getMessage());
+    }
+}
     }
 }
