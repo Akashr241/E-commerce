@@ -1,5 +1,5 @@
 package com.example.demo.order.entity;
-
+import com.example.demo.security.user.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,9 +18,9 @@ public class Order {
 
     private String status;
 
-   // @OneToOne
-   // @JoinColumn(name = "user_id")
-    //private String user;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
@@ -64,13 +64,16 @@ public class Order {
     public List<OrderItem> getOrderItems() {
         return orderItems;
     }
-/* 
+
     public void setOrderItems(List<OrderItem> orderItems) {
         this.orderItems = orderItems;
     }
+    public User getUser() {
+        return user;
+    }
 
-    public void setUser(String user){
+    public void setUser(User user){
         this.user=user;
     }
-    */
+    
 }
