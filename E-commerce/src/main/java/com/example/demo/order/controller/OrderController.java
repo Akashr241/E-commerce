@@ -4,6 +4,7 @@ import com.example.demo.order.dto.OrderRequestDto;
 import com.example.demo.order.dto.OrderResponseDto;
 import com.example.demo.order.service.OrderService;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,10 +20,8 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-   @PostMapping("/place")
-public OrderResponseDto placeOrder(
-        @RequestBody OrderRequestDto requestDto) {
-
-    return orderService.placeOrder(requestDto.getCartId());
+   @PostMapping("/place/{cartId}")
+public OrderResponseDto placeOrder(@PathVariable Long cartId) {
+    return orderService.placeOrder(cartId);
 } 
 }
