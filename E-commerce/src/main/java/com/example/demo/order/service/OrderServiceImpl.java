@@ -12,8 +12,9 @@ import com.example.demo.cart.entity.Cart;
 import com.example.demo.cart.repository.CartRepository;
 import com.example.demo.order.entity.OrderItem;
 //import com.example.demo.cart.entity.Cart;
+import com.example.demo.product.entity.Product;
 import com.example.demo.cartitem.CartItem;
-
+import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OrderServiceImpl implements OrderService {
 
@@ -26,7 +27,7 @@ public class OrderServiceImpl implements OrderService {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
     }
-
+    @Transactional
     @Override
     public OrderResponseDto placeOrder(Long cartId) {
         Cart cart = cartRepository.findById(cartId)
@@ -36,8 +37,16 @@ public class OrderServiceImpl implements OrderService {
         OrderResponseDto dto =new OrderResponseDto();
         order.setStatus("PLACED");
                 order.setTotalAmount(cart.getTotalPrice());
+
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem cartItem : cart.getCartItems()) {
+            Product product = cartItem.getProduct();
+            if(product.getStock() < cartItem.getQuantity()) {
+                throw new RuntimeException("Product " + product.getName() + " is out of stock.");
+            }
+            product.setStock(product.getStock() - cartItem.getQuantity());
+
+
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(cartItem.getProduct());
             orderItem.setProductName(cartItem.getProduct().getName());

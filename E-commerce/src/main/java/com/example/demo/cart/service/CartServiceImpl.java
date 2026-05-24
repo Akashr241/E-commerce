@@ -8,7 +8,6 @@ import com.example.demo.cart.mapper.CartMapper;
 import com.example.demo.cart.repository.CartRepository;
 import com.example.demo.cartitem.CartItem;
 import com.example.demo.cartitem.CartItemService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -16,6 +15,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
  import com.example.demo.security.user.entity.User;
 import com.example.demo.security.user.repository.UserRepository;
+import com.example.demo.product.repository.ProductRepository;
+import com.example.demo.product.entity.Product;
+import com.example.demo.order.entity.OrderItem;
 @Service
 public class CartServiceImpl implements CartService {
 
@@ -28,6 +30,8 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ProductRepository productRepository;
 
     @Override
     public CartResponseDto addProductToCart(
@@ -43,6 +47,20 @@ public class CartServiceImpl implements CartService {
                         request.getCartId(),
                         request.getProductId(),
                         request.getQuantity());
+
+
+             Product product = productRepository
+        .findById(request.getProductId())
+        .orElseThrow(() ->
+                new RuntimeException("Product not found"));
+
+System.out.println(product.getStock());
+
+System.out.println("Quantity: " + request.getQuantity());
+
+if(product.getStock() < request.getQuantity()) {
+    throw new RuntimeException("Insufficient stock");
+}           
 
         cart.getCartItems().add(cartItem);
 
@@ -67,7 +85,6 @@ public class CartServiceImpl implements CartService {
         cart.setTotalPrice(0);
 
         Cart savedCart = cartRepository.save(cart);
-
         return CartMapper.mapToCartResponseDto(savedCart);
     }
 
