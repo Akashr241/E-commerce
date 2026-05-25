@@ -15,17 +15,23 @@ import com.example.demo.order.entity.OrderItem;
 import com.example.demo.product.entity.Product;
 import com.example.demo.cartitem.CartItem;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.demo.product.repository.ProductRepository;
+import com.example.demo.cartitem.CartItemRepository;
 @Service
 public class OrderServiceImpl implements OrderService {
 
+
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
+    private final ProductRepository productRepository;
 
     public OrderServiceImpl(OrderRepository orderRepository,
-                            CartRepository cartRepository
+                            CartRepository cartRepository,
+                            ProductRepository productRepository
     ) {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
+        this.productRepository = productRepository;
     }
     @Transactional
     @Override
@@ -34,24 +40,28 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new RuntimeException("Cart not found with id: "));
         Order order = new Order();
         order.setOrderDate(LocalDateTime.now());
-        OrderResponseDto dto =new OrderResponseDto();
+       // OrderResponseDto dto =new OrderResponseDto();
         order.setStatus("PLACED");
                 order.setTotalAmount(cart.getTotalPrice());
 
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem cartItem : cart.getCartItems()) {
+            System.out.println("loop was running");
             Product product = cartItem.getProduct();
+            System.out.println("Old stock " + product.getStock());
+
             if(product.getStock() < cartItem.getQuantity()) {
                 throw new RuntimeException("Product " + product.getName() + " is out of stock.");
             }
+            System.out.println("new stock " +product.getStock());
             product.setStock(product.getStock() - cartItem.getQuantity());
-
+            productRepository.save(product);
 
             OrderItem orderItem = new OrderItem();
-            orderItem.setProduct(cartItem.getProduct());
-            orderItem.setProductName(cartItem.getProduct().getName());
+           // orderItem.setProduct(cartItem.getProduct());
+            orderItem.setProductName(product.getName());
             orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setPrice(cartItem.getProduct().getPrice());
+            orderItem.setPrice(product.getPrice());
             orderItem.setSubtotal(cartItem.getSubTotal());
             orderItem.setOrder(order);
             orderItems.add(orderItem);
