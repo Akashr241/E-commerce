@@ -30,6 +30,8 @@ public class CartItemService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Cart not found"));
+                                cart.setCartItems(cart.getCartItems());
+                                System.out.println(cart.getCartItems().size()+" items in cart");
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->
@@ -39,12 +41,16 @@ public class CartItemService {
         double subTotal = quantity * product.getPrice();
 
         CartItem cartItem = new CartItem();
+        
 
         cartItem.setCart(cart);
         cartItem.setProduct(product);
         cartItem.setQuantity(quantity);
         cartItem.setSubTotal(subTotal);
+                System.out.println("cart item saving inside database");
 
-        return cartItemRepository.save(cartItem);
+                CartItem saved= cartItemRepository.save(cartItem);
+                System.out.println("cart item saved with id: " + saved.getId());
+        return saved;
     }
 }
