@@ -53,8 +53,10 @@ public class OrderServiceImpl implements OrderService {
             if(product.getStock() < cartItem.getQuantity()) {
                 throw new RuntimeException("Product " + product.getName() + " is out of stock.");
             }
-            System.out.println("new stock " +product.getStock());
+            System.out.println("quantity:  " + cartItem.getQuantity());
             product.setStock(product.getStock() - cartItem.getQuantity());
+            System.out.println("new stock " +product.getStock());
+
             productRepository.save(product);
 
             OrderItem orderItem = new OrderItem();

@@ -32,7 +32,7 @@ public class CartItemService {
                                 "Cart not found"));
                                 cart.setCartItems(cart.getCartItems());
                                 System.out.println(cart.getCartItems().size()+" items in cart");
-
+System.out.println("add product method called");
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
