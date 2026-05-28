@@ -38,6 +38,9 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponseDto placeOrder(Long cartId) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Cart not found with id: "));
+                if(cart.getCartItems().isEmpty()) {
+                    throw new RuntimeException("Cart is empty. Cannot place order.");
+                }
         Order order = new Order();
         order.setOrderDate(LocalDateTime.now());
        // OrderResponseDto dto =new OrderResponseDto();
@@ -66,12 +69,17 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setPrice(product.getPrice());
             orderItem.setSubtotal(cartItem.getSubTotal());
             orderItem.setOrder(order);
+            //set order item
             orderItems.add(orderItem);
+            //save order item
             order.setOrderItems(orderItems);
             
         }
         order.setOrderItems(orderItems);
         Order savedOrder = orderRepository.save(order);
+        cart.getCartItems().clear();
+        cart.setTotalPrice(0.0);
+        cartRepository.save(cart);
 
         return OrderMapper.mapToOrderResponseDto(savedOrder);
     }
