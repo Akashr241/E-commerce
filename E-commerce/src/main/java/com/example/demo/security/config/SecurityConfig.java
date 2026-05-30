@@ -1,6 +1,6 @@
 package com.example.demo.security.config;
 
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties.Jwt;
+//import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties.Jwt;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,6 +33,10 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/orders/**")
+                        .hasRole("USER")
+                        .requestMatchers("/products/add")
+                        .hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                                 .exceptionHandling(ex -> ex
