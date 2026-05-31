@@ -1,5 +1,7 @@
 package com.example.demo.security.user.entity;
 
+import com.example.demo.security.user.entity.Role;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -17,7 +19,8 @@ public class User {
 
     private String password;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     public User() {
     }
@@ -38,7 +41,7 @@ public class User {
         return password;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
@@ -58,7 +61,7 @@ public class User {
         this.password = password;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 }

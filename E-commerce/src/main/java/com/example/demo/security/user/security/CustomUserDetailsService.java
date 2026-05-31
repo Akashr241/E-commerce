@@ -1,12 +1,8 @@
 package com.example.demo.security.user.security;
-
-import java.util.Optional;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import com.example.demo.security.user.entity.User;
 import com.example.demo.security.user.repository.UserRepository;
 
@@ -37,7 +33,7 @@ public class CustomUserDetailsService
                 .builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
-                .authorities(user.getRole())
+                .authorities(user.getRole()!=null? user.getRole().name() : null)
                 .build();
     }
 }
