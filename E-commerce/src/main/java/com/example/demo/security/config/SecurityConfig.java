@@ -3,6 +3,7 @@ package com.example.demo.security.config;
 //import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties.Jwt;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,6 +34,10 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/products").hasAuthority("ADMIN")
+                         .requestMatchers(HttpMethod.PUT,"/products/**").hasAuthority("ADMIN")
+                         .requestMatchers(HttpMethod.DELETE,"/products/**").hasAuthority("ADMIN")
+
                         .requestMatchers("/orders/**")
                         .hasRole("USER")
                         .requestMatchers("/products/add")
