@@ -1,10 +1,9 @@
 package com.example.demo.order.mapper;
-
 import com.example.demo.order.dto.OrderItemResponseDto;
 import com.example.demo.order.dto.OrderResponseDto;
 import com.example.demo.order.entity.Order;
 import com.example.demo.order.entity.OrderItem;
-
+import com.example.demo.order.dto.OrderHistoryResponseDto;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,4 +41,17 @@ public class OrderMapper {
 
         return dto;
     }
+
+   private OrderHistoryResponseDto
+   mapToOrderHistoryDto(Order order){
+
+    OrderHistoryResponseDto dto =
+            new OrderHistoryResponseDto();
+
+    dto.setId(order.getId());
+    dto.setTotalPrice(order.getTotalPrice());
+    dto.setStatus(order.getStatus().name());
+
+    return dto;
+} 
 }
