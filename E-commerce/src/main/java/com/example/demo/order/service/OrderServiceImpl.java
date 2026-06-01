@@ -7,6 +7,7 @@ import com.example.demo.order.service.OrderService;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.example.demo.cart.entity.Cart;
 import com.example.demo.cart.repository.CartRepository;
@@ -17,6 +18,10 @@ import com.example.demo.cartitem.CartItem;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.product.repository.ProductRepository;
 import com.example.demo.cartitem.CartItemRepository;
+import com.example.demo.order.dto.OrderHistoryResponseDto;
+import com.example.demo.security.user.repository.UserRepository;
+import com.example.demo.security.user.entity.User;
+import org.springframework.security.core.Authentication;
 @Service
 public class OrderServiceImpl implements OrderService {
 
@@ -24,14 +29,16 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
-
+    private final UserRepository userRepository;
     public OrderServiceImpl(OrderRepository orderRepository,
                             CartRepository cartRepository,
-                            ProductRepository productRepository
+                            ProductRepository productRepository,
+                            UserRepository userRepository
     ) {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
     }
     @Transactional
     @Override
@@ -84,5 +91,23 @@ public class OrderServiceImpl implements OrderService {
         return OrderMapper.mapToOrderResponseDto(savedOrder);
     }
     
+@Override
+public List<OrderHistoryResponseDto> getMyOrders() {
 
+    Authentication authentication =
+            SecurityContextHolder.getContext().getAuthentication();
+
+    String email = authentication.getName();
+
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() ->
+                    new RuntimeException("User not found"));
+
+    List<Order> orders =
+            orderRepository.findByUser(user);
+
+    return orders.stream()
+            .map(this::mapToOrderHistoryDto)
+            .toList();
+}
 }
