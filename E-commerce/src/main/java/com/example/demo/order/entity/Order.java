@@ -3,7 +3,8 @@ import com.example.demo.security.user.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
-
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -16,7 +17,10 @@ public class Order {
 
     private Double totalAmount;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private enum  OrderStatus {
+        PLACED, PROCESSING ,SHIPPED, DELIVERED, CANCELLED,
+    };
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -53,11 +57,11 @@ public class Order {
         this.totalAmount = totalAmount;
     }
 
-    public String getStatus() {
+    public OrderStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(OrderStatus status) {
         this.status = status;
     }
 
