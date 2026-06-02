@@ -17,7 +17,6 @@ import java.util.List;
 import com.example.demo.security.user.repository.UserRepository;
 import com.example.demo.product.repository.ProductRepository;
 import com.example.demo.product.entity.Product;
-import com.example.demo.order.entity.OrderItem;
 @Service
 public class CartServiceImpl implements CartService {
 

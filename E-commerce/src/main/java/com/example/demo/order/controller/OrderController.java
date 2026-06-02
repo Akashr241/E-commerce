@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.example.demo.order.mapper.OrderMapper;
 import com.example.demo.order.dto.OrderHistoryResponseDto;
 @RestController
 @RequestMapping("/orders")
@@ -29,6 +28,6 @@ public OrderResponseDto placeOrder(@PathVariable Long cartId) {
  @GetMapping("/my-orders")
     public ResponseEntity<List<OrderHistoryResponseDto>> getMyOrders() {
         List<OrderHistoryResponseDto> orders = orderService.getMyOrders();
-        return ResponseEntity.ok(orderService.getMyOrders());
+        return ResponseEntity.ok(orders);
     }
 }
