@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import com.example.demo.order.entity.OrderStatus;
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -18,9 +19,7 @@ public class Order {
     private Double totalAmount;
 
     @Enumerated(EnumType.STRING)
-    private enum  OrderStatus {
-        PLACED, PROCESSING ,SHIPPED, DELIVERED, CANCELLED,
-    };
+    private OrderStatus status;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
