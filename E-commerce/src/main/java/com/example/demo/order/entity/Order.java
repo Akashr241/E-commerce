@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import com.example.demo.order.entity.OrderStatus;
 @Entity
 @Table(name = "orders")
 public class Order {
