@@ -7,9 +7,10 @@ import com.example.demo.order.dto.OrderHistoryResponseDto;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 public class OrderMapper {
 
-    public static OrderItemResponseDto mapToOrderItemDto(OrderItem orderItem) {
+    private static OrderItemResponseDto mapToOrderItemDto(OrderItem orderItem) {
 
         OrderItemResponseDto dto = new OrderItemResponseDto();
 
@@ -29,7 +30,7 @@ public class OrderMapper {
         dto.setId(order.getId());
         dto.setOrderDate(order.getOrderDate());
         dto.setTotalAmount(order.getTotalAmount());
-        dto.setStatus(order.getStatus());
+        dto.setStatus(order.getStatus().name());
 
         List<OrderItemResponseDto> itemDtos =
                 order.getOrderItems()
@@ -42,14 +43,13 @@ public class OrderMapper {
         return dto;
     }
 
-   private OrderHistoryResponseDto
-   mapToOrderHistoryDto(Order order){
+   public static OrderHistoryResponseDto mapToOrderHistoryDto(Order order){
 
     OrderHistoryResponseDto dto =
             new OrderHistoryResponseDto();
 
     dto.setId(order.getId());
-    dto.setTotalPrice(order.getTotalPrice());
+    dto.setTotalPrice(order.getTotalAmount());
     dto.setStatus(order.getStatus().name());
 
     return dto;

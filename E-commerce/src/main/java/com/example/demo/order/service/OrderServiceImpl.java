@@ -17,11 +17,11 @@ import com.example.demo.product.entity.Product;
 import com.example.demo.cartitem.CartItem;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.product.repository.ProductRepository;
-import com.example.demo.cartitem.CartItemRepository;
 import com.example.demo.order.dto.OrderHistoryResponseDto;
 import com.example.demo.security.user.repository.UserRepository;
 import com.example.demo.security.user.entity.User;
 import org.springframework.security.core.Authentication;
+import com.example.demo.order.entity.OrderStatus;
 @Service
 public class OrderServiceImpl implements OrderService {
 
@@ -51,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setOrderDate(LocalDateTime.now());
        // OrderResponseDto dto =new OrderResponseDto();
-        order.setStatus("PLACED");
+        order.setStatus(OrderStatus.PLACED);
                 order.setTotalAmount(cart.getTotalPrice());
 
         List<OrderItem> orderItems = new ArrayList<>();
@@ -107,7 +107,7 @@ public List<OrderHistoryResponseDto> getMyOrders() {
             orderRepository.findByUser(user);
 
     return orders.stream()
-            .map(this::mapToOrderHistoryDto)
+            .map(OrderMapper::mapToOrderHistoryDto)
             .toList();
 }
 }
