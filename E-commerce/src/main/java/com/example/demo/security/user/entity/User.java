@@ -1,6 +1,6 @@
 package com.example.demo.security.user.entity;
 
-import com.example.demo.security.user.entity.Role;
+
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
