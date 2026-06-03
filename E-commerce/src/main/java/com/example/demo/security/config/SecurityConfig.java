@@ -32,14 +32,14 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/products").hasAuthority("ADMIN")
-                         .requestMatchers(HttpMethod.PUT,"/products/**").hasAuthority("ADMIN")
-                         .requestMatchers(HttpMethod.DELETE,"/products/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/products").hasAuthority(" ROLE_ADMIN")
+                         .requestMatchers(HttpMethod.PUT,"/products/**").hasAuthority(" ROLE_ADMIN")
+                         .requestMatchers(HttpMethod.DELETE,"/products/**").hasAuthority(" ROLE_ADMIN")
 
                         .requestMatchers("/orders/**")
-                        .hasRole("USER")
+                        .hasRole(" ROLE_USER")
                         .requestMatchers("/products/add")
-                        .hasRole("ADMIN")
+                        .hasRole(" ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
                                 .exceptionHandling(ex -> ex
