@@ -5,7 +5,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.example.demo.security.user.entity.User;
 import com.example.demo.security.user.repository.UserRepository;
-
 @Service
 public class CustomUserDetailsService
         implements UserDetailsService {
@@ -33,7 +32,8 @@ public class CustomUserDetailsService
                 .builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
-                .authorities(user.getRole()!=null? user.getRole().name() : null)
+                .authorities("ROLE_" +user.getRole().name())
+                //System.out.println(userDetails.getAuthorities());
                 .build();
     }
 }
