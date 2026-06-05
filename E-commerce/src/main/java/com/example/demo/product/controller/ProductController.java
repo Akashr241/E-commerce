@@ -22,6 +22,7 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductResponseDto> addProduct(
             @Valid @RequestBody ProductRequestDto dto) {
+                System.out.println("product was added");
 
         return new ResponseEntity<>(
                 productService.addProduct(dto),

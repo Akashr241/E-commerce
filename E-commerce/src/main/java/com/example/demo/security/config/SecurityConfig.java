@@ -32,7 +32,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/products").hasAuthority("ADMIN")
+                requeseMatchers(HttpMethod.POST,"/products").hasAuthority("ADMIN")
                          .requestMatchers(HttpMethod.PUT,"/products/**").hasAuthority("ADMIN")
                          .requestMatchers(HttpMethod.DELETE,"/products/**").hasAuthority("ADMIN")
 
@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/products/add")
                         .hasRole("ADMIN")
                         .anyRequest().authenticated()
+                        .
                 )
                                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(
