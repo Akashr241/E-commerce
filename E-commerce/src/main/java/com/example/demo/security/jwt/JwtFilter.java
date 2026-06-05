@@ -79,6 +79,16 @@ protected void doFilterInternal(
     System.out.println(jwtToken);
     System.out.println(email);
 
-    filterChain.doFilter(request, response);
+System.out.println(SecurityContextHolder.getContext()
+                        .getAuthentication());
+
+    System.out.println(SecurityContextHolder.getContext()
+                                .getAuthentication()
+                                .getAuthorities() );
+                        
+                
+                
+        filterChain.doFilter(request, response);
+
 }
 }
