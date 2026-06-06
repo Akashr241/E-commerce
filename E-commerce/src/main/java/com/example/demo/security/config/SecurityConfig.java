@@ -32,12 +32,12 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        //.requestMatchers(HttpMethod.POST,"/products").hasAuthority("ADMIN")
-                         //.requestMatchers(HttpMethod.PUT,"/products/**").hasAuthority("ADMIN")
-                         //.requestMatchers(HttpMethod.DELETE,"/products/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST,"/products").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/products").hasAuthority("ADMIN")
+                         .requestMatchers(HttpMethod.PUT,"/products").hasAuthority("ADMIN")
+                         .requestMatchers(HttpMethod.DELETE,"/products").hasAuthority("ADMIN")
+                       // .requestMatchers(HttpMethod.POST,"/products").permitAll()
 
-                        
+
                         .requestMatchers("/orders/**")
                         .hasRole("USER")
                         .requestMatchers("/products/add")

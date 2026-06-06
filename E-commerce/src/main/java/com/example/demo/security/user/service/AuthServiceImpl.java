@@ -7,7 +7,6 @@ import com.example.demo.security.user.dto.LoginRequestDto;
 import com.example.demo.security.user.dto.RegisterRequestDto;
 import com.example.demo.security.user.entity.User;
 import com.example.demo.security.user.repository.UserRepository;
-import com.example.demo.security.user.service.AuthService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.demo.security.user.entity.Role;
@@ -39,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
                 passwordEncoder.encode(requestDto.getPassword())
         );
 
-        user.setRole(Role.ROLE_USER);
+        user.setRole(Role.USER);
 
         userRepository.save(user);
         String token= jwtService.generateToken(user.getEmail());
