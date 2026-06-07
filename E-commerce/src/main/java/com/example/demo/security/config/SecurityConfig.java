@@ -37,6 +37,7 @@ public class SecurityConfig {
                          .requestMatchers(HttpMethod.DELETE,"/products").hasAuthority("ADMIN")
                        // .requestMatchers(HttpMethod.POST,"/products").permitAll()
 
+                       
 
                         .requestMatchers("/orders").hasAuthority("USER")
                        // .requestMatchers(HttpMethod.POST,"/orders").hasAuthority("USER")
