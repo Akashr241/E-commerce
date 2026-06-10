@@ -33,6 +33,16 @@ protected void doFilterInternal(
         FilterChain filterChain)
         throws ServletException, IOException {
 
+
+                String path = request.getServletPath();
+
+if (path.startsWith("/swagger-ui")
+        || path.startsWith("/v3/api-docs")) {
+
+    filterChain.doFilter(request, response);
+    return;
+}
+
     final String authHeader =
             request.getHeader("Authorization");
 
@@ -78,16 +88,8 @@ protected void doFilterInternal(
     System.out.println(authHeader);
     System.out.println(jwtToken);
     System.out.println(email);
-
-System.out.println(SecurityContextHolder.getContext()
-                        .getAuthentication());
-
-    System.out.println(SecurityContextHolder.getContext()
-                                .getAuthentication()
-                                .getAuthorities() );
-                        
-                
-                
+    
+    
         filterChain.doFilter(request, response);
 
 }
