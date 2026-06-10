@@ -11,10 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/cart")
 @SecurityRequirement(name = "bearerAuth")
+//@Operation(summary = "Cart Controller")
 public class CartController {
 
     @Autowired
@@ -30,6 +33,8 @@ public class CartController {
     }
  
     // CREATE
+        @Operation(summary = "Add product ")
+    @Tag(name="/cart  Apis")
     @PostMapping("/add-product")
     public ResponseEntity<CartResponseDto> addProductToCart(
              @RequestBody AddProductToCartRequest request) {

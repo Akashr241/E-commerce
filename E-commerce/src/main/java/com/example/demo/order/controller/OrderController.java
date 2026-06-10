@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.order.dto.OrderHistoryResponseDto;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 @SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/orders")
@@ -23,7 +25,8 @@ public class OrderController {
         this.orderService = orderService;
     }
    
-
+@Operation(summary="place order")
+@Tag(name=" Orders apis")
    @PostMapping("/place/{cartId}")
 public OrderResponseDto placeOrder(@PathVariable Long cartId) {
     return orderService.placeOrder(cartId);
