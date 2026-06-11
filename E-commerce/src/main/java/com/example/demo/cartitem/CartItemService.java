@@ -1,7 +1,7 @@
 package com.example.demo.cartitem;
 
 import com.example.demo.cart.entity.Cart;
-import com.example.demo.cart.exception.ResourceNotFoundException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.cart.repository.CartRepository;
 import com.example.demo.product.entity.Product;
 import com.example.demo.product.repository.ProductRepository;

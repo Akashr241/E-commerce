@@ -1,7 +1,7 @@
 
 package com.example.demo.product.service;
 
-import com.example.demo.cart.exception.ResourceNotFoundException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.product.dto.ProductRequestDto;
 import com.example.demo.product.dto.ProductResponseDto;
 import com.example.demo.product.entity.Product;
