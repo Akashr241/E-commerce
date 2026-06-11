@@ -3,7 +3,7 @@ package com.example.demo.cart.service;
 import com.example.demo.cart.dto.AddProductToCartRequest;
 import com.example.demo.cart.dto.CartResponseDto;
 import com.example.demo.cart.entity.Cart;
-import com.example.demo.cart.exception.ResourceNotFoundException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.cart.mapper.CartMapper;
 import com.example.demo.cart.repository.CartRepository;
 import com.example.demo.cartitem.CartItem;
