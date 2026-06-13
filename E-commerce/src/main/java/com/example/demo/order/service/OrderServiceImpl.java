@@ -1,5 +1,6 @@
 package com.example.demo.order.service;
 import com.example.demo.order.dto.OrderResponseDto;
+import com.example.demo.order.dto.UpdateOrderStatusDto;
 import com.example.demo.order.entity.Order;
 import com.example.demo.order.mapper.OrderMapper;
 import com.example.demo.order.repository.OrderRepository;
@@ -13,6 +14,8 @@ import com.example.demo.cart.repository.CartRepository;
 import com.example.demo.order.entity.OrderItem;
 import com.example.demo.product.entity.Product;
 import com.example.demo.cartitem.CartItem;
+import com.example.demo.exception.OrderNotFoundException;
+
 import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.product.repository.ProductRepository;
 import com.example.demo.order.dto.OrderHistoryResponseDto;
@@ -20,6 +23,7 @@ import com.example.demo.security.user.repository.UserRepository;
 import com.example.demo.security.user.entity.User;
 import org.springframework.security.core.Authentication;
 import com.example.demo.order.entity.OrderStatus;
+import com.example.demo.order.dto.UpdateOrderStatusDto;
 @Service
 public class OrderServiceImpl implements OrderService {
 
@@ -108,4 +112,21 @@ public List<OrderHistoryResponseDto> getMyOrders() {
             .map(OrderMapper::mapToOrderHistoryDto)
             .toList();
 }
+@Override
+public OrderResponseDto updateOrderStatus(
+        Long orderId,
+        UpdateOrderStatusDto dto) {
+
+    Order order = orderRepository.findById(orderId)
+            .orElseThrow(() ->
+                    new OrderNotFoundException(
+                            "Order not found"));
+
+    order.setStatus(dto.getStatus());
+
+    orderRepository.save(order);
+
+    return OrderMapper.toDto(order);
+}
+
 }

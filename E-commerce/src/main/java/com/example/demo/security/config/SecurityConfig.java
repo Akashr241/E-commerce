@@ -11,8 +11,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.example.demo.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.demo.security.jwt.JwtFilter;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import com.example.demo.security.config.OpenApiConfig;
 
 @Configuration
 public class SecurityConfig {
@@ -41,7 +39,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/products").hasAuthority("ADMIN")
                          .requestMatchers(HttpMethod.PUT,"/products").hasAuthority("ADMIN")
                          .requestMatchers(HttpMethod.DELETE,"/products").hasAuthority("ADMIN")
-                       // .requestMatchers(HttpMethod.POST,"/products").permitAll()
+                        .requestMatchers(HttpMethod.PUT,"/orders/*/status").hasAuthority("ADMIN")
 
                        
 
