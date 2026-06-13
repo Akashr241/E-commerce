@@ -1,15 +1,19 @@
 package com.example.demo.order.controller;
 
 import com.example.demo.order.dto.OrderResponseDto;
+import com.example.demo.order.dto.UpdateOrderStatusDto;
 import com.example.demo.order.service.OrderService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.order.dto.OrderHistoryResponseDto;
+
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @SecurityRequirement(name = "bearerAuth")
@@ -33,4 +37,13 @@ public OrderResponseDto placeOrder(@PathVariable Long cartId) {
         List<OrderHistoryResponseDto> orders = orderService.getMyOrders();
         return ResponseEntity.ok(orders);
     }
+@PutMapping("/{orderId}/status")
+public OrderResponseDto updateStatus(
+        @PathVariable Long orderId,
+        @RequestBody UpdateOrderStatusDto dto) {
+
+    return orderService.updateOrderStatus(
+            orderId,
+            dto);
+}
 }
