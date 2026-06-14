@@ -81,13 +81,14 @@ protected void doFilterInternal(
 
 System.out.println(SecurityContextHolder.getContext()
                         .getAuthentication());
-
+                        
+if (SecurityContextHolder.getContext().getAuthentication() != null) {
     System.out.println(SecurityContextHolder.getContext()
                                 .getAuthentication()
                                 .getAuthorities() );
                         
                 
-                
+}            
         filterChain.doFilter(request, response);
 
 }

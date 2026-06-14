@@ -8,6 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import com.example.demo.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.demo.security.jwt.JwtFilter;
@@ -44,7 +45,8 @@ public class SecurityConfig {
                        
 
                         .requestMatchers("/orders").hasAuthority("USER")
-                       // .requestMatchers(HttpMethod.POST,"/orders").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.POST,"/orders").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.GET,"/orders").hasAuthority("USER")
                         .anyRequest().authenticated()
                         
                 )
