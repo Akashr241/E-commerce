@@ -126,7 +126,7 @@ public OrderResponseDto updateOrderStatus(
 
     orderRepository.save(order);
 
-    return OrderMapper.toDto(order);
+    return OrderMapper.mapToOrderResponseDto(order);
 }
 
 }

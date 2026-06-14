@@ -52,6 +52,8 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(requestDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+                System.out.println("User found: " + user.getEmail());
+
                 boolean isPasswordMatch = passwordEncoder.matches(
                         requestDto.getPassword(),
                         user.getPassword()
