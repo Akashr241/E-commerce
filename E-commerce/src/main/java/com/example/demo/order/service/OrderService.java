@@ -11,4 +11,5 @@ OrderResponseDto updateOrderStatus(
         Long orderId,
         UpdateOrderStatusDto dto);
   //void updateOrderStatus(Long orderId, UpdateOrderStatusDto updateOrderStatusDto);
+List<OrderResponseDto> getOrdersByStatus(String status);
 }

@@ -24,6 +24,7 @@ import com.example.demo.security.user.entity.User;
 import org.springframework.security.core.Authentication;
 import com.example.demo.order.entity.OrderStatus;
 import com.example.demo.order.dto.UpdateOrderStatusDto;
+import org.springframework.http.ResponseEntity;
 @Service
 public class OrderServiceImpl implements OrderService {
 
@@ -128,5 +129,20 @@ public OrderResponseDto updateOrderStatus(
 
     return OrderMapper.mapToOrderResponseDto(order);
 }
+@Override
+public List<OrderResponseDto> getOrdersByStatus(String status) {
 
+    OrderStatus orderStatus;
+
+    try {
+        orderStatus = OrderStatus.valueOf(status.toUpperCase());
+    } catch (IllegalArgumentException e) {
+        throw new RuntimeException("Invalid order status: " + status);
+    }
+
+    return orderRepository.findByStatus(orderStatus)
+            .stream()
+            .map(OrderMapper::mapToOrderResponseDto)
+            .toList();
+}
 }
