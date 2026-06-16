@@ -10,6 +10,9 @@ List<OrderHistoryResponseDto> getMyOrders();
 OrderResponseDto updateOrderStatus(
         Long orderId,
         UpdateOrderStatusDto dto);
-  //void updateOrderStatus(Long orderId, UpdateOrderStatusDto updateOrderStatusDto);
+  
 List<OrderResponseDto> getOrdersByStatus(String status);
+OrderResponseDto getOrderById(Long orderId);
+List<OrderResponseDto> getAllOrders();
+void cancelOrder(Long orderId);
 }

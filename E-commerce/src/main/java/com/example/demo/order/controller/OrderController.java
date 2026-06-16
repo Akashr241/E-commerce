@@ -4,8 +4,6 @@ import com.example.demo.order.dto.OrderResponseDto;
 import com.example.demo.order.dto.UpdateOrderStatusDto;
 import com.example.demo.order.service.OrderService;
 import java.util.List;
-
-import org.springframework.data.domain.jaxb.SpringDataJaxb.OrderDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.order.dto.OrderHistoryResponseDto;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,10 +49,34 @@ public OrderResponseDto updateStatus(
             orderId,
             dto);
 }
-@GetMapping("/orders/status")
+@GetMapping("/status")
 public ResponseEntity<List<OrderResponseDto>> getOrdersByStatus(
         @RequestParam String status) {
 
     return ResponseEntity.ok(orderService.getOrdersByStatus(status));
 }
+@GetMapping("/{orderId}")
+public ResponseEntity<OrderResponseDto> getOrderById(
+        @PathVariable Long orderId) {
+
+    return ResponseEntity.ok(
+            orderService.getOrderById(orderId));
+}
+@GetMapping
+public ResponseEntity<List<OrderResponseDto>> getAllOrders() {
+
+    return ResponseEntity.ok(
+            orderService.getAllOrders());
+}
+
+
+@PutMapping("/{orderId}/cancel")
+public ResponseEntity<String> cancelOrder(
+        @PathVariable Long orderId) {
+
+    orderService.cancelOrder(orderId);
+
+    return ResponseEntity.ok("Order cancelled");
+}
+
 }
