@@ -23,8 +23,7 @@ import com.example.demo.security.user.repository.UserRepository;
 import com.example.demo.security.user.entity.User;
 import org.springframework.security.core.Authentication;
 import com.example.demo.order.entity.OrderStatus;
-import com.example.demo.order.dto.UpdateOrderStatusDto;
-import org.springframework.http.ResponseEntity;
+
 @Service
 public class OrderServiceImpl implements OrderService {
 
@@ -144,5 +143,33 @@ public List<OrderResponseDto> getOrdersByStatus(String status) {
             .stream()
             .map(OrderMapper::mapToOrderResponseDto)
             .toList();
+}
+@Override
+public List<OrderResponseDto> getAllOrders() {
+
+    return orderRepository.findAll()
+            .stream()
+            .map(OrderMapper::mapToOrderResponseDto)
+            .toList();
+}
+@Override
+public OrderResponseDto getOrderById(Long orderId) {
+
+    Order order = orderRepository.findById(orderId)
+            .orElseThrow(() ->
+                    new RuntimeException("Order not found with id: " + orderId));
+
+    return OrderMapper.mapToOrderResponseDto(order);
+}
+@Override
+public void cancelOrder(Long orderId) {
+
+    Order order = orderRepository.findById(orderId)
+            .orElseThrow(() ->
+                    new RuntimeException("Order not found with id: " + orderId));
+
+    order.setStatus(OrderStatus.CANCELLED);
+
+    orderRepository.save(order);
 }
 }
