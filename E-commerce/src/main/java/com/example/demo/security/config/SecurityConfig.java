@@ -34,17 +34,20 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/swagger-ui.html").permitAll()
-
+                        // product  API access admin
                         .requestMatchers(HttpMethod.POST,"/products").hasAuthority("ADMIN")
                          .requestMatchers(HttpMethod.PUT,"/products").hasAuthority("ADMIN")
                          .requestMatchers(HttpMethod.DELETE,"/products").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT,"/orders/*/status").hasAuthority("ADMIN")
+                        // order API access admin
+                         .requestMatchers(HttpMethod.PUT,"/orders/*/status").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/orders/status").hasAuthority("ADMIN")
+                       .requestMatchers(HttpMethod.GET, "/orders").hasAuthority("ADMIN")
 
-                       
+                       // Orders API access user
+                        .requestMatchers(HttpMethod.GET,"/orders/my-orders").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.PUT,"/orders/*/cancel").hasAuthority("USER")
 
-                        .requestMatchers("/orders").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.POST,"/orders").hasAuthority("USER")
-                        .requestMatchers(HttpMethod.GET,"/orders").hasAuthority("USER")
+
                         .anyRequest().authenticated()
                         
                 )
