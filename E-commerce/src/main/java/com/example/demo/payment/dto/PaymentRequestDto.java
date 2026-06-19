@@ -1,5 +1,14 @@
 package com.example.demo.payment.dto;
 
-public interface PaymentRequestDto {
-  
+public class PaymentRequestDto {
+
+    private String paymentMethod;
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
 }
