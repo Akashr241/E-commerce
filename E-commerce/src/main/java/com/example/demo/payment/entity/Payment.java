@@ -1,9 +1,10 @@
 package com.example.demo.payment.entity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.*;
+
 import com.example.demo.order.entity.Order;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "payments")
 public class Payment {
 
     @Id
@@ -17,38 +18,49 @@ public class Payment {
     private String paymentStatus;
 
     @OneToOne
+    @JoinColumn(name = "order_id")
     private Order order;
+
+    public Payment() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
 
     public Order getOrder() {
         return order;
     }
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-
 
     public void setId(Long id) {
         this.id = id;
     }
-    public Long getId() {
-        return id;
-    }
+
     public void setAmount(Double amount) {
         this.amount = amount;
-    } 
-    public Double getAmount() {
-        return amount;
     }
+
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
+
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
-    public String getPaymentStatus() {
-        return paymentStatus;
+
+    public void setOrder(Order order) {
+        this.order = order;
     }
 }

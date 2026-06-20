@@ -1,19 +1,53 @@
 package com.example.demo.payment.dto;
 
-import com.example.demo.payment.entity.Payment;
+public class PaymentResponseDto {
 
+    private Long id;
+    private Double amount;
+    private String paymentMethod;
+    private String paymentStatus;
+    private Long orderId;
 
+    public PaymentResponseDto() {
+    }
 
-public static PaymentResponseDto mapToPaymentResponseDto(
-        Payment payment) {
+    public Long getId() {
+        return id;
+    }
 
-    PaymentResponseDto dto = new PaymentResponseDto();
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    dto.setId(payment.getId());
-    dto.setAmount(payment.getAmount());
-    dto.setPaymentMethod(payment.getPaymentMethod());
-    dto.setPaymentStatus(payment.getPaymentStatus());
+    public Double getAmount() {
+        return amount;
+    }
 
-    return dto;
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
 }
-
