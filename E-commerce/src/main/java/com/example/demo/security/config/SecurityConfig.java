@@ -47,7 +47,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/orders/my-orders").hasAuthority("USER")
                         .requestMatchers(HttpMethod.PUT,"/orders/*/cancel").hasAuthority("USER")
 
+                        // payment API access user
+                        .requestMatchers(HttpMethod.POST,"/payments/*").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.GET,"/payments/*").hasAuthority("USER")
 
+                        //payment API access admin
+                        .requestMatchers(HttpMethod.GET,"/payments").hasAuthority("ADMIN")
+                        
                         .anyRequest().authenticated()
                         
                 )
