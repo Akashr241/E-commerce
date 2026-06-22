@@ -74,7 +74,7 @@ protected void doFilterInternal(
                     .setAuthentication(authToken);
         }
     }
-
+    //System.out.println("Authorities: " + userDetails.getAuthorities());
     System.out.println(authHeader);
     System.out.println(jwtToken);
     System.out.println(email);
