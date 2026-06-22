@@ -33,17 +33,26 @@ protected void doFilterInternal(
         FilterChain filterChain)
         throws ServletException, IOException {
 
+         System.out.println("jwt filter was started");
     final String authHeader =
             request.getHeader("Authorization");
-
-    String jwtToken = null;
-    String email = null;
+System.out.println("Authorization header: " + authHeader);
+System.out.println("Request URI: " + request.getRequestURI());
+                String jwtToken = null;
+                String email = null;
 
     if (authHeader != null
             && authHeader.startsWith("Bearer ")) {
-
+System.out.println("Bearer token found");
         jwtToken = authHeader.substring(7);
+System.out.println("extracted JWT token: " + jwtToken);
+
+
         email = jwtService.extractEmail(jwtToken);
+System.out.println("extracted email: " + email);
+
+
+
     }
 
     if (email != null

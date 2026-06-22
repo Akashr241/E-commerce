@@ -1,10 +1,11 @@
 package com.example.demo.payment.controller;
-
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import com.example.demo.payment.dto.PaymentRequestDto;
 import com.example.demo.payment.dto.PaymentResponseDto;
 import com.example.demo.payment.service.PaymentService;
 import org.springframework.web.bind.annotation.*;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/payments")
 public class PaymentController {
