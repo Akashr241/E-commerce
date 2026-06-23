@@ -83,10 +83,7 @@ System.out.println("extracted email: " + email);
                     .setAuthentication(authToken);
         }
     }
-    //System.out.println("Authorities: " + userDetails.getAuthorities());
-    System.out.println(authHeader);
-    System.out.println(jwtToken);
-    System.out.println(email);
+   
 
 System.out.println(SecurityContextHolder.getContext()
                         .getAuthentication());
