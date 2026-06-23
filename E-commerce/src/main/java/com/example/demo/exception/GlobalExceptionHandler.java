@@ -1,5 +1,7 @@
-
 package com.example.demo.exception;
+
+import java.time.LocalDateTime;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,7 +23,8 @@ public class GlobalExceptionHandler {
 
         ErrorResponse error = new ErrorResponse(
                 errorMessage,
-                HttpStatus.BAD_REQUEST.value()
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now()
         );
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
@@ -34,10 +37,39 @@ public class GlobalExceptionHandler {
 
         ErrorResponse error = new ErrorResponse(
                 ex.getMessage(),
-                HttpStatus.NOT_FOUND.value()
+                HttpStatus.NOT_FOUND.value(),
+                LocalDateTime.now()
         );
 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    // INVALID ORDER STATUS
+    @ExceptionHandler(InvalidOrderStatusException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidOrderStatusException(
+            InvalidOrderStatusException ex) {
+
+        ErrorResponse error = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    // PAYMENT EXCEPTION
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentException(
+            PaymentException ex) {
+
+        ErrorResponse error = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     // GLOBAL ERROR
@@ -47,7 +79,8 @@ public class GlobalExceptionHandler {
 
         ErrorResponse error = new ErrorResponse(
                 ex.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value()
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                LocalDateTime.now()
         );
 
         return new ResponseEntity<>(error,
