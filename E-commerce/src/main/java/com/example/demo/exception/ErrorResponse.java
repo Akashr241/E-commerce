@@ -13,6 +13,12 @@ public class ErrorResponse {
         this.status = status;
         this.timestamp = LocalDateTime.now();
     }
+    // constructor with timestamp parameter
+    public ErrorResponse(String message, int status, LocalDateTime timestamp) {
+        this.message = message;
+        this.status = status;
+        this.timestamp = timestamp;
+    }
 
     public String getMessage() {
         return message;
