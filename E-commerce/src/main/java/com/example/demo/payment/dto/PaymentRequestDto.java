@@ -1,7 +1,9 @@
 package com.example.demo.payment.dto;
 
-public class PaymentRequestDto {
+import jakarta.validation.constraints.NotNull;
 
+public class PaymentRequestDto {
+    @NotNull
     private String paymentMethod;
 
     public String getPaymentMethod() {
