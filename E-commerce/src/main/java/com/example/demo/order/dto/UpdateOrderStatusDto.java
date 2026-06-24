@@ -2,8 +2,10 @@ package com.example.demo.order.dto;
 
 import com.example.demo.order.entity.OrderStatus;
 
-public class UpdateOrderStatusDto {
+import jakarta.validation.constraints.NotNull;
 
+public class UpdateOrderStatusDto {
+    @NotNull
     private OrderStatus status;
 
     public OrderStatus getStatus() {

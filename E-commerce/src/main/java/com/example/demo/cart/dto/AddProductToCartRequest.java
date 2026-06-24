@@ -1,10 +1,15 @@
 package com.example.demo.cart.dto;
 
-public class AddProductToCartRequest {
-    private Long cartId;
+import jakarta.validation.constraints.NotNull;
 
+public class AddProductToCartRequest {
+    @NotNull
+    private Long cartId;
+    
+    @NotNull
     private Long productId;
 
+    @jakarta.validation.constraints.Positive
     private int quantity;
 
     public Long getCartId() {
