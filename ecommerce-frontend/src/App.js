@@ -46,6 +46,8 @@ function App() {
             }
           />
 
+        <Route path="/products/:id" element={<ProductDetails/>}/>
+
           <Route
             path="/admin/products"
             element={
@@ -55,6 +57,8 @@ function App() {
             }
           />
         </Routes>
+
+
       </div>
     </Router>
   );
