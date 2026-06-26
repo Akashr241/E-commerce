@@ -1,60 +1,85 @@
 import React, { useState } from "react";
+import { loginUser } from "../services/authService";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+    const navigate = useNavigate();
+
+    const { login } = useAuth();
+
+    const [user, setUser] = useState({
+        email: "",
+        password: ""
     });
-  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Login Data:", formData);
-  };
+    const handleChange = (e) => {
 
-  return (
-    <div className="container mt-4" style={{ maxWidth: "500px" }}>
-      <h2 className="mb-4">Login</h2>
+        setUser({
+            ...user,
+            [e.target.name]: e.target.value
+        });
 
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label>Email</label>
-          <input
-            type="email"
-            className="form-control"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter email"
-            required
-          />
+    };
+
+    const handleSubmit = async (e) => {
+
+        e.preventDefault();
+
+        try {
+
+            const response = await loginUser(user);
+
+            login(response.data.token);
+
+            alert("Login Successful");
+
+            navigate("/products");
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert("Invalid Email or Password");
+
+        }
+
+    };
+
+    return (
+
+        <div className="container mt-5">
+
+            <h2>Login</h2>
+
+            <form onSubmit={handleSubmit}>
+
+                <input
+                    type="email"
+                    name="email"
+                    className="form-control mb-3"
+                    placeholder="Email"
+                    onChange={handleChange}
+                />
+
+                <input
+                    type="password"
+                    name="password"
+                    className="form-control mb-3"
+                    placeholder="Password"
+                    onChange={handleChange}
+                />
+
+                <button className="btn btn-primary">
+                    Login
+                </button>
+
+            </form>
+
         </div>
 
-        <div className="mb-3">
-          <label>Password</label>
-          <input
-            type="password"
-            className="form-control"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter password"
-            required
-          />
-        </div>
-
-        <button className="btn btn-primary w-100" type="submit">
-          Login
-        </button>
-      </form>
-    </div>
-  );
+    );
 }
 
 export default Login;

@@ -43,6 +43,9 @@ public class SecurityConfig {
                          .requestMatchers(HttpMethod.GET,"/products").permitAll()
                          .requestMatchers(HttpMethod.GET,"/products/{id}").permitAll()
                          .requestMatchers(HttpMethod.GET,"/products/**").permitAll()
+                         // auth and register
+                        .requestMatchers(HttpMethod.GET,"/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/auth/register").permitAll()
                         // order API access admin
                          .requestMatchers(HttpMethod.PUT,"/orders/*/status").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/orders/status").hasAuthority("ADMIN")

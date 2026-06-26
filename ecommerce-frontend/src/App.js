@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import{ BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -46,18 +46,7 @@ function App() {
             }
           />
 
-        <Route path="/products/:id" element={<ProductDetails/>}/>
-
-          <Route
-            path="/admin/products"
-            element={
-              <ProtectedRoute>
-                <AdminProducts />
-              </ProtectedRoute>
-            }
-          />
         </Routes>
-
 
       </div>
     </Router>
