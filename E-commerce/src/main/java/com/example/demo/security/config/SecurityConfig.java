@@ -38,7 +38,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/products").hasAuthority("ADMIN")
                          .requestMatchers(HttpMethod.PUT,"/products").hasAuthority("ADMIN")
                          .requestMatchers(HttpMethod.DELETE,"/products").hasAuthority("ADMIN")
+                     
+                      //product use to access the react file 
                          .requestMatchers(HttpMethod.GET,"/products").permitAll()
+                         .requestMatchers(HttpMethod.GET,"/products/{id}").permitAll()
+                         .requestMatchers(HttpMethod.GET,"/products/**").permitAll()
                         // order API access admin
                          .requestMatchers(HttpMethod.PUT,"/orders/*/status").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/orders/status").hasAuthority("ADMIN")
