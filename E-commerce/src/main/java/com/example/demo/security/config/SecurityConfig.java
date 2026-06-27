@@ -46,6 +46,10 @@ public class SecurityConfig {
                          // auth and register
                         .requestMatchers(HttpMethod.GET,"/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/auth/register").permitAll()
+ 
+                        // checkout API access user
+                        .requestMatchers(HttpMethod.POST,"/checkout").permitAll()
+
                         // order API access admin
                          .requestMatchers(HttpMethod.PUT,"/orders/*/status").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/orders/status").hasAuthority("ADMIN")
