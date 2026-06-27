@@ -37,4 +37,16 @@ public class CartItemResponseDto {
     public double getSubTotal() {
         return subTotal;
     }
+    public void setId(){
+        setId();
+    }
+    public void setProductName(){
+         setProductName();
+    }
+    public void setQuantity(){
+    setQuantity();
+    }
+    public void setSubTotal(){
+        setSubTotal();
+    }
 }
