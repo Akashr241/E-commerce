@@ -37,7 +37,7 @@ User user = userRepository.findByEmail(email)
                 new RuntimeException("User not found"));
 
 
-        Cart cart = cartRepository.findByUserId(request.getCartId())
+        Cart cart = cartRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
         List<CartItemResponseDto> items = cart.getCartItems()
