@@ -5,9 +5,8 @@ import com.example.demo.payment.dto.PaymentResponseDto;
 
 public interface PaymentService {
 
-    PaymentResponseDto makePayment(
-            Long orderId,
-            PaymentRequestDto dto);
+    PaymentResponseDto CreatePayment(
+            PaymentRequestDto  requestDto);
 
     PaymentResponseDto getPaymentById(Long paymentId);
 }
