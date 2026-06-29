@@ -16,6 +16,7 @@ public class PaymentResponseDto {
     // Currency (INR)
     private String currency;
 
+    private String paymentId;
     // Razorpay Signature
     private String signature;
 
@@ -62,12 +63,25 @@ public class PaymentResponseDto {
         this.orderId = orderId;
     }
 
-    public String getKey() {
-        return key;
+    public String getsignature() {
+        return signature;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+
+    public void setsignature(String signature) {
+        this.signature = signature;
+    }
+    public String paymentId(){
+        return paymentId;
+    }
+    public void setpaymentId(String paymentId){
+        this.paymentId=paymentId;
+    }
+    public String key(){
+        return key;
+    }
+    public void setkey(String key){
+        this.key=key;
     }
 
     public String getCurrency() {
