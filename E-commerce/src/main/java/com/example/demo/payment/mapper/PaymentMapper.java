@@ -19,9 +19,13 @@ public class PaymentMapper {
         dto.setPaymentStatus(payment.getPaymentStatus());
 
         if (payment.getOrder() != null) {
-            dto.setOrderId(payment.getOrder().getId());
+            dto.setOrderId((String.valueOf(payment.getOrder().getId())));
         }
-
+      //  dto.setkey(razorpayKey);
+        dto.setCurrency(payment.getCurrency());
+        dto.setSignature(payment.getRazorpaySignature());
+       // dto.setrazorpayOrderId(payment.getRazorpayOrderId());
+        //dto.setPaymentId(payment.getRazorpayPaymentId());
         return dto;
     }
 }

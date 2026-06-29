@@ -1,6 +1,6 @@
 package com.example.demo.payment.service;
 
-import com.example.demo.order.entity.Order;
+//import com.example.demo.order.entity.Order;
 import com.example.demo.order.repository.OrderRepository;
 import com.example.demo.payment.dto.PaymentRequestDto;
 import com.example.demo.payment.dto.PaymentResponseDto;
@@ -8,24 +8,29 @@ import com.example.demo.payment.entity.Payment;
 import com.example.demo.payment.mapper.PaymentMapper;
 import com.example.demo.payment.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
-
+import com.example.demo.payment.config.RazorpayConfig;
+import com.razorpay.RazorpayClient;
+import com.razorpay.Order;
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final RazorpayClient razorpayClient;
     private final OrderRepository orderRepository;
 
     public PaymentServiceImpl(PaymentRepository paymentRepository,
-                              OrderRepository orderRepository) {
-        this.paymentRepository = paymentRepository;
+                             OrderRepository orderRepository,
+                            RazorpayClient razorpayClient) {
+       this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
+        this.razorpayClient=razorpayClient;
     }
 
     @Override
-    public PaymentResponseDto makePayment(Long orderId, PaymentRequestDto dto) {
+    public PaymentResponseDto createPayment( PaymentRequestDto dto) {
 
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+        Order razorpayOrder = razorpayClient.orders.create(option)
+                .orElseThrow(() -> new RuntimeException("Order not found  "));
 
         Payment payment = new Payment();
         payment.setAmount(order.getTotalAmount());   // if your Order uses getTotalAmount(), change this line
