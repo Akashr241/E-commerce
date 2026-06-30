@@ -1,13 +1,15 @@
 package com.example.demo.payment.controller;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 import com.example.demo.payment.dto.PaymentRequestDto;
 import com.example.demo.payment.dto.PaymentResponseDto;
 import com.example.demo.payment.service.PaymentService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@SecurityRequirement(name = "bearerAuth")
 @RestController
-@RequestMapping("/payments")
+@RequestMapping("/api/payments")
+@CrossOrigin(origins = "http://localhost:5173")
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -16,16 +18,19 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    @PostMapping("/{orderId}")
-    public PaymentResponseDto makePayment(
-            @PathVariable Long orderId,
-            @RequestBody PaymentRequestDto dto) {
+    @PostMapping("/create")
+    public ResponseEntity<PaymentResponseDto> createPayment(
+            @Valid @RequestBody PaymentRequestDto request) {
 
-        return paymentService.makePayment(orderId, dto);
+        return ResponseEntity.ok(
+                paymentService.createPayment(request));
     }
 
-    @GetMapping("/{paymentId}")
-    public PaymentResponseDto getPaymentById(@PathVariable Long paymentId) {
-        return paymentService.getPaymentById(paymentId);
+    @GetMapping("/{id}")
+    public ResponseEntity<PaymentResponseDto> getPayment(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                paymentService.getPaymentById(id));
     }
 }

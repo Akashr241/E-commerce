@@ -13,18 +13,15 @@ public class PaymentRequestDto {
     @NotBlank(message = "Payment method is required")
     private String paymentMethod;
 
-    @NotBlank(message = "Order ID is required")
-    private String orderId;
 
     public PaymentRequestDto() {
     }
 
     public PaymentRequestDto(Double amount,
-                             String paymentMethod,
-                             String orderId) {
+                             String paymentMethod
+                            ) {
         this.amount = amount;
         this.paymentMethod = paymentMethod;
-        this.orderId = orderId;
     }
 
     public Double getAmount() {
@@ -43,11 +40,5 @@ public class PaymentRequestDto {
         this.paymentMethod = paymentMethod;
     }
 
-    public String getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
-    }
+   
 }

@@ -1,53 +1,87 @@
 package com.example.demo.payment.service;
 
-//import com.example.demo.order.entity.Order;
-import com.example.demo.order.repository.OrderRepository;
+import org.json.JSONObject;
+import org.springframework.stereotype.Service;
+
 import com.example.demo.payment.dto.PaymentRequestDto;
 import com.example.demo.payment.dto.PaymentResponseDto;
 import com.example.demo.payment.entity.Payment;
 import com.example.demo.payment.mapper.PaymentMapper;
 import com.example.demo.payment.repository.PaymentRepository;
-import org.springframework.stereotype.Service;
-import com.example.demo.payment.config.RazorpayConfig;
-import com.razorpay.RazorpayClient;
 import com.razorpay.Order;
+import com.razorpay.RazorpayClient;
+
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final RazorpayClient razorpayClient;
-    private final OrderRepository orderRepository;
 
-    public PaymentServiceImpl(PaymentRepository paymentRepository,
-                             OrderRepository orderRepository,
-                            RazorpayClient razorpayClient) {
-       this.paymentRepository = paymentRepository;
-        this.orderRepository = orderRepository;
-        this.razorpayClient=razorpayClient;
+    public PaymentServiceImpl(
+            PaymentRepository paymentRepository,
+            RazorpayClient razorpayClient) {
+
+        this.paymentRepository = paymentRepository;
+        this.razorpayClient = razorpayClient;
     }
 
     @Override
-    public PaymentResponseDto createPayment( PaymentRequestDto dto) {
+    public PaymentResponseDto createPayment(PaymentRequestDto request) {
 
-        Order razorpayOrder = razorpayClient.orders.create(option)
-                .orElseThrow(() -> new RuntimeException("Order not found  "));
+        try {
 
-        Payment payment = new Payment();
-        payment.setAmount(order.getTotalAmount());   // if your Order uses getTotalAmount(), change this line
-        payment.setPaymentMethod(dto.getPaymentMethod());
-        payment.setPaymentStatus("SUCCESS");
-        payment.setOrder(order);
+            JSONObject options = new JSONObject();
 
-        Payment savedPayment = paymentRepository.save(payment);
+            options.put("amount", (int) (request.getAmount() * 100));
 
-        return PaymentMapper.mapToPaymentResponseDto(savedPayment);
+            options.put("currency", "INR");
+
+            options.put("receipt",
+                    "receipt_" + System.currentTimeMillis());
+
+            Order razorpayOrder =
+                    razorpayClient.orders.create(options);
+
+            Payment payment = new Payment();
+
+            payment.setAmount(request.getAmount());
+
+            payment.setCurrency("INR");
+
+            payment.setPaymentMethod(
+                    request.getPaymentMethod());
+
+            payment.setPaymentStatus("CREATED");
+
+            payment.setRazorpayOrderId(
+                    razorpayOrder.get("id"));
+
+            Payment savedPayment =
+                    paymentRepository.save(payment);
+
+            return PaymentMapper
+                    .mapToPaymentResponseDto(savedPayment);
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(
+                    "Error while creating payment", e);
+
+        }
     }
 
     @Override
     public PaymentResponseDto getPaymentById(Long paymentId) {
-        Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment not found with id: " + paymentId));
 
-        return PaymentMapper.mapToPaymentResponseDto(payment);
+        Payment payment =
+                paymentRepository.findById(paymentId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Payment not found"));
+
+        return PaymentMapper
+                .mapToPaymentResponseDto(payment);
+
     }
+
 }
