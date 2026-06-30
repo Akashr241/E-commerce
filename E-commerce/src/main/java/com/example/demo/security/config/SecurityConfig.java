@@ -50,6 +50,9 @@ public class SecurityConfig {
                         // checkout API access user
                         .requestMatchers(HttpMethod.POST,"/checkout").permitAll()
 
+                        // payment api 
+                        .requestMatchers("/api/payments/**").permitAll()
+
                         // order API access admin
                          .requestMatchers(HttpMethod.PUT,"/orders/*/status").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/orders/status").hasAuthority("ADMIN")

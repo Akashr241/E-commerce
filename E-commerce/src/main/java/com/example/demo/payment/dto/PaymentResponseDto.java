@@ -3,22 +3,20 @@ package com.example.demo.payment.dto;
 public class PaymentResponseDto {
 
     private Long id;
+
     private Double amount;
-    private String paymentMethod;
-    private String paymentStatus;
 
-    // Razorpay Order ID
-    private String orderId;
-
-    // Razorpay Public Key
-    private String key;
-
-    // Currency (INR)
     private String currency;
 
-    private String paymentId;
-    // Razorpay Signature
-    private String signature;
+    private String paymentMethod;
+
+    private String paymentStatus;
+
+    private String razorpayOrderId;
+
+    private String razorpayPaymentId;
+
+    private String razorpaySignature;
 
     public PaymentResponseDto() {
     }
@@ -39,6 +37,14 @@ public class PaymentResponseDto {
         this.amount = amount;
     }
 
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
     public String getPaymentMethod() {
         return paymentMethod;
     }
@@ -55,48 +61,27 @@ public class PaymentResponseDto {
         this.paymentStatus = paymentStatus;
     }
 
-    public String getOrderId() {
-        return orderId;
+    public String getRazorpayOrderId() {
+        return razorpayOrderId;
     }
 
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
+    public void setRazorpayOrderId(String razorpayOrderId) {
+        this.razorpayOrderId = razorpayOrderId;
     }
 
-    public String getsignature() {
-        return signature;
+    public String getRazorpayPaymentId() {
+        return razorpayPaymentId;
     }
 
-
-    public void setsignature(String signature) {
-        this.signature = signature;
-    }
-    public String paymentId(){
-        return paymentId;
-    }
-    public void setpaymentId(String paymentId){
-        this.paymentId=paymentId;
-    }
-    public String key(){
-        return key;
-    }
-    public void setkey(String key){
-        this.key=key;
+    public void setRazorpayPaymentId(String razorpayPaymentId) {
+        this.razorpayPaymentId = razorpayPaymentId;
     }
 
-    public String getCurrency() {
-        return currency;
+    public String getRazorpaySignature() {
+        return razorpaySignature;
     }
 
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public String getSignature() {
-        return signature;
-    }
-
-    public void setSignature(String signature) {
-        this.signature = signature;
+    public void setRazorpaySignature(String razorpaySignature) {
+        this.razorpaySignature = razorpaySignature;
     }
 }

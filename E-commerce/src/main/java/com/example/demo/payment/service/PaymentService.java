@@ -6,7 +6,7 @@ import com.example.demo.payment.dto.PaymentResponseDto;
 public interface PaymentService {
 
     PaymentResponseDto createPayment(
-            PaymentRequestDto  requestDto) throws Exception;
+            PaymentRequestDto  requestDto) ;
 
     PaymentResponseDto getPaymentById(Long paymentId);
 }
