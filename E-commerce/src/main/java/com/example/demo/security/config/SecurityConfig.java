@@ -48,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/auth/register").permitAll()
  
                         // checkout API access user
-                        .requestMatchers(HttpMethod.POST,"/checkout").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/checkout/**").permitAll()
 
                         // payment api 
                         .requestMatchers("/api/payments/**").permitAll()
