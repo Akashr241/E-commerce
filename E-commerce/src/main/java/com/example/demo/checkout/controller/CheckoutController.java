@@ -1,25 +1,30 @@
 package com.example.demo.checkout.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.example.demo.checkout.dto.CheckoutRequestDto;
 import com.example.demo.checkout.dto.CheckoutResponseDto;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.http.ResponseEntity;
 import com.example.demo.checkout.service.CheckoutService;
+
 @RestController
-@RequestMapping("/checkout")
+@RequestMapping("/api/checkout")
+@CrossOrigin(origins = "http://localhost:5173")
 public class CheckoutController {
 
-    @Autowired
-    private CheckoutService checkoutService;
+    private final CheckoutService checkoutService;
+
+    public CheckoutController(
+            CheckoutService checkoutService) {
+
+        this.checkoutService = checkoutService;
+    }
 
     @PostMapping
     public ResponseEntity<CheckoutResponseDto> checkout(
             @RequestBody CheckoutRequestDto request) {
 
-        return ResponseEntity.ok(checkoutService.checkout(request));
+        return ResponseEntity.ok(
+                checkoutService.checkout(request));
     }
 }
