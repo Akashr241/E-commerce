@@ -1,7 +1,7 @@
 package com.example.demo.cart.repository;
 import com.example.demo.cart.entity.Cart;
-import com.example.demo.security.user.entity.User;
 
+import com.example.demo.security.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

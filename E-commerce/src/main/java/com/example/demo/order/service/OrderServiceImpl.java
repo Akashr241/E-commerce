@@ -45,8 +45,18 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public OrderResponseDto placeOrder(Long cartId) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Cart not found with id: "));
+
+String email = SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() ->
+                    new RuntimeException("User not found"));
+
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Cart not found with user id: " + user.getId()));
                 if(cart.getCartItems().isEmpty()) {
                     throw new RuntimeException("Cart is empty. Cannot place order.");
                 }
@@ -73,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
 
             OrderItem orderItem = new OrderItem();
            // orderItem.setProduct(cartItem.getProduct());
-            orderItem.setProductName(product.getName());
+            orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setPrice(product.getPrice());
             orderItem.setSubtotal(cartItem.getSubTotal());
