@@ -8,7 +8,6 @@ import com.example.demo.cart.mapper.CartMapper;
 import com.example.demo.cart.repository.CartRepository;
 import com.example.demo.cartitem.CartItem;
 import com.example.demo.cartitem.CartItemService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -20,17 +19,23 @@ import com.example.demo.product.entity.Product;
 @Service
 public class CartServiceImpl implements CartService {
 
-    @Autowired
-    private CartRepository cartRepository;
+        private final CartRepository cartRepository;
+        private final CartItemService cartItemService;
+        private final UserRepository userRepository;
+        private final ProductRepository productRepository;
 
-    @Autowired
-    private CartItemService cartItemService;
+        public CartServiceImpl(
+                CartRepository cartRepository,
+                CartItemService cartItemService,
+                UserRepository userRepository,
+                ProductRepository productRepository) {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
+            this.cartRepository = cartRepository;
+            this.cartItemService = cartItemService;
+            this.userRepository = userRepository;
+            this.productRepository = productRepository;
+        }
+    
 
     @Override
     public CartResponseDto addProductToCart(
@@ -39,11 +44,11 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findById(request.getCartId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Cart not found"));
+                                "user not found"));
 
         CartItem cartItem =
                 cartItemService.addProductToCart(
-                        request.getCartId(),
+                        cart.getId(),
                         request.getProductId(),
                         request.getQuantity());
 
@@ -104,11 +109,19 @@ if(product.getStock() < request.getQuantity()) {
     
     @Override
 public CartResponseDto updateCartItemQuantity (
-        Long cartId,
         Long cartItemId,
         int quantity) {
+        String email = SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
 
-    Cart cart = cartRepository.findById(cartId)
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() ->
+                    new RuntimeException("User not found"));
+
+
+    Cart cart = cartRepository.findByUserId(user.getId())
             .orElseThrow(() ->
                     new RuntimeException("Cart not found"));
 
@@ -135,9 +148,18 @@ public CartResponseDto updateCartItemQuantity (
     
 
     @Override
-public void removeCartItem(Long cartId, Long cartItemId) {
+public void removeCartItem( Long cartItemId) {
+         String email = SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
 
-    Cart cart = cartRepository.findById(cartId)
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() ->
+                    new RuntimeException("User not found"));
+
+
+    Cart cart = cartRepository.findByUserId(user.getId())
             .orElseThrow(() ->
                     new RuntimeException("Cart not found"));
 
@@ -186,7 +208,7 @@ public CartResponseDto createCart() {
 
     cart.setTotalPrice(0.0);
 
-    Cart savedCart = cartRepository.save(cart);
+    Cart savedCart = cartRepository.save(user.getId());
 
     return CartMapper
             .mapToCartResponseDto(savedCart);
