@@ -1,6 +1,5 @@
 package com.example.demo.checkout.dto;
 import com.example.demo.cart.dto.CartItemResponseDto;
-import com.example.demo.cart.dto.CartResponseDto;
 import java.util.List;
 
 public class CheckoutResponseDto {

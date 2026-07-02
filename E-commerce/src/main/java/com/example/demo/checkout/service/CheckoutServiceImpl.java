@@ -40,7 +40,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
-        Cart cart = cartRepository.findByUser(user)
+        Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() ->
                         new RuntimeException("Cart not found"));
 
