@@ -116,7 +116,6 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartResponseDto updateCartItemQuantity(
-            Long cartId,
             Long cartItemId,
             int quantity) {
 
@@ -142,7 +141,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void removeCartItem(Long cartId, Long cartItemId) {
+    public void removeCartItem( Long cartItemId) {
 
         Cart cart = getCurrentUserCart();
 

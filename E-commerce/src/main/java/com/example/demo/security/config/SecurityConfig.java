@@ -67,7 +67,9 @@ public class SecurityConfig {
                        //payment API access user and admin
                         .requestMatchers(HttpMethod.GET,"/payments/**").hasAnyAuthority("USER","ADMIN")
 
-                        //payment API access admin
+                        //cart API access user
+                        .requestMatchers(HttpMethod.POST,"/cart/**").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.GET,"/cart/all").hasAuthority("ADMIN")
                    //     .requestMatchers(HttpMethod.GET,"/payments").hasAuthority("ADMIN")
                         
                         .anyRequest().authenticated()
