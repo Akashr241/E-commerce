@@ -5,7 +5,6 @@ import com.example.demo.cart.service.CartService;
 
 import com.example.demo.cart.dto.AddProductToCartRequest;
 import com.example.demo.cart.dto.CartResponseDto;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,60 +16,67 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class CartController {
 
-    @Autowired
-    private CartService cartService;
 
-    @PostMapping("/add")
-    public ResponseEntity<CartResponseDto> addCart() {
-        return new ResponseEntity <>(
-                cartService.addCart(),
-                HttpStatus.CREATED
-                
-        );
+private final CartService cartService;
+public CartController(CartService cartService) {
+        this.cartService = cartService;
     }
- 
-    // CREATE
+
+ @PostMapping("/create")
+    public ResponseEntity<CartResponseDto> createCart() {
+
+        return new ResponseEntity<>(
+                cartService.createCart(),
+                HttpStatus.CREATED);
+    }
+
+    // Add product to logged-in user's cart
     @PostMapping("/add-product")
     public ResponseEntity<CartResponseDto> addProductToCart(
-             @RequestBody AddProductToCartRequest request) {
+            @RequestBody AddProductToCartRequest request) {
 
         return new ResponseEntity<>(
                 cartService.addProductToCart(request),
-            HttpStatus.CREATED
-    );
-}
-
-    
-    @GetMapping("/all")
-    public List<Cart> getAllCartItems() {
-        return cartService.getAllCartItems();
+                HttpStatus.CREATED);
     }
 
-    // READ
-    @GetMapping("/get/{id}")
-    public Cart getCart(@PathVariable Long id) {
-    return cartService.getCartById(id);
-}
+    // Get all carts (Admin/testing)
+    @GetMapping("/all")
+    public ResponseEntity<List<Cart>> getAllCartItems() {
 
-    // UPDATE
-    @PutMapping("/{cartId}/items/{cartItemId}")
+        return ResponseEntity.ok(
+                cartService.getAllCartItems());
+    }
+
+    // Get cart by id
+    @GetMapping("/{id}")
+    public ResponseEntity<Cart> getCart(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                cartService.getCartById(id));
+    }
+
+    // Update quantity
+    @PutMapping("/items/{cartItemId}")
     public ResponseEntity<CartResponseDto> updateCartItemQuantity(
-            @PathVariable Long cartId,
             @PathVariable Long cartItemId,
             @RequestParam int quantity) {
-                CartResponseDto response = cartService.updateCartItemQuantity(cartId, cartItemId, quantity);
-        return ResponseEntity.ok(response);
 
+       
+
+        return ResponseEntity.ok(cartService.updateCartItemQuantity(
+                cartItemId,
+                quantity));
     }
 
-    // DELETE
-    @DeleteMapping("/{cartId}/items/{cartItemId}")
+    // Remove item
+    @DeleteMapping("/items/{cartItemId}")
     public ResponseEntity<String> removeCartItem(
-            @PathVariable Long cartId,
             @PathVariable Long cartItemId) {
 
-        cartService.removeCartItem(cartId, cartItemId);
+        cartService.removeCartItem(cartItemId);
 
-        return ResponseEntity.ok("item removed successfully");
+        return ResponseEntity.ok("Item removed successfully");
     }
 }
