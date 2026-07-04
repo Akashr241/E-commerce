@@ -25,9 +25,8 @@ public CartController(CartService cartService) {
  @PostMapping("/create")
     public ResponseEntity<CartResponseDto> createCart() {
 
-        return new ResponseEntity<>(
-                cartService.createCart(),
-                HttpStatus.CREATED);
+    return ResponseEntity.status(HttpStatus.CREATED)
+            .body(cartService.createCart());
     }
 
     // Add product to logged-in user's cart
