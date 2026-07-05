@@ -44,7 +44,7 @@ public class OrderServiceImpl implements OrderService {
     }
     @Transactional
     @Override
-    public OrderResponseDto placeOrder(Long cartId) {
+    public OrderResponseDto placeOrder() {
 
 String email = SecurityContextHolder
             .getContext()
@@ -54,12 +54,15 @@ String email = SecurityContextHolder
     User user = userRepository.findByEmail(email)
             .orElseThrow(() ->
                     new RuntimeException("User not found"));
+ 
 
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Cart not found with user id: " + user.getId()));
                 if(cart.getCartItems().isEmpty()) {
                     throw new RuntimeException("Cart is empty. Cannot place order.");
-                }
+                } if (!cart.getUser().getId().equals(user.getId())) {
+                    throw new RuntimeException("Unauthorized cart");
+}
         Order order = new Order();
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
@@ -92,7 +95,6 @@ String email = SecurityContextHolder
             //set order item
             orderItems.add(orderItem);
             //save order item
-            order.setOrderItems(orderItems);
             
         }
         order.setOrderItems(orderItems);
