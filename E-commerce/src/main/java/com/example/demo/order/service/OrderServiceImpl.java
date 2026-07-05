@@ -61,10 +61,11 @@ String email = SecurityContextHolder
                     throw new RuntimeException("Cart is empty. Cannot place order.");
                 }
         Order order = new Order();
+        order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
-       // OrderResponseDto dto =new OrderResponseDto();
         order.setStatus(OrderStatus.PLACED);
-                order.setTotalAmount(cart.getTotalPrice());
+        order.setTotalAmount(cart.getTotalPrice());
+              
 
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem cartItem : cart.getCartItems()) {
@@ -82,12 +83,12 @@ String email = SecurityContextHolder
             productRepository.save(product);
 
             OrderItem orderItem = new OrderItem();
-           // orderItem.setProduct(cartItem.getProduct());
             orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
             orderItem.setPrice(product.getPrice());
             orderItem.setSubtotal(cartItem.getSubTotal());
             orderItem.setOrder(order);
+            orderItem.setProductName(product.getName());
             //set order item
             orderItems.add(orderItem);
             //save order item
