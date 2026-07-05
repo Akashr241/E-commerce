@@ -31,9 +31,9 @@ public class OrderController {
    
     @Tag(name="Orders",description="add the order")
     @Operation(summary="Place an order based on the cart ID")
-   @PostMapping("/place/{cartId}")
-public OrderResponseDto placeOrder(@PathVariable Long cartId) {
-    return orderService.placeOrder(cartId);
+   @PostMapping("/place/")
+public OrderResponseDto placeOrder() {
+    return orderService.placeOrder();
 } 
  @GetMapping("/my-orders")
     public ResponseEntity<List<OrderHistoryResponseDto>> getMyOrders() {

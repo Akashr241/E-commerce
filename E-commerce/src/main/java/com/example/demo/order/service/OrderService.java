@@ -5,7 +5,7 @@ import com.example.demo.order.dto.OrderHistoryResponseDto;
 import java.util.List;
 import com.example.demo.order.dto.UpdateOrderStatusDto;
 public interface OrderService {
-  OrderResponseDto placeOrder(Long cartId);
+  OrderResponseDto placeOrder();
 List<OrderHistoryResponseDto> getMyOrders();
 OrderResponseDto updateOrderStatus(
         Long orderId,
