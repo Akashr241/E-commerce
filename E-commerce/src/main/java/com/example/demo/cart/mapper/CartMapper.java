@@ -22,10 +22,17 @@ public class CartMapper {
                         ))
                         .toList();
 
+
+        double total = cart.getCartItems()
+                .stream()
+                .mapToDouble(item -> item.getSubTotal())
+                .sum();
+
         return new CartResponseDto(
                 cart.getId(),
-                cart.getTotalPrice(),
+                total,
                 itemDtos
+        
         );
     }
 }

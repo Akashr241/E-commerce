@@ -1,5 +1,6 @@
 package com.example.demo.checkout.service;
 
+//import com.example.demo.cartitem.CartItemRepository;
 import java.util.List;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +17,7 @@ import com.example.demo.security.user.repository.UserRepository;
 @Service
 public class CheckoutServiceImpl implements CheckoutService {
 
+  //  private final CartItemRepository cartItemRepository;
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
 
@@ -25,6 +27,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
+        //this.cartItemRepository = cartItemRepository;
     }
 
     @Override
@@ -59,8 +62,17 @@ public class CheckoutServiceImpl implements CheckoutService {
                 new CheckoutResponseDto();
 
         response.setItems(items);
-        response.setTotal(cart.getTotalPrice());
+        //response.setTotal(cart.getTotalPrice());
         response.setShippingAddress(request);
+
+        double total = cart.getCartItems()
+        .stream()
+        .mapToDouble(item -> item.getSubTotal())
+        .sum();
+
+
+                response.setTotal(total);
+
 
         return response;
     }
