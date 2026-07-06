@@ -69,7 +69,7 @@ public class CartServiceImpl implements CartService {
 
         Cart cart = new Cart();
         cart.setUser(user);
-        cart.setTotalPrice(0.0);
+        
 
         Cart savedCart = cartRepository.save(cart);
 
@@ -80,7 +80,7 @@ public class CartServiceImpl implements CartService {
     public CartResponseDto addCart() {
 
         Cart cart = new Cart();
-        cart.setTotalPrice(0.0);
+    
 
         Cart savedCart = cartRepository.save(cart);
 
@@ -180,6 +180,5 @@ public class CartServiceImpl implements CartService {
                 .mapToDouble(CartItem::getSubTotal)
                 .sum();
 
-        cart.setTotalPrice(total);
     }
 }

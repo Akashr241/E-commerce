@@ -6,17 +6,17 @@ public class CartResponseDto {
 
     private Long id;
 
-    private double totalPrice;
+    private double total;
 
     private List<CartItemResponseDto> cartItems;
 
     public CartResponseDto(
             Long id,
-            double totalPrice,
+            double total,
             List<CartItemResponseDto> cartItems) {
 
         this.id = id;
-        this.totalPrice = totalPrice;
+        this.total = total;
         this.cartItems = cartItems;
     }
 
@@ -24,8 +24,8 @@ public class CartResponseDto {
         return id;
     }
 
-    public double getTotalPrice() {
-        return totalPrice;
+    public double getTotal() {
+        return total;
     }
 
     public List<CartItemResponseDto> getCartItems() {

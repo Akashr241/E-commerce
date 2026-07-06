@@ -1,4 +1,5 @@
 package com.example.demo.order.service;
+import com.example.demo.cartitem.CartItemService;
 import com.example.demo.order.dto.OrderResponseDto;
 import com.example.demo.order.dto.UpdateOrderStatusDto;
 import com.example.demo.order.entity.Order;
@@ -20,6 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.product.repository.ProductRepository;
 import com.example.demo.order.dto.OrderHistoryResponseDto;
 import com.example.demo.security.user.repository.UserRepository;
+
+
+
+
 import com.example.demo.security.user.entity.User;
 import org.springframework.security.core.Authentication;
 import com.example.demo.order.entity.OrderStatus;
@@ -28,6 +33,7 @@ import com.example.demo.order.entity.OrderStatus;
 public class OrderServiceImpl implements OrderService {
 
 
+    private final CartItemService cartItemService;
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
@@ -35,12 +41,13 @@ public class OrderServiceImpl implements OrderService {
     public OrderServiceImpl(OrderRepository orderRepository,
                             CartRepository cartRepository,
                             ProductRepository productRepository,
-                            UserRepository userRepository
+                            UserRepository userRepository, CartItemService cartItemService
     ) {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.cartItemService = cartItemService;
     }
     @Transactional
     @Override
@@ -67,7 +74,14 @@ String email = SecurityContextHolder
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(OrderStatus.PLACED);
-        order.setTotalAmount(cart.getTotalPrice());
+
+        double total = cart.getCartItems()
+        .stream()
+        .mapToDouble(CartItem::getSubTotal)
+        .sum();
+
+        order.setTotalAmount(total);
+    
               
 
         List<OrderItem> orderItems = new ArrayList<>();
@@ -100,7 +114,7 @@ String email = SecurityContextHolder
         order.setOrderItems(orderItems);
         Order savedOrder = orderRepository.save(order);
         cart.getCartItems().clear();
-        cart.setTotalPrice(0.0);
+        
         cartRepository.save(cart);
 
         return OrderMapper.mapToOrderResponseDto(savedOrder);
@@ -176,7 +190,6 @@ public OrderResponseDto getOrderById(Long orderId) {
 }
 @Override
 public void cancelOrder(Long orderId) {
-
     Order order = orderRepository.findById(orderId)
             .orElseThrow(() ->
                     new RuntimeException("Order not found with id: " + orderId));

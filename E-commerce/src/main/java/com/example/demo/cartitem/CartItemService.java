@@ -6,20 +6,21 @@ import com.example.demo.cart.repository.CartRepository;
 import com.example.demo.product.entity.Product;
 import com.example.demo.product.repository.ProductRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CartItemService {
+        private final CartItemRepository cartItemRepository;
+        private final CartRepository cartRepository;
+        private final ProductRepository productRepository;
 
-    @Autowired
-    private CartItemRepository cartItemRepository;
 
-    @Autowired
-    private CartRepository cartRepository;
+        public CartItemService(CartItemRepository cartItemRepository, CartRepository cartRepository, ProductRepository productRepository) {
+            this.cartItemRepository = cartItemRepository;
+            this.cartRepository = cartRepository;
+            this.productRepository = productRepository;
+        }
 
-    @Autowired
-    private ProductRepository productRepository;
 
     public CartItem addProductToCart(
             Long cartId,

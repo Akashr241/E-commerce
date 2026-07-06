@@ -14,7 +14,7 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double totalPrice;
+    
 
 
     @OneToOne
@@ -35,13 +35,7 @@ public class Cart {
         return id;
     }
 
-    public double getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(double totalPrice) {
-        this.totalPrice = totalPrice;
-    }
+   
 
     public List<CartItem> getCartItems() {
         return cartItems;
