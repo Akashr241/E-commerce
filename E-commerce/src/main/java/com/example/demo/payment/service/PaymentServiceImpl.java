@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.payment.dto.PaymentRequestDto;
 import com.example.demo.payment.dto.PaymentResponseDto;
+import com.example.demo.payment.dto.VerifyPaymentRequestDto;
 import com.example.demo.payment.entity.Payment;
 import com.example.demo.payment.mapper.PaymentMapper;
 import com.example.demo.payment.repository.PaymentRepository;
@@ -69,6 +70,34 @@ public class PaymentServiceImpl implements PaymentService {
 
         }
     }
+@Override
+public PaymentResponseDto verifyPayment(
+        VerifyPaymentRequestDto request) {
+
+    Payment payment =
+            paymentRepository
+                    .findByRazorpayOrderId(
+                            request.getRazorpayOrderId())
+                    .orElseThrow(() ->
+                            new RuntimeException(
+                                    "Payment not found"));
+
+    payment.setRazorpayPaymentId(
+            request.getRazorpayPaymentId());
+
+    payment.setRazorpaySignature(
+            request.getRazorpaySignature());
+
+    payment.setPaymentStatus("SUCCESS");
+
+    paymentRepository.save(payment);
+
+    return PaymentMapper
+            .mapToPaymentResponseDto(payment);
+}
+
+
+
 
     @Override
     public PaymentResponseDto getPaymentById(Long paymentId) {
