@@ -3,6 +3,7 @@ package com.example.demo.payment.service;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.order.repository.OrderRepository;
 import com.example.demo.payment.dto.PaymentRequestDto;
 import com.example.demo.payment.dto.PaymentResponseDto;
 import com.example.demo.payment.dto.VerifyPaymentRequestDto;
@@ -11,19 +12,23 @@ import com.example.demo.payment.mapper.PaymentMapper;
 import com.example.demo.payment.repository.PaymentRepository;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
+import com.example.demo.order.repository.OrderRepository;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final RazorpayClient razorpayClient;
+    private final OrderRepository orderRepository;
 
     public PaymentServiceImpl(
             PaymentRepository paymentRepository,
-            RazorpayClient razorpayClient) {
+            RazorpayClient razorpayClient,
+            OrderRepository orderRepository) {
 
         this.paymentRepository = paymentRepository;
         this.razorpayClient = razorpayClient;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -39,10 +44,15 @@ public class PaymentServiceImpl implements PaymentService {
 
             options.put("receipt",
                     "receipt_" + System.currentTimeMillis());
+        
+        System.out.println("Amount : " + request.getAmount());
+        System.out.println("Method : " + request.getPaymentMethod());
+        System.out.println("Creating Razorpay Order...");
 
+
+        
             Order razorpayOrder =
                     razorpayClient.orders.create(options);
-
             Payment payment = new Payment();
 
             payment.setAmount(request.getAmount());
@@ -65,8 +75,15 @@ public class PaymentServiceImpl implements PaymentService {
 
         } catch (Exception e) {
 
+    e.printStackTrace();
+
+    System.out.println(e.getClass().getName());
+    System.out.println(e.getMessage());
+
             throw new RuntimeException(
                     "Error while creating payment", e);
+
+                    
 
         }
     }
