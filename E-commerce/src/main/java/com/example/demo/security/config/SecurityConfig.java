@@ -75,7 +75,9 @@ public class SecurityConfig {
 
                    // razorpayment access user
                    .requestMatchers(HttpMethod.POST,"/payments/verify").hasAuthority("USER")
-                        .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.GET,"api/razorpay/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"api/razorpay/**").permitAll()
+                   .anyRequest().authenticated()
                         
                 )
                                 .exceptionHandling(ex -> ex
