@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT,"/orders/*/cancel").hasAuthority("USER")
 
                         // payment API access user
-                        .requestMatchers(HttpMethod.POST,"/payments/**").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.POST,"/payments/create*").hasAuthority("USER")
                        //payment API access user and admin
                         .requestMatchers(HttpMethod.GET,"/payments/**").hasAnyAuthority("USER","ADMIN")
 
@@ -72,6 +72,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/cart/all").hasAuthority("ADMIN")
                    //     .requestMatchers(HttpMethod.GET,"/payments").hasAuthority("ADMIN")
                         
+
+                   // razorpayment access user
+                   .requestMatchers(HttpMethod.POST,"/payments/verify").hasAuthority("USER")
                         .anyRequest().authenticated()
                         
                 )
