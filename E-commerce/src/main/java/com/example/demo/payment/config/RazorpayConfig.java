@@ -19,6 +19,10 @@ public class RazorpayConfig {
     public RazorpayClient razorpayClient() throws Exception {
 
 System.out.println("Razorpay Key ID: " + keyId);
+System.out.println("ID = " + keyId);
+System.out.println("ID Length = " + keyId.length());
+
+System.out.println("Secret Length = " + keySecret.length());
 System.out.println("Razorpay Key Secret: " + keySecret);
 
         return new RazorpayClient(keyId, keySecret);
