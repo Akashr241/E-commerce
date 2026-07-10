@@ -77,6 +77,10 @@ public class PaymentServiceImpl implements PaymentService {
 
     e.printStackTrace();
 
+    System.out.println("Exception class: " + e.getClass().getName());
+    System.out.println("Message: " + e.getMessage());
+
+
     System.out.println(e.getClass().getName());
     System.out.println(e.getMessage());
 
