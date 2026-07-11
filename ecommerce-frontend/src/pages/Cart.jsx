@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getCart, removeFromCart } from "../services/cartService";
+import { myCart, removeFromCart } from "../services/cartService";
 import { useNavigate } from "react-router-dom";
 
 function Cart() {
@@ -16,7 +16,7 @@ function Cart() {
     const loadCart = async () => {
         try {
 
-            const response = await getCart();
+            const response = await myCart();
 
             setCart(response);
 
@@ -49,7 +49,7 @@ function Cart() {
 
     }
 
-    if (!cart || !cart.items || cart.items.length === 0) {
+    if (!cart || !cart.cartItems || cart.cartItems.length === 0) {
 
         return (
             <div className="container mt-5">
@@ -80,7 +80,7 @@ function Cart() {
 
             <hr />
 
-            {cart.items.map(item => (
+            {cart.cartItems.map(item => (
 
                 <div className="card mb-3" key={item.id}>
 

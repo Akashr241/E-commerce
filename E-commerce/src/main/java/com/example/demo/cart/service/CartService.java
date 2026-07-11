@@ -24,4 +24,7 @@ public interface CartService {
     List<Cart> getAllCartItems();
 
     Cart getCartById(Long id);
+    
+        CartResponseDto getCurrentUserCartDto();
+
 }

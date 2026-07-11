@@ -39,6 +39,12 @@ public CartController(CartService cartService) {
                 HttpStatus.CREATED);
     }
 
+    @GetMapping("/my-cart")
+public ResponseEntity<CartResponseDto> getMyCart() {
+
+    return ResponseEntity.ok(cartService.getCurrentUserCartDto());
+
+}
     // Get all carts (Admin/testing)
     @GetMapping("/all")
     public ResponseEntity<List<Cart>> getAllCartItems() {
