@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { getProductById } from "../services/productService";
+import { useNavigate,useParams } from "react-router-dom";
+import { addToCart } from "../services/cartService";
 
 function ProductDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,17 +15,41 @@ function ProductDetails() {
     fetchProduct();
   }, []);
 
+
   const fetchProduct = async () => {
     try {
-      const response = await getProductById(id);
-      setProduct(response.data);
+        const response = await getProductById(id);
+        setProduct(response.data);
     } catch (err) {
-      console.error(err);
-      setError("Unable to load product.");
+        setError("Unable to load product");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
+
+
+const handleAddToCart = async () => {
+
+    try {
+
+        await addToCart(product.id);
+
+        alert("Product added to cart successfully!");
+
+        navigate("/cart");
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Failed to add product to cart.");
+
+    }
+
+};
+
+
 
   if (loading) {
     return (
@@ -62,9 +88,18 @@ function ProductDetails() {
           <strong>Stock :</strong> {product.stock}
         </p>
 
-        <button className="btn btn-primary">
-          Add To Cart
+        <button className="btn btn-primary"
+         onClick={handleAddToCart}>
+         Add To Cart
         </button>
+
+            <button
+        className="btn btn-outline-secondary"
+        onClick={() => navigate("/products")}
+    >
+        ← Back to Products
+    </button>
+
 
       </div>
 
