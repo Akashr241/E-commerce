@@ -184,4 +184,12 @@ public class CartServiceImpl implements CartService {
                 .sum();
 
     }
+
+    @Override
+public CartResponseDto getCurrentUserCartDto() {
+
+    Cart cart = getCurrentUserCart();
+
+    return CartMapper.mapToCartResponseDto(cart);
+}
 }
