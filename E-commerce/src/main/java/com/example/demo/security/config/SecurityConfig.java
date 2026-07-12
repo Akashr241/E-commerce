@@ -10,6 +10,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.example.demo.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.demo.security.jwt.JwtFilter;
+import org.springframework.security.config.Customizer;
 
 @Configuration
 public class SecurityConfig {
@@ -28,6 +29,7 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults())
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
@@ -70,7 +72,9 @@ public class SecurityConfig {
                         //cart API access user
                         .requestMatchers(HttpMethod.POST,"/cart/**").hasAuthority("USER")
                         .requestMatchers(HttpMethod.GET,"/cart/all").hasAuthority("ADMIN")
-                   //     .requestMatchers(HttpMethod.GET,"/payments").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/cart/my-cart").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/cart/items/{id}").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.PUT,"/cart/**").hasAuthority("USER")
                         
 
                    // razorpayment access user

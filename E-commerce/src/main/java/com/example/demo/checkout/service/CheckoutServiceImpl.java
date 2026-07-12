@@ -54,6 +54,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                                 new CartItemResponseDto(
                                         item.getId(),
                                         item.getProduct().getName(),
+                                        item.getProduct().getPrice(),
                                         item.getQuantity(),
                                         item.getSubTotal()))
                         .toList();

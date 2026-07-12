@@ -17,6 +17,7 @@ public class CartMapper {
                         .map(item -> new CartItemResponseDto(
                                 item.getId(),
                                 item.getProduct().getName(),
+                                item.getProduct().getPrice(),
                                 item.getQuantity(),
                                 item.getSubTotal()
                         ))

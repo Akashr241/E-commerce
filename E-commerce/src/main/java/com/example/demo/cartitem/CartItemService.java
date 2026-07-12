@@ -5,6 +5,7 @@ import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.cart.repository.CartRepository;
 import com.example.demo.product.entity.Product;
 import com.example.demo.product.repository.ProductRepository;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,23 @@ System.out.println("add product method called");
                                 "Product not found"));
 
         double subTotal = quantity * product.getPrice();
+
+Optional<CartItem> existingItem =
+        cartItemRepository.findByCartIdAndProductId(cartId, productId);
+
+if (existingItem.isPresent()) {
+
+    CartItem item = existingItem.get();
+
+    item.setQuantity(item.getQuantity() + quantity);
+
+    item.setSubTotal(
+            item.getProduct().getPrice() * item.getQuantity());
+
+    return cartItemRepository.save(item);
+
+}
+
 
         CartItem cartItem = new CartItem();
         

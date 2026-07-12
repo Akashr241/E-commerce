@@ -6,18 +6,25 @@ public class CartItemResponseDto {
 
     private String productName;
 
+    private double price;
+
     private int quantity;
 
     private double subTotal;
 
+    public CartItemResponseDto() {
+    }
+
     public CartItemResponseDto(
             Long id,
             String productName,
+            double price,
             int quantity,
             double subTotal) {
 
         this.id = id;
         this.productName = productName;
+        this.price = price;
         this.quantity = quantity;
         this.subTotal = subTotal;
     }
@@ -30,6 +37,10 @@ public class CartItemResponseDto {
         return productName;
     }
 
+    public double getPrice() {
+        return price;
+    }
+
     public int getQuantity() {
         return quantity;
     }
@@ -37,16 +48,24 @@ public class CartItemResponseDto {
     public double getSubTotal() {
         return subTotal;
     }
-    public void setId(){
-        setId();
+
+    public void setId(Long id) {
+        this.id = id;
     }
-    public void setProductName(){
-         setProductName();
+
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
-    public void setQuantity(){
-    setQuantity();
+
+    public void setPrice(double price) {
+        this.price = price;
     }
-    public void setSubTotal(){
-        setSubTotal();
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void setSubTotal(double subTotal) {
+        this.subTotal = subTotal;
     }
 }
