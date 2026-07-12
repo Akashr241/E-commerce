@@ -59,12 +59,12 @@ function App() {
 <Route path="/payment" element={<Payment />} />
 
 <Route
-    path="/payment-success"
+    path="/payment/success"
     element={<PaymentSuccess />}
 />
 
 <Route
-    path="/payment-failure"
+    path="/payment/failure"
     element={<PaymentFailure />}
 />
 
