@@ -5,10 +5,11 @@ import java.util.List;
 public class CartResponseDto {
 
     private Long id;
-
     private double total;
-
     private List<CartItemResponseDto> cartItems;
+
+    public CartResponseDto() {
+    }
 
     public CartResponseDto(
             Long id,
@@ -30,5 +31,17 @@ public class CartResponseDto {
 
     public List<CartItemResponseDto> getCartItems() {
         return cartItems;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public void setCartItems(List<CartItemResponseDto> cartItems) {
+        this.cartItems = cartItems;
     }
 }

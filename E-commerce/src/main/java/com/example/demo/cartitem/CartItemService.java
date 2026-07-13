@@ -45,6 +45,11 @@ System.out.println("add product method called");
 Optional<CartItem> existingItem =
         cartItemRepository.findByCartIdAndProductId(cartId, productId);
 
+    System.out.println("Cart ID = " + cartId);
+    System.out.println("Product ID = " + productId);
+    System.out.println("Existing Item = " + existingItem.isPresent());
+
+
 if (existingItem.isPresent()) {
 
     CartItem item = existingItem.get();
