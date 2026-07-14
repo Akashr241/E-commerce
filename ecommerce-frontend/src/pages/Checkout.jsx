@@ -1,84 +1,80 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import CheckoutForm from "../components/CheckoutForm";
 import OrderSummary from "../components/OrderSummary";
+import { checkout } from "../services/checkoutService";
 
-const Checkout = () => {
+function Checkout() {
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    country: "",
-    pincode: "",
-  });
-
-  const [cartItems, setCartItems] = useState([]);
-
-  useEffect(() => {
-
-    // Temporary Data
-    // Replace with Spring Boot API later
-
-    setCartItems([
-      {
-        id: 1,
-        productName: "Wireless Mouse",
-        quantity: 2,
-        subTotal: 2000,
-      },
-      {
-        id: 2,
-        productName: "Mechanical Keyboard",
-        quantity: 1,
-        subTotal: 3500,
-      },
-    ]);
-
-  }, []);
-
-  const handleChange = (e) => {
-
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+    const [formData, setFormData] = useState({
+        fullName: "",
+        phone: "",
+        address: "",
+        city: "",
+        state: "",
+        country: "",
+        pincode: ""
     });
 
-  };
+    const handleChange = (e) => {
 
-  return (
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
 
-    <div className="container mt-5">
+    };
 
-      <h2 className="text-center mb-4">
-        Checkout
-      </h2>
+    const handleCheckout = async () => {
 
-      <div className="row">
+    try {
 
-        <div className="col-md-7">
+        const response = await checkout(formData);
 
-          <CheckoutForm
-            formData={formData}
-            handleChange={handleChange}
-          />
+        console.log(response);
 
-        </div>
+        alert("Order placed successfully!");
 
-        <div className="col-md-5">
+        navigate("/payment");
 
-          <OrderSummary
-            cartItems={cartItems}
-          />
+    } catch (error) {
 
-        </div>
+        console.log(error);
 
-      </div>
+        alert("Checkout failed!");
 
-    </div>
+    }
 
-  );
 };
+
+    return (
+
+        <div className="container mt-4">
+
+            <div className="row">
+
+                <div className="col-md-8">
+
+                    <CheckoutForm
+                        formData={formData}
+                        handleChange={handleChange}
+                    />
+
+                </div>
+
+                <div className="col-md-4">
+
+                    <OrderSummary
+                        onCheckout={handleCheckout}
+                    />
+
+                </div>
+
+            </div>
+
+        </div>
+
+    );
+
+}
 
 export default Checkout;

@@ -9,7 +9,7 @@ import com.example.demo.checkout.service.CheckoutService;
 
 @RestController
 @RequestMapping("/api/checkout")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:3000")
 public class CheckoutController {
 
     private final CheckoutService checkoutService;
