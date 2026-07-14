@@ -17,7 +17,7 @@ function Cart() {
         try {
 
             const response = await myCart();
-            console.log("Cart Response:", response);
+       //     console.log("Cart Response:", response);
 
             setCart(response);
 
