@@ -1,48 +1,30 @@
 import React from "react";
 
-const OrderSummary = ({ cartItems }) => {
+function OrderSummary({ onCheckout }) {
 
-  const total = cartItems.reduce(
-    (sum, item) => sum + item.subTotal,
-    0
-  );
+    return (
 
-  return (
-    <div className="card p-4 shadow-sm">
-      <h3 className="mb-4">Order Summary</h3>
+        <div className="card shadow-sm p-4">
 
-      {cartItems.length === 0 ? (
-        <p>Your cart is empty.</p>
-      ) : (
-        <>
-          {cartItems.map((item) => (
-            <div
-              key={item.id}
-              className="d-flex justify-content-between border-bottom py-2"
+            <h3>Order Summary</h3>
+
+            <hr />
+
+            <p>Total Items : 0</p>
+
+            <p>Total Amount : ₹0</p>
+
+            <button
+                className="btn btn-success w-100"
+                onClick={onCheckout}
             >
-              <div>
-                <h6>{item.productName}</h6>
-                <small>Quantity : {item.quantity}</small>
-              </div>
+                Place Order
+            </button>
 
-              <strong>₹ {item.subTotal}</strong>
-            </div>
-          ))}
+        </div>
 
-          <hr />
+    );
 
-          <div className="d-flex justify-content-between">
-            <h5>Total</h5>
-            <h5>₹ {total}</h5>
-          </div>
-
-          <button className="btn btn-success w-100 mt-3">
-            Proceed to Payment
-          </button>
-        </>
-      )}
-    </div>
-  );
-};
+}
 
 export default OrderSummary;
