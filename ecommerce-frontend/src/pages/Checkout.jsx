@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import CheckoutForm from "../components/CheckoutForm";
 import OrderSummary from "../components/OrderSummary";
 import { checkout } from "../services/checkoutService";
+import { useNavigate } from "react-router-dom";
 
 function Checkout() {
+
+    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
         fullName: "",

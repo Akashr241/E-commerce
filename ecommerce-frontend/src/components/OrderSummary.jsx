@@ -1,4 +1,5 @@
 import React from "react";
+import Checkout  from "../pages/Checkout";
 
 function OrderSummary({ onCheckout }) {
 
