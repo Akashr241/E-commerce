@@ -51,10 +51,19 @@ const loadCart = async () => {
         const response = await checkout(formData);
 
         console.log(response);
+        console.log(" passing to payment page",{
+            total: response.total,
+            items: response.items
+        });
 
         alert("Order placed successfully!");
 
-        navigate("/payment");
+        navigate("/payment", {
+    state: {
+        total: response.total,
+        items: response.items
+    }
+});
 
     } catch (error) {
 
