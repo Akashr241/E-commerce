@@ -121,7 +121,7 @@ function Cart() {
 
                 <div className="card-body">
 
-                    <h3>Total : ₹ {cart.totalPrice}</h3>
+                    <h3>Total : ₹ {cart.total}</h3>
 
                     <button
                         className="btn btn-success me-3"

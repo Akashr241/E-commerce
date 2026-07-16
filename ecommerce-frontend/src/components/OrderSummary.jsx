@@ -1,7 +1,11 @@
 import React from "react";
-import Checkout  from "../pages/Checkout";
 
-function OrderSummary({ onCheckout }) {
+
+function OrderSummary({ cart, onCheckout }) {
+        if (!cart) {
+        return <h5>Loading...</h5>;
+    }
+
 
     return (
 
@@ -11,9 +15,9 @@ function OrderSummary({ onCheckout }) {
 
             <hr />
 
-            <p>Total Items : 0</p>
+            <p>Total Items : {cart.cartItems.length}</p>
 
-            <p>Total Amount : ₹0</p>
+            <p>Total Amount : ₹{cart.total}</p>
 
             <button
                 className="btn btn-success w-100"
