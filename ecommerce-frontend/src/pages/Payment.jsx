@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createPayment } from "../services/paymentService";
+import { createPayment,verifyPayment } from "../services/paymentService";
 import { useLocation, useNavigate } from "react-router-dom";
 
 function Payment() {
@@ -11,7 +11,10 @@ function Payment() {
 
     const total = location.state?.total || 0;
     console.log(total);
-    
+
+    const items = location.state?.items || [];
+    console.log(items);
+
     const [paymentMethod, setPaymentMethod] = useState("COD");
 
     const handlePayment = async () => {
