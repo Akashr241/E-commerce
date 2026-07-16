@@ -3,6 +3,8 @@ import CheckoutForm from "../components/CheckoutForm";
 import OrderSummary from "../components/OrderSummary";
 import { checkout } from "../services/checkoutService";
 import { useNavigate } from "react-router-dom";
+import {useEffect} from "react";
+import { myCart } from "../services/cartService";
 
 function Checkout() {
 
@@ -17,6 +19,21 @@ function Checkout() {
         country: "",
         pincode: ""
     });
+
+    const [cart, setCart] = useState(null);
+
+useEffect(() => {
+    loadCart();
+}, []);
+
+const loadCart = async () => {
+    try {
+        const response = await myCart();
+        setCart(response);
+    } catch (error) {
+        console.log(error);
+    }
+};
 
     const handleChange = (e) => {
 
@@ -67,6 +84,7 @@ function Checkout() {
                 <div className="col-md-4">
 
                     <OrderSummary
+                    cart={cart}
                         onCheckout={handleCheckout}
                     />
 
