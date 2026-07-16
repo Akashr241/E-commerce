@@ -1,21 +1,123 @@
-import React from "react";
-import PaymentButton from "../components/PaymentButton";
+import React, { useState } from "react";
+import { createPayment } from "../services/paymentService";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function Payment() {
+
+    const navigate = useNavigate();
+    
+    const location = useLocation();
+        console.log(location.state);
+
+    const total = location.state?.total || 0;
+    console.log(total);
+    
+    const [paymentMethod, setPaymentMethod] = useState("COD");
+
+    const handlePayment = async () => {
+
+        try {
+
+            const paymentData = {
+
+                amount: total,
+
+                paymentMethod: paymentMethod
+
+            };
+
+            const response = await createPayment(paymentData);
+
+            console.log(response.data);
+
+            if (paymentMethod === "COD") {
+
+                alert("Order placed successfully.");
+
+                navigate("/payment-success");
+
+            } else {
+
+                // Razorpay integration will come here
+                alert("Opening Razorpay...");
+
+            }
+
+        } catch (error) {
+
+            console.log(error);
+
+            alert("Payment Failed");
+
+        }
+
+    };
 
     return (
 
         <div className="container mt-5">
 
-            <h2>Payment</h2>
+            <div className="card p-4 shadow">
 
-            <p>Total Amount : ₹3000</p>
+                <h2>Payment</h2>
 
-            <PaymentButton />
+                <hr />
+
+                <h4>Total Amount : ₹ {total}</h4>
+
+                <div className="mt-4">
+
+                    <label>
+
+                        <input
+                            type="radio"
+                            value="COD"
+                            checked={paymentMethod === "COD"}
+                            onChange={(e) =>
+                                setPaymentMethod(e.target.value)
+                            }
+                        />
+
+                        {" "}Cash On Delivery
+
+                    </label>
+
+                </div>
+
+                <div className="mt-2">
+
+                    <label>
+
+                        <input
+                            type="radio"
+                            value="RAZORPAY"
+                            checked={paymentMethod === "RAZORPAY"}
+                            onChange={(e) =>
+                                setPaymentMethod(e.target.value)
+                            }
+                        />
+
+                        {" "}UPI / Card / Net Banking
+
+                    </label>
+
+                </div>
+
+                <button
+                    className="btn btn-success mt-4"
+                    onClick={handlePayment}
+                >
+
+                    Pay Now
+
+                </button>
+
+            </div>
 
         </div>
 
     );
+
 }
 
 export default Payment;

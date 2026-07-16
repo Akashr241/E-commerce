@@ -47,6 +47,28 @@ public class PaymentServiceImpl implements PaymentService {
         
         System.out.println("Amount : " + request.getAmount());
         System.out.println("Method : " + request.getPaymentMethod());
+
+if (request.getPaymentMethod().equalsIgnoreCase("COD")) {
+
+    Payment payment = new Payment();
+
+    payment.setAmount(request.getAmount());
+
+    payment.setCurrency("INR");
+
+    payment.setPaymentMethod("COD");
+
+    payment.setPaymentStatus("PENDING");
+
+    Payment savedPayment =
+            paymentRepository.save(payment);
+
+    return PaymentMapper
+            .mapToPaymentResponseDto(savedPayment);
+}
+
+
+
         System.out.println("Creating Razorpay Order...");
 
 
