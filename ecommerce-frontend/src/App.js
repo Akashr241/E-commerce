@@ -12,8 +12,10 @@ import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import AdminProducts from "./pages/AdminProducts";
-
+import Payment from "./pages/Payment";
 import Orders from "./pages/Orders";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFailure from "./pages/PaymentFailure";
 
 function App() {
   return (
@@ -29,7 +31,9 @@ function App() {
           <Route path="/products" element={<Products />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/products/:id" element={<ProductDetails />} />
-       
+       <Route path="/payment" element={<Payment />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/payment-failure" element={<PaymentFailure />} />
           <Route path="/cart" element={<Cart />} />
 
           {/* Protected Routes */}

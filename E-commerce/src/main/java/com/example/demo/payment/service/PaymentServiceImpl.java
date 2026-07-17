@@ -71,8 +71,10 @@ if (request.getPaymentMethod().equalsIgnoreCase("COD")) {
 
         System.out.println("Creating Razorpay Order...");
 
+        System.out.println("------------Razorpay Request------------");
+        System.out.println(options.toString(2));
+        System.out.println("------------Razorpay Request------------");
 
-        
             Order razorpayOrder =
                     razorpayClient.orders.create(options);
             Payment payment = new Payment();

@@ -44,7 +44,76 @@ function Payment() {
                 // Razorpay integration will come here
                 alert("Opening Razorpay...");
 
+
+                
+
+    const options = {
+
+        key: "YOUR_RAZORPAY_KEY_ID",
+
+        amount: response.data.amount * 100,
+
+        currency: response.data.currency,
+
+        name: "Akash E-Commerce",
+
+        description: "Order Payment",
+
+        order_id: response.data.razorpayOrderId,
+
+        handler: async function (razorpayResponse) {
+
+            try {
+
+                const verifyData = {
+
+                    razorpayOrderId: razorpayResponse.razorpay_order_id,
+
+                    razorpayPaymentId: razorpayResponse.razorpay_payment_id,
+
+                    razorpaySignature: razorpayResponse.razorpay_signature
+
+                };
+
+                await verifyPayment(verifyData);
+
+                navigate("/payment-success");
+
+            } catch (error) {
+
+                console.log(error);
+
+                navigate("/payment-failure");
+
             }
+
+        },
+
+        prefill: {
+
+            name: "",
+
+            email: "",
+
+            contact: ""
+
+        },
+
+        theme: {
+
+            color: "#3399cc"
+
+        }
+
+    };
+
+    const razorpay = new window.Razorpay(options);
+
+    razorpay.open();
+
+}
+
+            
 
         } catch (error) {
 
