@@ -32,6 +32,7 @@ function Payment() {
             const response = await createPayment(paymentData);
 
             console.log(response.data);
+            console.log(response.data.razorpayOrderId);
 
             if (paymentMethod === "COD") {
 
@@ -49,8 +50,10 @@ function Payment() {
 
     const options = {
 
-        key: "YOUR_RAZORPAY_KEY_ID",
+        key: "rzp_test_TEdwiuvXS4duTr",
 
+    
+        
         amount: response.data.amount * 100,
 
         currency: response.data.currency,
@@ -91,11 +94,11 @@ function Payment() {
 
         prefill: {
 
-            name: "",
+            name: "Akash",
 
-            email: "",
+            email: "akash@example.com",
 
-            contact: ""
+            contact: "9876543210"
 
         },
 
