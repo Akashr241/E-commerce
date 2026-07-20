@@ -12,21 +12,19 @@ function ProductDetails() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const fetchProduct = async () => {
+        try {
+            const response = await getProductById(id);
+            setProduct(response.data);
+        } catch (err) {
+            setError("Unable to load product");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     fetchProduct();
-  }, []);
-
-
-  const fetchProduct = async () => {
-    try {
-        const response = await getProductById(id);
-        setProduct(response.data);
-    } catch (err) {
-        setError("Unable to load product");
-    } finally {
-        setLoading(false);
-    }
-};
-
+}, [id]);
 
 
 const handleAddToCart = async () => {
