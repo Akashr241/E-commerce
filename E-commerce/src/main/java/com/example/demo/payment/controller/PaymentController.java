@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/payments")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://your-vercel-app.vercel.app")
+
 public class PaymentController {
 
     private final PaymentService paymentService;

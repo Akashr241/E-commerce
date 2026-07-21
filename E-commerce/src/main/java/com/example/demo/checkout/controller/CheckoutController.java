@@ -9,7 +9,7 @@ import com.example.demo.checkout.service.CheckoutService;
 
 @RestController
 @RequestMapping("/api/checkout")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://your-vercel-app.vercel.app")
 public class CheckoutController {
 
     private final CheckoutService checkoutService;
