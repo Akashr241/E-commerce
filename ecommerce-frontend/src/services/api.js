@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const API = axios.create({
-  baseURL: "https://e-commerce-backend-akash.onrender.com"
+  baseURL: process.env.REACT_APP_API_URL
 });
 
 API.interceptors.request.use(
