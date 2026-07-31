@@ -1,20 +1,74 @@
 package com.example.demo.ai.client;
 import com.example.demo.ai.config.AiConfig;
 import org.springframework.stereotype.Component;
+import com.example.demo.ai.dto.GeminiRequest;
+import com.example.demo.ai.dto.GeminiResponse;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 @Component
 public class GeminiClient {
 
+    private final RestTemplate restTemplate;
     private final AiConfig aiConfig;
 
-    public GeminiClient(AiConfig aiConfig) {
+    public GeminiClient(RestTemplate restTemplate,
+                        AiConfig aiConfig) {
+
+        this.restTemplate = restTemplate;
         this.aiConfig = aiConfig;
     }
 
     public String askGemini(String prompt) {
 
-        // We will implement the HTTP call next.
-        return "Gemini Response";
+        GeminiRequest.Part part =
+                new GeminiRequest.Part(prompt);
 
+        GeminiRequest.Content content =
+                new GeminiRequest.Content(List.of(part));
+
+        GeminiRequest request =
+                new GeminiRequest(List.of(content));
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<GeminiRequest> entity =
+                new HttpEntity<>(request, headers);
+
+        String url =
+                aiConfig.getApiUrl()
+                        + "?key="
+                        + aiConfig.getApiKey();
+
+        ResponseEntity<GeminiResponse> response =
+                restTemplate.postForEntity(
+                        url,
+                        entity,
+                        GeminiResponse.class
+                );
+
+        GeminiResponse body = response.getBody();
+
+        if (body == null
+                || body.getCandidates() == null
+                || body.getCandidates().isEmpty()) {
+
+            return "No response from Gemini.";
+
+        }
+
+        return body.getCandidates()
+                .get(0)
+                .getContent()
+                .getParts()
+                .get(0)
+                .getText();
     }
 }
+
+
+

@@ -1,7 +1,9 @@
 package com.example.demo.ai.dto;
 
-public class AiRequestDto {
+import jakarta.validation.constraints.NotBlank;
 
+public class AiRequestDto {
+    @NotBlank(message = "Prompt cannot be empty ")
     private String prompt;
 
     public AiRequestDto() {
