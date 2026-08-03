@@ -36,6 +36,16 @@ public class GeminiClient {
 
         headers.setContentType(MediaType.APPLICATION_JSON);
 
+
+
+
+
+
+
+// degug statements
+
+
+
         HttpEntity<GeminiRequest> entity =
                 new HttpEntity<>(request, headers);
 
@@ -43,6 +53,12 @@ public class GeminiClient {
                 aiConfig.getApiUrl()
                         + "?key="
                         + aiConfig.getApiKey();
+
+        System.out.println("Gemini URL = " + url);
+        System.out.println("API Key = " + aiConfig.getApiKey());
+System.out.println("Gemini URL: [" + url + "]");
+System.out.println("Prompt = " + prompt);
+System.out.println("Contents = " + request.getContents().size());
 
         ResponseEntity<GeminiResponse> response =
                 restTemplate.postForEntity(
@@ -53,14 +69,37 @@ public class GeminiClient {
 
         GeminiResponse body = response.getBody();
 
-        if (body == null
-                || body.getCandidates() == null
-                || body.getCandidates().isEmpty()) {
 
-            return "No response from Gemini.";
+try {
+    ResponseEntity<GeminiResponse> response =
+            restTemplate.postForEntity(
+                    url,
+                    entity,
+                    GeminiResponse.class
+            );
 
-        }
+    GeminiResponse body = response.getBody();
 
+    if (body == null
+            || body.getCandidates() == null
+            || body.getCandidates().isEmpty()) {
+        return "No response from Gemini.";
+    }
+
+    return body.getCandidates()
+            .get(0)
+            .getContent()
+            .getParts()
+            .get(0)
+            .getText();
+
+} catch (Exception e) {
+    e.printStackTrace();
+    throw e;
+}
+
+
+      
         return body.getCandidates()
                 .get(0)
                 .getContent()
