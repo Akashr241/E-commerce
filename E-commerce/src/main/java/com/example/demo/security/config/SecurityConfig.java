@@ -81,7 +81,15 @@ public class SecurityConfig {
                    .requestMatchers(HttpMethod.POST,"/payments/verify").hasAuthority("USER")
                         .requestMatchers(HttpMethod.GET,"api/razorpay/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"api/razorpay/**").permitAll()
+
+                   //ai was intergation permission users
+                   .requestMatchers(HttpMethod.GET,"api/ai/**").permitAll()
+                   .requestMatchers(HttpMethod.POST,"api/ai/chat/**").permitAll() 
+
+
                    .anyRequest().authenticated()
+
+
                         
                 )
                                 .exceptionHandling(ex -> ex
