@@ -21,44 +21,29 @@ public class GeminiClient {
         this.aiConfig = aiConfig;
     }
 
-    public String askGemini(String prompt) {
+public String askGemini(String prompt) {
 
-        GeminiRequest.Part part =
-                new GeminiRequest.Part(prompt);
+    GeminiRequest.Part part = new GeminiRequest.Part(prompt);
 
-        GeminiRequest.Content content =
-                new GeminiRequest.Content(List.of(part));
+    GeminiRequest.Content content = new GeminiRequest.Content(List.of(part));
 
-        GeminiRequest request =
-                new GeminiRequest(List.of(content));
+    GeminiRequest request = new GeminiRequest(List.of(content));
 
-        HttpHeaders headers = new HttpHeaders();
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
 
-        headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<GeminiRequest> entity = new HttpEntity<>(request, headers);
 
+    String url = aiConfig.getApiUrl() + "?key=" + aiConfig.getApiKey();
 
+    // Debug prints
+    System.out.println("====================================");
+    System.out.println("Gemini URL = " + url);
+    System.out.println("API Key = " + aiConfig.getApiKey());
+    System.out.println("Prompt = " + prompt);
+    System.out.println("====================================");
 
-
-
-
-
-// degug statements
-
-
-
-        HttpEntity<GeminiRequest> entity =
-                new HttpEntity<>(request, headers);
-
-        String url =
-                aiConfig.getApiUrl()
-                        + "?key="
-                        + aiConfig.getApiKey();
-
-        System.out.println("Gemini URL = " + url);
-        System.out.println("API Key = " + aiConfig.getApiKey());
-System.out.println("Gemini URL: [" + url + "]");
-System.out.println("Prompt = " + prompt);
-System.out.println("Contents = " + request.getContents().size());
+    try {
 
         ResponseEntity<GeminiResponse> response =
                 restTemplate.postForEntity(
@@ -69,45 +54,26 @@ System.out.println("Contents = " + request.getContents().size());
 
         GeminiResponse body = response.getBody();
 
+        if (body == null
+                || body.getCandidates() == null
+                || body.getCandidates().isEmpty()) {
 
-try {
-    ResponseEntity<GeminiResponse> response =
-            restTemplate.postForEntity(
-                    url,
-                    entity,
-                    GeminiResponse.class
-            );
+            return "No response from Gemini.";
+        }
 
-    GeminiResponse body = response.getBody();
-
-    if (body == null
-            || body.getCandidates() == null
-            || body.getCandidates().isEmpty()) {
-        return "No response from Gemini.";
-    }
-
-    return body.getCandidates()
-            .get(0)
-            .getContent()
-            .getParts()
-            .get(0)
-            .getText();
-
-} catch (Exception e) {
-    e.printStackTrace();
-    throw e;
-}
-
-
-      
         return body.getCandidates()
                 .get(0)
                 .getContent()
                 .getParts()
                 .get(0)
                 .getText();
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+        throw e;
     }
 }
-
+}
 
 
