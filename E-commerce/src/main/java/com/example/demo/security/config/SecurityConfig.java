@@ -86,7 +86,6 @@ public class SecurityConfig {
                    .requestMatchers(HttpMethod.GET,"api/ai/**").permitAll()
                    .requestMatchers(HttpMethod.POST,"api/ai/chat/**").permitAll() 
 
-
                    .anyRequest().authenticated()
 
                    

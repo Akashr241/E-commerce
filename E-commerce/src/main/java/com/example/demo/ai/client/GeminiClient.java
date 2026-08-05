@@ -1,79 +1,31 @@
 package com.example.demo.ai.client;
-import com.example.demo.ai.config.AiConfig;
-import org.springframework.stereotype.Component;
-import com.example.demo.ai.dto.GeminiRequest;
-import com.example.demo.ai.dto.GeminiResponse;
-import org.springframework.http.*;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentResponse;
+import com.google.genai.types.Model;
 
 @Component
 public class GeminiClient {
 
-    private final RestTemplate restTemplate;
-    private final AiConfig aiConfig;
+    @Value("${gemini.api.key}")
+    private String apiKey;
 
-    public GeminiClient(RestTemplate restTemplate,
-                        AiConfig aiConfig) {
+    public String askGemini(String prompt) {
 
-        this.restTemplate = restTemplate;
-        this.aiConfig = aiConfig;
-    }
+        Client client = Client.builder()
+                .apiKey(apiKey)
+                .build();
 
-public String askGemini(String prompt) {
-
-    GeminiRequest.Part part = new GeminiRequest.Part(prompt);
-
-    GeminiRequest.Content content = new GeminiRequest.Content(List.of(part));
-
-    GeminiRequest request = new GeminiRequest(List.of(content));
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-
-    HttpEntity<GeminiRequest> entity = new HttpEntity<>(request, headers);
-
-    String url = aiConfig.getApiUrl() + "?key=" + aiConfig.getApiKey();
-
-    // Debug prints
-    System.out.println("====================================");
-    System.out.println("Gemini URL = " + url);
-    System.out.println("API Key = " + aiConfig.getApiKey());
-    System.out.println("Prompt = " + prompt);
-    System.out.println("====================================");
-
-    try {
-
-        ResponseEntity<GeminiResponse> response =
-                restTemplate.postForEntity(
-                        url,
-                        entity,
-                        GeminiResponse.class
+        GenerateContentResponse response =
+                client.models.generateContent(
+                        "gemini-2.5-flash",
+                        prompt,
+                        null
                 );
 
-        GeminiResponse body = response.getBody();
-
-        if (body == null
-                || body.getCandidates() == null
-                || body.getCandidates().isEmpty()) {
-
-            return "No response from Gemini.";
-        }
-
-        return body.getCandidates()
-                .get(0)
-                .getContent()
-                .getParts()
-                .get(0)
-                .getText();
-
-    } catch (Exception e) {
-
-        e.printStackTrace();
-        throw e;
+        return response.text();
     }
 }
-}
-
-
