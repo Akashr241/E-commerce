@@ -1,11 +1,10 @@
-package com.example.demo.ai.client;
+package com.example.demo.ai.chatbot.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
-import com.google.genai.types.Model;
 
 @Component
 public class GeminiClient {

@@ -1,4 +1,4 @@
-package com.example.demo.ai.dto;
+package com.example.demo.ai.chatbot.dto;
 
 
 public class AiResponseDto {

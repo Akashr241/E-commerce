@@ -1,8 +1,8 @@
-package com.example.demo.ai.controller;
+package com.example.demo.ai.chatbot.controller;
 
-import com.example.demo.ai.dto.AiRequestDto;
-import com.example.demo.ai.dto.AiResponseDto;
-import com.example.demo.ai.service.AiService;
+import com.example.demo.ai.chatbot.dto.AiRequestDto;
+import com.example.demo.ai.chatbot.dto.AiResponseDto;
+import com.example.demo.ai.chatbot.service.AiService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

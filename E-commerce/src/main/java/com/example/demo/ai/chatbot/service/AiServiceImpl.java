@@ -1,6 +1,6 @@
-package com.example.demo.ai.service;
+package com.example.demo.ai.chatbot.service;
 import org.springframework.stereotype.Service;
-import com.example.demo.ai.client.GeminiClient;
+import com.example.demo.ai.chatbot.client.GeminiClient;
 @Service
 public class AiServiceImpl implements AiService {
 
