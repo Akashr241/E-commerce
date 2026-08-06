@@ -3,26 +3,28 @@ import com.example.demo.ai.prescription.dto.PrescriptionResponseDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-@Service
+
+        @Service
 public class PrescriptionServiceImpl implements PrescriptionService {
+
+    private final OCRService ocrService;
+
+    public PrescriptionServiceImpl(OCRService ocrService) {
+        this.ocrService = ocrService;
+    }
 
     @Override
     public PrescriptionResponseDto analyzePrescription(MultipartFile file) {
 
-        // Step 1
-        // OCR
+        String extractedText =
+                ocrService.extractText(file);
 
-        // Step 2
-        // Gemini
-
-        // Step 3
-        // Validate Medicine
-
-        // Step 4
-        // Return Response
+        System.out.println(extractedText);
 
         return new PrescriptionResponseDto();
 
     }
 
 }
+
+        
