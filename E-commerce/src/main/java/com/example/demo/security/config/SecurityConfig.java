@@ -82,10 +82,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"api/razorpay/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"api/razorpay/**").permitAll()
 
-                   //ai was intergation permission users
+                   //ai was intergation permission users of chatbot
                    .requestMatchers(HttpMethod.GET,"api/ai/**").permitAll()
                    .requestMatchers(HttpMethod.POST,"api/ai/chat/**").permitAll() 
 
+                        // prescription API access user
+                        .requestMatchers(HttpMethod.GET,"/prescriptions/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/prescriptions/analyze").permitAll()
                    .anyRequest().authenticated()
 
                    

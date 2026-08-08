@@ -21,6 +21,9 @@ private String credentialPath;
 @Bean
 public ImageAnnotatorClient imageAnnotatorClient() throws IOException {
 
+            System.out.println("Credential Path = " + credentialPath);// degugging line to check the value of credentialPath
+
+
     FileInputStream serviceAccount =
             new FileInputStream(credentialPath);
 
