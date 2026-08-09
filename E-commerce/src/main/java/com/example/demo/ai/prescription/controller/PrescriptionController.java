@@ -1,35 +1,35 @@
 package com.example.demo.ai.prescription.controller;
-import com.example.demo.ai.prescription.dto.PrescriptionResponseDto;
-import com.example.demo.ai.prescription.service.PrescriptionService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestPart;
+import com.example.demo.ai.prescription.service.OCRService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+
 @RestController
-@RequestMapping("/api/prescriptions")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/prescription")
 public class PrescriptionController {
 
-    private final PrescriptionService prescriptionService;
+    private final OCRService ocrService;
 
-    public PrescriptionController(PrescriptionService prescriptionService) {
-        this.prescriptionService = prescriptionService;
+    public PrescriptionController(OCRService ocrService) {
+        this.ocrService = ocrService;
     }
 
-    @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<PrescriptionResponseDto> analyzePrescription(
+    @PostMapping("/ocr")
+    public ResponseEntity<Map<String, String>> extractPrescriptionText(
             @RequestParam("file") MultipartFile file) {
 
-        if (file == null || file.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Please upload a prescription image"));
         }
 
-        PrescriptionResponseDto response =
-                prescriptionService.analyzePrescription(file);
+        String extractedText = ocrService.extractText(file);
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok(
+                Map.of("text", extractedText)
+        );
     }
-
 }

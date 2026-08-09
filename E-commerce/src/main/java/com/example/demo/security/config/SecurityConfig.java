@@ -87,8 +87,8 @@ public class SecurityConfig {
                    .requestMatchers(HttpMethod.POST,"api/ai/chat/**").permitAll() 
 
                         // prescription API access user
-                        .requestMatchers(HttpMethod.GET,"/prescriptions/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/prescriptions/analyze").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/prescription/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"api/prescription/ocr").permitAll()
                    .anyRequest().authenticated()
 
                    
