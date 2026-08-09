@@ -1,18 +1,31 @@
 package com.example.demo.ai.prescription.service;
-import com.google.cloud.vision.v1.*;
-import com.google.protobuf.ByteString;
+
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 @Service
 public class OCRServiceImpl implements OCRService {
 
-    private final ImageAnnotatorClient visionClient;
+    private final Tesseract tesseract;
 
-    public OCRServiceImpl(ImageAnnotatorClient visionClient) {
-        this.visionClient = visionClient;
+    public OCRServiceImpl() {
+
+        tesseract = new Tesseract();
+
+        // Tesseract installation folder
+        tesseract.setDatapath(
+                "C:/Program Files/Tesseract-OCR/tessdata"
+        );
+
+        // English language
+        tesseract.setLanguage("eng");
     }
 
     @Override
@@ -20,45 +33,33 @@ public class OCRServiceImpl implements OCRService {
 
         try {
 
-            ByteString imgBytes =
-                    ByteString.copyFrom(file.getBytes());
+            // Convert uploaded file into an image
+            BufferedImage image = ImageIO.read(file.getInputStream());
 
-            Image image =
-                    Image.newBuilder()
-                            .setContent(imgBytes)
-                            .build();
-
-            Feature feature =
-                    Feature.newBuilder()
-                            .setType(Feature.Type.DOCUMENT_TEXT_DETECTION)
-                            .build();
-
-            AnnotateImageRequest request =
-                    AnnotateImageRequest.newBuilder()
-                            .setImage(image)
-                            .addFeatures(feature)
-                            .build();
-
-            BatchAnnotateImagesResponse response =
-                    visionClient.batchAnnotateImages(
-                            List.of(request));
-
-            AnnotateImageResponse result =
-                    response.getResponses(0);
-
-            if (result.hasError()) {
+            if (image == null) {
                 throw new RuntimeException(
-                        result.getError().getMessage());
+                        "Unable to read the uploaded image"
+                );
             }
 
-            return result
-                    .getFullTextAnnotation()
-                    .getText();
+            // Send image to Tesseract
+            String extractedText = tesseract.doOCR(image);
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            return extractedText;
+
+        } catch (IOException e) {
+
+            throw new RuntimeException(
+                    "Error reading prescription image",
+                    e
+            );
+
+        } catch (TesseractException e) {
+
+            throw new RuntimeException(
+                    "Error extracting text using Tesseract",
+                    e
+            );
         }
-
     }
-
 }
