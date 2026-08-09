@@ -1,9 +1,12 @@
 package com.example.demo.ai.prescription.controller;
-import org.springframework.web.bind.annotation.RequestPart;
+
 import com.example.demo.ai.prescription.service.OCRService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import java.util.Map;
 
@@ -17,19 +20,46 @@ public class PrescriptionController {
         this.ocrService = ocrService;
     }
 
-    @PostMapping("/ocr")
-    public ResponseEntity<Map<String, String>> extractPrescriptionText(
-            @RequestParam("file") MultipartFile file) {
+    @PostMapping(
+        value = "/ocr",
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+)
+public ResponseEntity<?> testUpload(
+        HttpServletRequest request) throws Exception {
 
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Please upload a prescription image"));
-        }
+    System.out.println("========== MULTIPART DEBUG ==========");
 
-        String extractedText = ocrService.extractText(file);
+    System.out.println(
+            "Content-Type: " + request.getContentType()
+    );
 
-        return ResponseEntity.ok(
-                Map.of("text", extractedText)
+    var parts = request.getParts();
+
+    System.out.println(
+            "Number of parts: " + parts.size()
+    );
+
+    for (var part : parts) {
+
+        System.out.println(
+                "Part name: " + part.getName()
+        );
+
+        System.out.println(
+                "Submitted filename: " + part.getSubmittedFileName()
+        );
+
+        System.out.println(
+                "Part size: " + part.getSize()
+        );
+
+        System.out.println(
+                "Part content type: " + part.getContentType()
         );
     }
+
+    System.out.println("======================================");
+
+    return ResponseEntity.ok("Multipart debug completed");
+}
 }

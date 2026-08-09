@@ -2,7 +2,6 @@ package com.example.demo.ai.prescription.service;
 
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,37 +16,96 @@ public class OCRServiceImpl implements OCRService {
 
     public OCRServiceImpl() {
 
+        System.out.println("========== TESSERACT INITIALIZATION ==========");
+
         tesseract = new Tesseract();
 
-        // Tesseract installation folder
-        tesseract.setDatapath(
-                "C:/Program Files/Tesseract-OCR/tessdata"
-        );
+        String tessDataPath =
+                "C:/Program Files/Tesseract-OCR/tessdata";
 
-        // English language
+        System.out.println("Tesseract data path: " + tessDataPath);
+
+        tesseract.setDatapath(tessDataPath);
         tesseract.setLanguage("eng");
+
+        System.out.println("Tesseract initialized successfully.");
+        System.out.println("==============================================");
     }
 
     @Override
     public String extractText(MultipartFile file) {
 
+        System.out.println("========== OCR SERVICE ==========");
+
+        if (file == null) {
+            System.out.println("ERROR: MultipartFile is NULL");
+            throw new RuntimeException("File is null");
+        }
+
+        System.out.println(
+                "Filename: " + file.getOriginalFilename()
+        );
+
+        System.out.println(
+                "Content Type: " + file.getContentType()
+        );
+
+        System.out.println(
+                "File Size: " + file.getSize()
+        );
+
         try {
 
-            // Convert uploaded file into an image
-            BufferedImage image = ImageIO.read(file.getInputStream());
+            BufferedImage image =
+                    ImageIO.read(file.getInputStream());
 
             if (image == null) {
+
+                System.out.println(
+                        "ERROR: ImageIO could not read image"
+                );
+
                 throw new RuntimeException(
-                        "Unable to read the uploaded image"
+                        "Unable to read uploaded image"
                 );
             }
 
-            // Send image to Tesseract
-            String extractedText = tesseract.doOCR(image);
+            System.out.println(
+                    "Image successfully converted to BufferedImage"
+            );
+
+            System.out.println(
+                    "Image width: " + image.getWidth()
+            );
+
+            System.out.println(
+                    "Image height: " + image.getHeight()
+            );
+
+            System.out.println(
+                    "Sending image to Tesseract..."
+            );
+
+            String extractedText =
+                    tesseract.doOCR(image);
+
+            System.out.println(
+                    "Tesseract OCR completed successfully."
+            );
+
+            System.out.println("========== EXTRACTED TEXT ==========");
+            System.out.println(extractedText);
+            System.out.println("====================================");
 
             return extractedText;
 
         } catch (IOException e) {
+
+            System.out.println(
+                    "ERROR: Could not read uploaded file"
+            );
+
+            e.printStackTrace();
 
             throw new RuntimeException(
                     "Error reading prescription image",
@@ -55,6 +113,12 @@ public class OCRServiceImpl implements OCRService {
             );
 
         } catch (TesseractException e) {
+
+            System.out.println(
+                    "ERROR: Tesseract OCR failed"
+            );
+
+            e.printStackTrace();
 
             throw new RuntimeException(
                     "Error extracting text using Tesseract",
