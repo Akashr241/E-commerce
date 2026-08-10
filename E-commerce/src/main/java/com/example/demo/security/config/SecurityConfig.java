@@ -89,6 +89,7 @@ public class SecurityConfig {
                         // prescription API access user
                         .requestMatchers(HttpMethod.GET,"/prescription/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"api/prescription/ocr").permitAll()
+                        .requestMatchers(HttpMethod.POST,"api/prescription/ocr").hasAuthority("USER")
                    .anyRequest().authenticated()
 
                    
