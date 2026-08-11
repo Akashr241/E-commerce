@@ -7,16 +7,35 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.example.demo.ai.prescription.service.PrescriptionService;
 @RestController
 @RequestMapping("/api/prescription")
 public class PrescriptionController {
 
     private final OCRService ocrService;
+    private final PrescriptionService prescriptionService;
 
-    public PrescriptionController(OCRService ocrService) {
+    public PrescriptionController(OCRService ocrService,
+                                PrescriptionService prescriptionService) {
         this.ocrService = ocrService;
+        this.prescriptionService = prescriptionService;
     }
+
+@PostMapping(
+    value = "/analyze",
+    consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+)
+public ResponseEntity<String> analyzePrescription(
+        @RequestParam("file") MultipartFile file) {
+
+    String extractedText = ocrService.extractText(file);
+
+    String result =
+            prescriptionService.analyzePrescription(extractedText);
+
+    return ResponseEntity.ok(result);
+}
+
 
     @PostMapping(
             value = "/ocr",

@@ -2,14 +2,17 @@ package com.example.demo.ai.prescription.service;
 
 import com.example.demo.ai.chatbot.client.GeminiClient;
 import org.springframework.stereotype.Service;
+import com.example.demo.ai.chatbot.service.AiService;
 
 @Service
 public class PrescriptionServiceImpl implements PrescriptionService {
 
     private final GeminiClient geminiClient;
+    private final AiService aiService;
 
-    public PrescriptionServiceImpl(GeminiClient geminiClient) {
+    public PrescriptionServiceImpl(GeminiClient geminiClient, AiService aiService) {
         this.geminiClient = geminiClient;
+        this.aiService = aiService;
     }
 
     @Override
