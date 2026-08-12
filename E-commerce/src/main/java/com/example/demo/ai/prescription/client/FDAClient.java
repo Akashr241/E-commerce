@@ -1,4 +1,3 @@
-
 package com.example.demo.ai.prescription.client;
 
 import org.springframework.stereotype.Component;
@@ -21,6 +20,27 @@ public class FDAClient {
                 + medicineName
                 + "&limit=1";
 
-        return restTemplate.getForObject(url, String.class);
+        System.out.println("========== FDA DEBUG ==========");
+        System.out.println("Medicine: " + medicineName);
+        System.out.println("FDA URL: " + url);
+
+        try {
+
+            String response =
+                    restTemplate.getForObject(url, String.class);
+
+            System.out.println("FDA RESPONSE RECEIVED");
+            System.out.println(response);
+
+            return response;
+
+        } catch (Exception e) {
+
+            System.out.println("========== FDA ERROR ==========");
+            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
+
+            return "FDA ERROR: " + e.getMessage();
+        }
     }
 }

@@ -21,6 +21,20 @@ public class PrescriptionController {
         this.prescriptionService = prescriptionService;
     }
 
+    @GetMapping("/fda/{medicineName}")
+public ResponseEntity<String> testFDA(
+        @PathVariable String medicineName) {
+
+    System.out.println("========== FDA CONTROLLER DEBUG ==========");
+    System.out.println("Medicine received: " + medicineName);
+    System.out.println("==========================================");
+
+    return ResponseEntity.ok(
+            "FDA Controller received: " + medicineName
+    );
+}
+
+
 @PostMapping(
     value = "/analyze",
     consumes = MediaType.MULTIPART_FORM_DATA_VALUE
