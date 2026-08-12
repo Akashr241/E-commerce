@@ -8,17 +8,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.ai.prescription.service.PrescriptionService;
+import com.example.demo.ai.prescription.service.FDAService;
 @RestController
 @RequestMapping("/api/prescription")
 public class PrescriptionController {
 
     private final OCRService ocrService;
     private final PrescriptionService prescriptionService;
+    private final FDAService fdaService;
 
     public PrescriptionController(OCRService ocrService,
-                                PrescriptionService prescriptionService) {
+                                PrescriptionService prescriptionService,
+                                FDAService fdaService) {
         this.ocrService = ocrService;
         this.prescriptionService = prescriptionService;
+        this.fdaService = fdaService;
     }
 
     @GetMapping("/fda/{medicineName}")
@@ -27,11 +31,11 @@ public ResponseEntity<String> testFDA(
 
     System.out.println("========== FDA CONTROLLER DEBUG ==========");
     System.out.println("Medicine received: " + medicineName);
+    System.out.println("Calling FDA Service...");
     System.out.println("==========================================");
 
-    return ResponseEntity.ok(
-            "FDA Controller received: " + medicineName
-    );
+    String result= fdaService.searchMedicine(medicineName);
+    return ResponseEntity.ok(result);
 }
 
 
