@@ -3,54 +3,91 @@ package com.example.demo.ai.prescription.service;
 import com.example.demo.ai.chatbot.client.GeminiClient;
 import org.springframework.stereotype.Service;
 import com.example.demo.ai.chatbot.service.AiService;
+import com.example.demo.ai.prescription.client.FDAClient;
+import com.example.demo.ai.prescription.dto.FDAMedicineDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class PrescriptionServiceImpl implements PrescriptionService {
 
     private final GeminiClient geminiClient;
     private final AiService aiService;
-
-    public PrescriptionServiceImpl(GeminiClient geminiClient, AiService aiService) {
+    private final FDAClient fdaClient;
+    private final ObjectMapper objectMapper;
+    public PrescriptionServiceImpl(GeminiClient geminiClient, AiService aiService, FDAClient fdaClient, ObjectMapper objectMapper) {
         this.geminiClient = geminiClient;
         this.aiService = aiService;
+        this.fdaClient = fdaClient;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public String analyzePrescription(String extractedText) {
 
-        String prompt = """
-                You are a prescription understanding assistant.
+         System.out.println("========== PRESCRIPTION SERVICE ==========");
+    System.out.println("OCR TEXT:");
+    System.out.println(extractedText);
+    System.out.println("==========================================");
 
-                The following text was extracted from a doctor's prescription
-                using OCR.
+            String aiResult = geminiClient.askGemini(
+                "Analyze this doctor's prescription and identify "
+                + "the medicine names.\n\n"
+                +"Return only medicine name,without any explanation or additional text. \n\n"
+                + extractedText
+        );
+        System.out.println("========== GEMINI RESULT ==========");
+    System.out.println(aiResult);
+    System.out.println("===================================");
 
-                OCR can contain spelling mistakes and incorrectly recognized
-                characters.
+ // Step 2: For now assume Gemini returns one medicine
+    String [] medicines = aiResult.split("\\R");//split by new line
 
-                Your task is to understand and structure the prescription.
+    List<FDAMedicineDto> fdaResults = new ArrayList<>();
 
-                Extract:
-                - Patient name
-                - Date
-                - Clinical description if available
-                - Medicine name
-                - Dosage
-                - Frequency
-                - Duration
-                - Instructions
 
-                Important rules:
-                1. Do not invent information.
-                2. If something cannot be confidently understood, write "Unknown".
-                3. Do not create a medicine name that is not present in the OCR.
-                4. Do not diagnose the patient.
-                5. Do not recommend a different medicine.
-                6. Preserve uncertainty when the OCR text is unclear.
+    for (String medicineName : medicines) {
 
-                OCR TEXT:
-                
-                """ + extractedText;
+    medicineName = medicineName.trim();
 
-        return geminiClient.askGemini(prompt);
+    if (medicineName.isEmpty()) {
+        continue;
     }
+
+
+        // Step 3: Search FDA
+    System.out.println("========== FDA SEARCH ==========");
+    System.out.println("Searching FDA for: " + medicineName);
+   
+    FDAMedicineDto fdaResult = fdaClient.searchMedicine(medicineName);
+
+    fdaResults.add(fdaResult);
+
+    System.out.println("FDA RESULT RECEIVED");
+    System.out.println("================================");
+    }
+
+    
+
+    try {
+
+            return objectMapper.writeValueAsString(medicineName);
+
+        } catch (JsonProcessingException e) {
+
+            System.out.println(
+                    "ERROR CONVERTING FDA DTO TO JSON"
+            );
+
+            e.printStackTrace();
+
+
+return "{\"message\":\"Unable to create FDA response\"}";
+
+        }   
+        
+
+}
 }

@@ -1,8 +1,9 @@
 package com.example.demo.ai.prescription.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
+import org.springframework.web.client.HttpClientErrorException;
 @Service
 public class FDAServiceImpl implements FDAService {
 
@@ -35,16 +36,32 @@ public String searchMedicine(String medicineName) {
     System.out.println("Request URL: " + url.replace(apiKey, "HIDDEN"));
 
 
+    try {
+
+        String response =
+                restTemplate.getForObject(url, String.class);
+
+        System.out.println("FDA API response received!");
+
+        return response;
+
+    } catch (HttpClientErrorException.NotFound e) {
+
+        System.out.println("FDA: Medicine not found");
+
+        return "{ \"message\": \"Medicine not found in OpenFDA\" }";
+
+    } catch (Exception e) {
+
+        System.out.println("FDA API ERROR: " + e.getMessage());
+
+        return "{ \"message\": \"FDA API error\" }";
+    }
 
 
-    
 
-    String response = restTemplate.getForObject(url, String.class);
 
-    System.out.println("FDA API response received!");
-
-    return response;
-}
+  }
     }
 
 
