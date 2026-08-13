@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.stereotype.Service;
-
+import com.example.demo.ai.prescription.util.MedicineNameNormalizer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +16,7 @@ import java.util.List;
 public class PrescriptionServiceImpl implements PrescriptionService {
 
     private final GeminiClient geminiClient;
+    private final MedicineNameNormalizer medicineNameNormalizer;
     private final AiService aiService;
     private final FDAClient fdaClient;
     private final ObjectMapper objectMapper;
@@ -24,12 +25,14 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             GeminiClient geminiClient,
             AiService aiService,
             FDAClient fdaClient,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            MedicineNameNormalizer medicineNameNormalizer) {
 
         this.geminiClient = geminiClient;
         this.aiService = aiService;
         this.fdaClient = fdaClient;
         this.objectMapper = objectMapper;
+        this.medicineNameNormalizer = medicineNameNormalizer;
     }
 
     @Override
@@ -76,15 +79,19 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         // ==============================
         // STEP 4: SEARCH FDA
         // ==============================
+        System.out.println("========== Gemini Medicines ==========");
 
         for (String medicineName : medicines) {
 
-            medicineName = medicineName.trim();
-
+            medicineName = medicineNameNormalizer.normalize(medicineName);
             // Ignore empty lines
             if (medicineName.isEmpty()) {
                 continue;
             }
+
+            System.out.println("========== NOrmalized logic ==========");
+            System.out.println("Medicine:  [" + medicineName + "]");
+            System.out.println("=======================================");
 
             System.out.println("========== FDA SEARCH ==========");
             System.out.println("Searching FDA for: " + medicineName);
@@ -94,6 +101,9 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
                 FDAMedicineDto fdaResult =
                         fdaClient.searchMedicine(medicineName);
+                        if(fdaResult!=null){
+
+                        
 
                 // Add FDA result to list
                 fdaResults.add(fdaResult);
@@ -101,7 +111,10 @@ public class PrescriptionServiceImpl implements PrescriptionService {
                 System.out.println("FDA RESULT RECEIVED");
                 System.out.println("Medicine: " + medicineName);
                 System.out.println("================================");
-
+                    }
+                    else{
+                        System.out.println("FDA RESULT NOT FOUND : "+medicineName);
+                    }
             } catch (Exception e) {
 
                 System.out.println("========== FDA ERROR ==========");
