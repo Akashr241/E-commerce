@@ -1,12 +1,14 @@
 package com.example.demo.ai.prescription.service;
 
 import com.example.demo.ai.chatbot.client.GeminiClient;
-import org.springframework.stereotype.Service;
 import com.example.demo.ai.chatbot.service.AiService;
 import com.example.demo.ai.prescription.client.FDAClient;
 import com.example.demo.ai.prescription.dto.FDAMedicineDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +19,13 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     private final AiService aiService;
     private final FDAClient fdaClient;
     private final ObjectMapper objectMapper;
-    public PrescriptionServiceImpl(GeminiClient geminiClient, AiService aiService, FDAClient fdaClient, ObjectMapper objectMapper) {
+
+    public PrescriptionServiceImpl(
+            GeminiClient geminiClient,
+            AiService aiService,
+            FDAClient fdaClient,
+            ObjectMapper objectMapper) {
+
         this.geminiClient = geminiClient;
         this.aiService = aiService;
         this.fdaClient = fdaClient;
@@ -27,67 +35,100 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public String analyzePrescription(String extractedText) {
 
-         System.out.println("========== PRESCRIPTION SERVICE ==========");
-    System.out.println("OCR TEXT:");
-    System.out.println(extractedText);
-    System.out.println("==========================================");
+        // ==============================
+        // STEP 1: OCR TEXT
+        // ==============================
 
-            String aiResult = geminiClient.askGemini(
+        System.out.println("========== PRESCRIPTION SERVICE ==========");
+        System.out.println("OCR TEXT:");
+        System.out.println(extractedText);
+        System.out.println("==========================================");
+
+
+        // ==============================
+        // STEP 2: SEND TEXT TO GEMINI
+        // ==============================
+
+        String aiResult = geminiClient.askGemini(
                 "Analyze this doctor's prescription and identify "
                 + "the medicine names.\n\n"
-                +"Return only medicine name,without any explanation or additional text. \n\n"
+                + "Return only medicine names, "
+                + "one medicine per line, "
+                + "without explanation or additional text.\n\n"
                 + extractedText
         );
+
         System.out.println("========== GEMINI RESULT ==========");
-    System.out.println(aiResult);
-    System.out.println("===================================");
-
- // Step 2: For now assume Gemini returns one medicine
-    String [] medicines = aiResult.split("\\R");//split by new line
-
-    List<FDAMedicineDto> fdaResults = new ArrayList<>();
+        System.out.println(aiResult);
+        System.out.println("===================================");
 
 
-    for (String medicineName : medicines) {
+        // ==============================
+        // STEP 3: SPLIT MEDICINE NAMES
+        // ==============================
 
-    medicineName = medicineName.trim();
+        String[] medicines = aiResult.split("\\R");
 
-    if (medicineName.isEmpty()) {
-        continue;
-    }
+        // Store all FDA results
+        List<FDAMedicineDto> fdaResults = new ArrayList<>();
 
 
-        // Step 3: Search FDA
-    System.out.println("========== FDA SEARCH ==========");
-    System.out.println("Searching FDA for: " + medicineName);
-   
-    FDAMedicineDto fdaResult = fdaClient.searchMedicine(medicineName);
+        // ==============================
+        // STEP 4: SEARCH FDA
+        // ==============================
 
-    fdaResults.add(fdaResult);
+        for (String medicineName : medicines) {
 
-    System.out.println("FDA RESULT RECEIVED");
-    System.out.println("================================");
-    }
+            medicineName = medicineName.trim();
 
-    
+            // Ignore empty lines
+            if (medicineName.isEmpty()) {
+                continue;
+            }
 
-    try {
+            System.out.println("========== FDA SEARCH ==========");
+            System.out.println("Searching FDA for: " + medicineName);
 
-            return objectMapper.writeValueAsString(medicineName);
+
+            try {
+
+                FDAMedicineDto fdaResult =
+                        fdaClient.searchMedicine(medicineName);
+
+                // Add FDA result to list
+                fdaResults.add(fdaResult);
+
+                System.out.println("FDA RESULT RECEIVED");
+                System.out.println("Medicine: " + medicineName);
+                System.out.println("================================");
+
+            } catch (Exception e) {
+
+                System.out.println("========== FDA ERROR ==========");
+                System.out.println("Medicine: " + medicineName);
+                System.out.println("Error: " + e.getMessage());
+                System.out.println("================================");
+            }
+        }
+
+
+        // ==============================
+        // STEP 5: RETURN FINAL JSON
+        // ==============================
+
+        try {
+
+            return objectMapper.writeValueAsString(fdaResults);
 
         } catch (JsonProcessingException e) {
 
             System.out.println(
-                    "ERROR CONVERTING FDA DTO TO JSON"
+                    "ERROR CONVERTING FDA RESULTS TO JSON"
             );
 
             e.printStackTrace();
 
-
-return "{\"message\":\"Unable to create FDA response\"}";
-
-        }   
-        
-
-}
+            return "{\"message\":\"Unable to create FDA response\"}";
+        }
+    }
 }
