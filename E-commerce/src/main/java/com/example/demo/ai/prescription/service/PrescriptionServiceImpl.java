@@ -83,7 +83,12 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
         for (String medicineName : medicines) {
 
+            System.out.println("Medicine: [" + medicineName + "]");
+
+            System.out.println("========== Normalizing  before Medicine Name ==========");
+
             medicineName = medicineNameNormalizer.normalize(medicineName);
+            System.out.println("After normalization: [" + medicineName + "]");
             // Ignore empty lines
             if (medicineName.isEmpty()) {
                 continue;

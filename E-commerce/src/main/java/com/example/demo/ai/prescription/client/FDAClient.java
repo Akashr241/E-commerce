@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriUtils;
+
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class FDAClient {
@@ -19,71 +22,151 @@ public class FDAClient {
 
     public FDAMedicineDto searchMedicine(String medicineName) {
 
+        medicineName = medicineName.trim();
+
+        String encodedName =
+                UriUtils.encodeQueryParam(
+                        medicineName,
+                        StandardCharsets.UTF_8
+                );
+
         String url =
                 "https://api.fda.gov/drug/label.json"
                 + "?search=openfda.brand_name:"
-                + medicineName
-                + "&limit=1";
+                + encodedName
+                + "&limit=10";
 
         System.out.println("========== FDA DEBUG ==========");
-        System.out.println("Medicine: " + medicineName);
+        System.out.println("Medicine searched: " + medicineName);
         System.out.println("FDA URL: " + url);
+        System.out.println("================================");
 
         try {
 
             String response =
                     restTemplate.getForObject(url, String.class);
 
-            System.out.println("FDA RESPONSE RECEIVED");
-
             JsonNode root =
                     objectMapper.readTree(response);
 
-            JsonNode result =
-                    root.path("results").get(0);
+            JsonNode results =
+                    root.path("results");
 
-            FDAMedicineDto medicine =
-                    new FDAMedicineDto();
+            if (!results.isArray() || results.size() == 0) {
 
-            medicine.setMedicineName(
-                    getFirstValue(result, "openfda", "brand_name")
+                System.out.println(
+                        "FDA RESULT NOT FOUND: " + medicineName
+                );
+
+                return null;
+            }
+
+            /*
+             * Check every returned result.
+             * Do NOT blindly use results[0].
+             */
+
+            for (JsonNode result : results) {
+
+                String brandName =
+                        getFirstValue(
+                                result,
+                                "openfda",
+                                "brand_name"
+                        );
+
+                System.out.println(
+                        "FDA candidate: " + brandName
+                );
+
+                if (brandName != null &&
+                        brandName.equalsIgnoreCase(medicineName)) {
+
+                    System.out.println(
+                            "FDA EXACT MATCH FOUND: "
+                            + brandName
+                    );
+
+                    return convertToDto(result);
+                }
+            }
+
+            System.out.println(
+                    "FDA returned results, but none matched: "
+                    + medicineName
             );
 
-            medicine.setGenericName(
-                    getFirstValue(result, "openfda", "generic_name")
-            );
-
-            medicine.setActiveIngredient(
-                    getFirstValue(result, "active_ingredient")
-            );
-
-            medicine.setPurpose(
-                    getFirstValue(result, "purpose")
-            );
-
-            medicine.setIndications(
-                    getFirstValue(result, "indications_and_usage")
-            );
-
-            medicine.setDosage(
-                    getFirstValue(result, "dosage_and_administration")
-            );
-
-            medicine.setWarnings(
-                    getFirstValue(result, "warnings")
-            );
-
-            return medicine;
+            return null;
 
         } catch (Exception e) {
 
             System.out.println("========== FDA ERROR ==========");
             System.out.println(e.getMessage());
-            e.printStackTrace();
 
             return null;
         }
     }
+
+
+    private FDAMedicineDto convertToDto(JsonNode result) {
+
+        FDAMedicineDto medicine =
+                new FDAMedicineDto();
+
+        medicine.setMedicineName(
+                getFirstValue(
+                        result,
+                        "openfda",
+                        "brand_name"
+                )
+        );
+
+        medicine.setGenericName(
+                getFirstValue(
+                        result,
+                        "openfda",
+                        "generic_name"
+                )
+        );
+
+        medicine.setActiveIngredient(
+                getFirstValue(
+                        result,
+                        "active_ingredient"
+                )
+        );
+
+        medicine.setPurpose(
+                getFirstValue(
+                        result,
+                        "purpose"
+                )
+        );
+
+        medicine.setIndications(
+                getFirstValue(
+                        result,
+                        "indications_and_usage"
+                )
+        );
+
+        medicine.setDosage(
+                getFirstValue(
+                        result,
+                        "dosage_and_administration"
+                )
+        );
+
+        medicine.setWarnings(
+                getFirstValue(
+                        result,
+                        "warnings"
+                )
+        );
+
+        return medicine;
+    }
+
 
     private String getFirstValue(
             JsonNode parent,
@@ -91,14 +174,19 @@ public class FDAClient {
             String fieldName) {
 
         JsonNode node =
-                parent.path(objectName).path(fieldName);
+                parent
+                        .path(objectName)
+                        .path(fieldName);
 
-        if (node.isArray() && node.size() > 0) {
+        if (node.isArray() &&
+                node.size() > 0) {
+
             return node.get(0).asText();
         }
 
         return null;
     }
+
 
     private String getFirstValue(
             JsonNode parent,
@@ -107,7 +195,9 @@ public class FDAClient {
         JsonNode node =
                 parent.path(fieldName);
 
-        if (node.isArray() && node.size() > 0) {
+        if (node.isArray() &&
+                node.size() > 0) {
+
             return node.get(0).asText();
         }
 

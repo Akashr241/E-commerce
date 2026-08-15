@@ -16,7 +16,7 @@ public class MedicineNameNormalizer {
 
         // Remove common prescription prefixes
         name = name.replaceFirst(
-                "(?i)^syp\\.?\\s+",
+                "(?i)^\\.?\\s+",
                 ""
         );
 
