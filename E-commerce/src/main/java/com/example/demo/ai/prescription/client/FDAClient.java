@@ -18,9 +18,16 @@ public class FDAClient {
     public FDAClient() {
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
+
+            System.out.println("========== FDA CLIENT CREATED ==========");
+
     }
+    
 
     public FDAMedicineDto searchMedicine(String medicineName) {
+
+        System.out.println("========== FDA CLIENT  file was recevied ==========" +
+                "Medicine: " + medicineName);
 
         medicineName = medicineName.trim();
 

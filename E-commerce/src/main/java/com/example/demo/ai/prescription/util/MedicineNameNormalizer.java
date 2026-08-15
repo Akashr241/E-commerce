@@ -11,57 +11,27 @@ public class MedicineNameNormalizer {
             return "";
         }
 
-        // Remove extra spaces
         String name = medicineName.trim();
 
-        // Remove common prescription prefixes
-        name = name.replaceFirst(
-                "(?i)^\\.?\\s+",
-                ""
-        );
+        // Remove prescription prefixes
+        name = name.replaceFirst("(?i)^syp\\.?\\s+", "");
+        name = name.replaceFirst("(?i)^syrup\\.?\\s+", "");
+        name = name.replaceFirst("(?i)^tab\\.?\\s+", "");
+        name = name.replaceFirst("(?i)^tablet\\.?\\s+", "");
+        name = name.replaceFirst("(?i)^cap\\.?\\s+", "");
+        name = name.replaceFirst("(?i)^capsule\\.?\\s+", "");
 
-        name = name.replaceFirst(
-                "(?i)^syrup\\.?\\s+",
-                ""
-        );
-
-        name = name.replaceFirst(
-                "(?i)^tab\\.?\\s+",
-                ""
-        );
-
-        name = name.replaceFirst(
-                "(?i)^tablet\\.?\\s+",
-                ""
-        );
-
-        name = name.replaceFirst(
-                "(?i)^cap\\.?\\s+",
-                ""
-        );
-
-        name = name.replaceFirst(
-                "(?i)^capsule\\.?\\s+",
-                ""
-        );
-
-        // Remove dosage information after the medicine name
+        // Remove dosage
         name = name.replaceAll(
                 "(?i)\\s+\\d+(\\.\\d+)?\\s*(ml|mg|g|mcg)\\b.*$",
                 ""
         );
 
-        // Remove unnecessary punctuation
-        name = name.replaceAll(
-                "[,;:]+$",
-                ""
-        );
+        // Remove punctuation
+        name = name.replaceAll("[,;:]+$", "");
 
-        // Remove multiple spaces
-        name = name.replaceAll(
-                "\\s+",
-                " "
-        );
+        // Remove extra spaces
+        name = name.replaceAll("\\s+", " ");
 
         return name.trim();
     }
