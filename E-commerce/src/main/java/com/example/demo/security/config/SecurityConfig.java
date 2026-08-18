@@ -93,6 +93,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"api/prescription/analyze").permitAll()
                         .requestMatchers(HttpMethod.POST,"api/prescription/fda/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"api/prescription/fda/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"api/medicines/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"api/medicines/**").permitAll()
+                     
                    .anyRequest().authenticated()
 
                    
