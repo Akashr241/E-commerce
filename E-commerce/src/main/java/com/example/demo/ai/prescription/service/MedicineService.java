@@ -1,5 +1,12 @@
+
 package com.example.demo.ai.prescription.service;
 
-public class MedicineService {
-  
+import com.example.demo.ai.prescription.dto.MedicineResponseDto;
+
+import java.util.List;
+
+public interface MedicineService {
+
+    List<MedicineResponseDto> searchMedicine(String medicineName);
+
 }
