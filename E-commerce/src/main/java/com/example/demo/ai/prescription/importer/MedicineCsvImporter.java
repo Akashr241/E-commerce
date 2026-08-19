@@ -15,6 +15,10 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 @Component
 public class MedicineCsvImporter {
@@ -38,8 +42,23 @@ public class MedicineCsvImporter {
 
         ClassPathResource resource =
                 new ClassPathResource(
-                        "data/indian_medicine_data.csv"
+                        
+                       " C:/Users/Akash/OneDrive/Documents/indian_medicine_data.csv"
+                                        
+
                 );
+
+        Path filepath = Paths.get("C:/Users/Akash/OneDrive/Documents/indian_medicine_data.csv");        
+
+  Path path = Paths.get(filePath);
+
+System.out.println("=================================");
+System.out.println("CSV FILE TEST");
+System.out.println("Path: " + path);
+System.out.println("Exists: " + Files.exists(path));
+System.out.println("Is File: " + Files.isRegularFile(path));
+System.out.println("Readable: " + Files.isReadable(path));
+System.out.println("=================================");      
 
         try (
                 Reader reader = new BufferedReader(
