@@ -2,23 +2,22 @@ package com.example.demo.ai.prescription.importer;
 
 import com.example.demo.ai.prescription.entity.Medicine;
 import com.example.demo.ai.prescription.repository.MedicineRepository;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.springframework.core.io.ClassPathResource;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class MedicineCsvImporter {
@@ -40,33 +39,50 @@ public class MedicineCsvImporter {
         System.out.println("MEDICINE CSV IMPORT STARTED");
         System.out.println("======================================");
 
-        ClassPathResource resource =
-                new ClassPathResource(
-                        
-                       " C:/Users/Akash/OneDrive/Documents/indian_medicine_data.csv"
-                                        
+        // CSV file location
+        Path path = Paths.get(
+                "C://Users//Akash//Documents//indian_medicine_data1.csv"
 
-                );
+        );
 
-        Path filepath = Paths.get("C:/Users/Akash/OneDrive/Documents/indian_medicine_data.csv");        
+        // Check file
+        System.out.println("CSV FILE TEST");
+        System.out.println("Path: " + path);
+        System.out.println("Exists: " + Files.exists(path));
+        System.out.println("Is File: " + Files.isRegularFile(path));
+        System.out.println("Readable: " + Files.isReadable(path));
+        System.out.println("======================================");
 
-  Path path = Paths.get(filePath);
+        // Stop if file doesn't exist
+        if (!Files.exists(path)) {
 
-System.out.println("=================================");
-System.out.println("CSV FILE TEST");
-System.out.println("Path: " + path);
-System.out.println("Exists: " + Files.exists(path));
-System.out.println("Is File: " + Files.isRegularFile(path));
-System.out.println("Readable: " + Files.isReadable(path));
-System.out.println("=================================");      
+            throw new RuntimeException(
+                    "CSV file not found: " + path
+            );
+        }
+
+        if (!Files.isRegularFile(path)) {
+
+            throw new RuntimeException(
+                    "Path is not a file: " + path
+            );
+        }
+
+        if (!Files.isReadable(path)) {
+
+            throw new RuntimeException(
+                    "CSV file is not readable: " + path
+            );
+        }
 
         try (
-                Reader reader = new BufferedReader(
-                        new InputStreamReader(
-                                resource.getInputStream(),
-                                StandardCharsets.UTF_8
-                        )
-                );
+                Reader reader =
+                        new BufferedReader(
+                                Files.newBufferedReader(
+                                        path,
+                                        StandardCharsets.UTF_8
+                                )
+                        );
 
                 CSVParser csvParser =
                         CSVFormat.DEFAULT
@@ -84,7 +100,8 @@ System.out.println("=================================");
 
             for (CSVRecord record : csvParser) {
 
-                Medicine medicine = new Medicine();
+                Medicine medicine =
+                        new Medicine();
 
                 medicine.setId(
                         Long.valueOf(
@@ -142,9 +159,12 @@ System.out.println("=================================");
 
                 batch.add(medicine);
 
+                // Save every 1000 records
                 if (batch.size() >= BATCH_SIZE) {
 
-                    medicineRepository.saveAll(batch);
+                    medicineRepository.saveAll(
+                            batch
+                    );
 
                     count += batch.size();
 
@@ -158,26 +178,21 @@ System.out.println("=================================");
             }
 
             // Save remaining records
-
             if (!batch.isEmpty()) {
 
-                medicineRepository.saveAll(batch);
+                medicineRepository.saveAll(
+                        batch
+                );
 
                 count += batch.size();
             }
 
-            System.out.println(
-                    "======================================"
-            );
-
+            System.out.println("======================================");
             System.out.println(
                     "TOTAL MEDICINES IMPORTED: "
                             + count
             );
-
-            System.out.println(
-                    "======================================"
-            );
+            System.out.println("======================================");
         }
     }
 }
