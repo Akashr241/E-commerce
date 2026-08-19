@@ -40,10 +40,9 @@ public class MedicineCsvImporter {
         System.out.println("======================================");
 
         // CSV file location
-        Path path = Paths.get(
-                "C://Users//Akash//Documents//indian_medicine_data1.csv"
 
-        );
+        String filePath = "C:\\Users\\Akash\\OneDrive\\Documents\\indian_medicine_data1.csv"; 
+        Path path = Paths.get( filePath);
 
         // Check file
         System.out.println("CSV FILE TEST");
@@ -105,7 +104,7 @@ public class MedicineCsvImporter {
 
                 medicine.setId(
                         Long.valueOf(
-                                record.get("id")
+                                record.get(0).trim()
                         )
                 );
 
@@ -125,7 +124,7 @@ public class MedicineCsvImporter {
                 }
 
                 String discontinued =
-                        record.get("is_discontinued");
+                        record.get("Is_discontinued");
 
                 if (discontinued != null &&
                         !discontinued.isBlank()) {
