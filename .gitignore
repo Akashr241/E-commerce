@@ -1,0 +1,7 @@
+E-commerce/src/main/resources/application-local.properties
+*.local.properties
+.env
+.env.*
+!.env.example
+target/
+node_modules/
