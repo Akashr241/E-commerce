@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface MedicineService {
 
-    List<MedicineResponseDto> searchMedicine(String medicineName);
+    List<MedicineResponseDto> searchMedicine(String name);
 
 }
