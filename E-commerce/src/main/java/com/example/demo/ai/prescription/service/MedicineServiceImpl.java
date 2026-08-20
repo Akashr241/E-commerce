@@ -3,17 +3,24 @@ package com.example.demo.ai.prescription.service;
 import com.example.demo.ai.prescription.dto.MedicineResponseDto;
 import com.example.demo.ai.prescription.entity.Medicine;
 import com.example.demo.ai.prescription.repository.MedicineRepository;
+import com.example.demo.ai.prescription.util.MedicineSearchRanker;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class MedicineServiceImpl implements MedicineService {
 
     private final MedicineRepository medicineRepository;
+    private final MedicineSearchRanker medicineSearchRanker;
 
-    public MedicineServiceImpl(MedicineRepository medicineRepository) {
+    public MedicineServiceImpl(
+            MedicineRepository medicineRepository,
+            MedicineSearchRanker medicineSearchRanker) {
+
         this.medicineRepository = medicineRepository;
+        this.medicineSearchRanker = medicineSearchRanker;
     }
 
     @Override
@@ -23,36 +30,65 @@ public class MedicineServiceImpl implements MedicineService {
             return List.of();
         }
 
-        name = name.trim();
+String SearchName = name.trim();
 
-        // 1. Exact match
-        List<Medicine> exactMatches =
-                medicineRepository
-                        .findByNameIgnoreCaseAndDiscontinuedFalse(name);
+        System.out.println("=================================");
+        System.out.println("MEDICINE SEARCH");
+        System.out.println("Search: " + SearchName);
+        System.out.println("=================================");
 
-        if (!exactMatches.isEmpty()) {
-
-            return exactMatches.stream()
-                    .map(this::convertToDto)
-                    .toList();
-        }
-
-        // 2. Partial match
-        List<Medicine> partialMatches =
+        // Get medicines from database
+        List<Medicine> medicines =
                 medicineRepository
                         .findByNameContainingIgnoreCaseAndDiscontinuedFalse(
-                                name
+                                SearchName
                         );
 
-        return partialMatches.stream()
+        System.out.println(
+                "Database results: " + medicines.size()
+        );
+
+        // Rank medicines
+        medicines.sort(
+                Comparator.comparingInt(
+                        (Medicine medicine) ->
+                                medicineSearchRanker
+                                        .calculateScore(name, medicine)
+                ).reversed()
+        );
+
+        // Print ranking for debugging
+        System.out.println("========== RANKING ==========");
+
+        for (Medicine medicine : medicines) {
+
+            int score =
+                    medicineSearchRanker.calculateScore(
+                            name,
+                            medicine
+                    );
+
+            System.out.println(
+                    medicine.getName()
+                            + " --> Score: "
+                            + score
+            );
+        }
+
+        System.out.println("=============================");
+
+        // Return only top 10
+        return medicines.stream()
                 .limit(10)
                 .map(this::convertToDto)
                 .toList();
     }
 
-    private MedicineResponseDto convertToDto(Medicine medicine) {
+    private MedicineResponseDto convertToDto(
+            Medicine medicine) {
 
-        MedicineResponseDto dto = new MedicineResponseDto();
+        MedicineResponseDto dto =
+                new MedicineResponseDto();
 
         dto.setId(medicine.getId());
         dto.setName(medicine.getName());
