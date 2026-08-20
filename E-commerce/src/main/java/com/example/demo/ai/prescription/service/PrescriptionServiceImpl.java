@@ -2,13 +2,11 @@ package com.example.demo.ai.prescription.service;
 
 import com.example.demo.ai.chatbot.client.GeminiClient;
 import com.example.demo.ai.chatbot.service.AiService;
-import com.example.demo.ai.prescription.client.FDAClient;
-
-import com.example.demo.ai.prescription.dto.FDAMedicineDto;
 import com.example.demo.ai.prescription.util.MedicineNameNormalizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.example.demo.ai.prescription.dto.MedicineResponseDto;
+import com.example.demo.ai.prescription.service.MedicineService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,162 +17,188 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
     private final GeminiClient geminiClient;
     private final AiService aiService;
-    private final FDAClient fdaClient;
     private final ObjectMapper objectMapper;
+    private final MedicineService medicineService;
     private final MedicineNameNormalizer normalizer;
 
     public PrescriptionServiceImpl(
             GeminiClient geminiClient,
             AiService aiService,
-            FDAClient fdaClient,
             ObjectMapper objectMapper,
+            MedicineService medicineService,
             MedicineNameNormalizer normalizer) {
 
         this.geminiClient = geminiClient;
         this.aiService = aiService;
-        this.fdaClient = fdaClient;
         this.objectMapper = objectMapper;
+        this.medicineService = medicineService;
         this.normalizer = normalizer;
     }
 
-    @Override
-    public String analyzePrescription(String extractedText) {
+@Override
+public String analyzePrescription(String extractedText) {
 
-        System.out.println(
-                "========== PRESCRIPTION SERVICE =========="
-        );
+    System.out.println(
+            "========== PRESCRIPTION SERVICE =========="
+    );
 
-        System.out.println("OCR TEXT:");
-        System.out.println(extractedText);
+    System.out.println("OCR TEXT:");
+    System.out.println(extractedText);
 
-        System.out.println(
-                "=========================================="
-        );
-
-        // 1. Gemini identifies medicine names
-        String aiResult = geminiClient.askGemini(
-                """
-                          You are a medical prescription OCR correction assistant.
-
-        The text below was extracted from a handwritten doctor's
-        prescription using OCR. OCR may contain spelling mistakes,
-        missing characters, extra characters, or incorrectly recognized
-        characters.
-
-        Your task is to identify the MEDICINE BRAND NAMES only.
+    System.out.println(
+            "=========================================="
+    );
 
 
-         IMPORTANT RULES:
+    // ================================
+    // STEP 1: GEMINI
+    // ================================
 
-        1. Correct obvious OCR errors in medicine names.
-        2. Use the surrounding prescription context to understand
-           whether a word is actually a medicine name.
-        3. Preserve the actual medicine name as much as possible.
-        4. Do NOT invent a medicine name.
-        5. Do NOT replace a medicine with a similar-sounding medicine
-           unless the OCR evidence strongly supports it.
-        6. Dosage such as 3 mL, 5 mL, 500 mg must NOT be included.
-        7. Words such as Syp, Syrup, Tab, Tablet, Cap, Capsule are
-           medicine-form instructions, not medicine names.
-        8. Return ONLY medicine brand names.
-        9. Return exactly ONE medicine name per line.
-        10. Do not provide explanations.
-        11. Do not return dosage, frequency, duration, or diagnosis.
+    String aiResult = geminiClient.askGemini(
 
-        OCR PRESCRIPTION:
-                        """
-                + extractedText
-        );
+            "Analyze this doctor's prescription.\n\n"
 
-        System.out.println(
-                "========== GEMINI RESULT =========="
-        );
+            + "Identify every medicine prescribed.\n"
 
-        System.out.println(aiResult);
+            + "OCR text may contain spelling mistakes.\n"
 
-        System.out.println(
-                "==================================="
-        );
+            + "Correct obvious OCR mistakes using medical context.\n"
 
-        // 2. Split medicines
-        String[] medicines = aiResult.split("\\R");
+            + "Return ONLY the medicine names.\n"
 
-        List<FDAMedicineDto> fdaResults = new ArrayList<>();
+            + "Return one medicine per line.\n"
 
-        // 3. Process each medicine
-        for (String medicineName : medicines) {
+            + "Do not include explanations.\n"
 
-            medicineName = medicineName.trim();
+            + "Do not include dosage instructions.\n"
 
-            if (medicineName.isEmpty()) {
-                continue;
-            }
+            + "Do not include numbering.\n\n"
 
-            System.out.println(
-                    "========== NORMALIZED LOGIC =========="
-            );
+            + "Prescription OCR:\n"
 
-            System.out.println(
-                    "Original Medicine: " + medicineName
-            );
+            + extractedText
+    );
 
-            // Normalize
-            String normalizedName =
-                    normalizer.normalize(medicineName);
 
-            System.out.println(
-                    "Normalized Medicine: " + normalizedName
-            );
+    System.out.println(
+            "========== GEMINI RESULT =========="
+    );
 
-            // 4. Search FDA
-            System.out.println(
-                    "========== FDA SEARCH =========="
-            );
+    System.out.println(aiResult);
 
-            System.out.println(
-                    "Searching FDA for: " + normalizedName
-            );
 
-            FDAMedicineDto fdaResult =
-                    fdaClient.searchMedicine(normalizedName);
+    // ================================
+    // STEP 2: SPLIT MEDICINES
+    // ================================
 
-            if (fdaResult != null) {
+    String[] medicines =
+            aiResult.split("\\R");
 
-                fdaResults.add(fdaResult);
 
-                System.out.println(
-                        "FDA RESULT FOUND"
-                );
+    List<MedicineResponseDto> finalResults =
+            new ArrayList<>();
 
-            } else {
 
-                System.out.println(
-                        "FDA RESULT NOT FOUND: "
-                        + normalizedName
-                );
-            }
+    // ================================
+    // STEP 3: SEARCH DATABASE
+    // ================================
 
-            System.out.println(
-                    "================================"
-            );
+    for (String medicineName : medicines) {
+
+        medicineName = medicineName.trim();
+
+        if (medicineName.isEmpty()) {
+            continue;
         }
 
-        // 5. Return all FDA results
-        try {
 
-            return objectMapper.writeValueAsString(
-                    fdaResults
+        System.out.println(
+                "========== MEDICINE =========="
+        );
+
+        System.out.println(
+                "Gemini Medicine: "
+                        + medicineName
+        );
+
+
+        // ================================
+        // NORMALIZATION
+        // ================================
+
+        String normalizedName =
+                normalizer.normalize(
+                        medicineName
+                );
+
+        System.out.println(
+                "Normalized Medicine: "
+                        + normalizedName
+        );
+
+
+        // ================================
+        // DATABASE SEARCH + RANKING
+        // ================================
+
+        List<MedicineResponseDto> results =
+                medicineService.searchMedicine(
+                        normalizedName
+                );
+
+
+        System.out.println(
+                "Database Matches: "
+                        + results.size()
+        );
+
+
+        // ================================
+        // BEST MATCH
+        // ================================
+
+        if (!results.isEmpty()) {
+
+            MedicineResponseDto bestMedicine =
+                    results.get(0);
+
+            finalResults.add(
+                    bestMedicine
             );
 
-        } catch (JsonProcessingException e) {
+            System.out.println(
+                    "BEST MATCH: "
+                            + bestMedicine.getName()
+            );
 
-            e.printStackTrace();
+        } else {
 
-            return """
-                    {
-            "message": "Error processing FDA results"
-                    }
-                    """;
+            System.out.println(
+                    "NO MEDICINE FOUND"
+            );
         }
     }
+
+
+    // ================================
+    // STEP 4: RETURN JSON
+    // ================================
+
+    try {
+
+        return objectMapper.writeValueAsString(
+                finalResults
+        );
+
+    } catch (JsonProcessingException e) {
+
+        System.out.println(
+                "ERROR CONVERTING MEDICINE RESULTS TO JSON"
+        );
+
+        e.printStackTrace();
+
+        return "{\"message\":\"Unable to create medicine response\"}";
+    }
+}
 }

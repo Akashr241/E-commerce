@@ -1,4 +1,3 @@
-
 package com.example.demo.ai.prescription.util;
 
 import com.example.demo.ai.prescription.entity.Medicine;
@@ -31,23 +30,46 @@ public class MedicineSearchRanker {
 
         int score = 0;
 
-        // 1. Exact medicine name
+
+        // =====================================
+        // 1. EXACT NAME
+        // =====================================
+
         if (medicineName.equals(search)) {
+
             score += 100;
+
         }
 
-        // 2. Medicine name starts with search
+
+        // =====================================
+        // 2. STARTS WITH SEARCH
+        // =====================================
+
         else if (medicineName.startsWith(search)) {
+
             score += 70;
+
         }
 
-        // 3. Medicine name contains search
+
+        // =====================================
+        // 3. CONTAINS SEARCH
+        // =====================================
+
         else if (medicineName.contains(search)) {
+
             score += 50;
+
         }
 
-        // 4. Check individual words
-        String[] searchWords = search.split("\\s+");
+
+        // =====================================
+        // 4. WORD MATCHING
+        // =====================================
+
+        String[] searchWords =
+                search.split("\\s+");
 
         for (String word : searchWords) {
 
@@ -56,9 +78,52 @@ public class MedicineSearchRanker {
             }
 
             if (medicineName.contains(word)) {
+
                 score += 10;
             }
         }
+
+
+        // =====================================
+        // 5. DOSAGE FORM MATCHING
+        // =====================================
+
+        if (search.contains("syrup")
+                && medicineName.contains("syrup")) {
+
+            score += 20;
+        }
+
+        if (search.contains("tablet")
+                && medicineName.contains("tablet")) {
+
+            score += 20;
+        }
+
+        if (search.contains("inhaler")
+                && medicineName.contains("inhaler")) {
+
+            score += 20;
+        }
+
+        if (search.contains("respules")
+                && medicineName.contains("respules")) {
+
+            score += 20;
+        }
+
+        if (search.contains("capsule")
+                && medicineName.contains("capsule")) {
+
+            score += 20;
+        }
+
+        if (search.contains("drops")
+                && medicineName.contains("drops")) {
+
+            score += 20;
+        }
+
 
         return score;
     }
