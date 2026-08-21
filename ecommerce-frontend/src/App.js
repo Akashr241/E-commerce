@@ -1,73 +1,62 @@
 import React from "react";
-import{ BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
+import Chatbot from "./components/Chatbot";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Products from "./pages/Products";
-import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
-import AdminProducts from "./pages/AdminProducts";
-import Payment from "./pages/Payment";
-import Orders from "./pages/Orders";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import PaymentFailure from "./pages/PaymentFailure";
 
 function App() {
-  return (
-    <Router>
-      <Navbar />
 
-      <div className="container mt-4">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/admin/products" element={<AdminProducts />} />
-          <Route path="/products/:id" element={<ProductDetails />} />
-       <Route path="/payment" element={<Payment />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/payment-failure" element={<PaymentFailure />} />
-          <Route path="/cart" element={<Cart />} />
+    return (
+        <BrowserRouter>
 
-          {/* Protected Routes */}
-          <Route
-            path="/cart"
-            element={
-              <ProtectedRoute>
-                <Cart />
-              </ProtectedRoute>
-            }
-          />
+            <Navbar />
 
-          <Route
-            path="/checkout"
-            element={
-              <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
-            }
-          />
+            <Routes>
 
+                <Route
+                    path="/"
+                    element={<Home />}
+                />
 
+                <Route
+                    path="/login"
+                    element={<Login />}
+                />
 
-<Route
-    path="/orders"
-    element={<Orders />}
-/>
+                <Route
+                    path="/register"
+                    element={<Register />}
+                />
 
+                <Route
+                    path="/products"
+                    element={<Products />}
+                />
 
-        </Routes>
+                <Route
+                    path="/cart"
+                    element={<Cart />}
+                />
 
-      </div>
-    </Router>
-  );
+                <Route
+                    path="/checkout"
+                    element={<Checkout />}
+                />
+
+            </Routes>
+
+            {/* ALWAYS VISIBLE */}
+            <Chatbot />
+
+        </BrowserRouter>
+    );
 }
 
 export default App;

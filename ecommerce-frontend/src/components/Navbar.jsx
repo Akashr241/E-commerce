@@ -1,51 +1,61 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-function Navbar() {
-  return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-      <Link className="navbar-brand" to="/">
-        E-Commerce
-      </Link>
+const Navbar = () => {
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
 
-      <button
-        className="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-      >
-        <span className="navbar-toggler-icon"></span>
-      </button>
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        navigate("/login");
+    };
 
-      <div className="collapse navbar-collapse" id="navbarNav">
-        <div className="navbar-nav ms-auto">
-          <Link className="nav-link" to="/">
-            Home
-          </Link>
+    return (
+        <nav className="main-navbar">
+            <div className="navbar-container">
 
-          <Link className="nav-link" to="/products">
-            Products
-          </Link>
+                <Link to="/" className="brand">
+                    <span className="brand-icon">✚</span>
+                    <span>Medi<span>AI</span></span>
+                </Link>
 
-          <Link className="nav-link" to="/cart">
-            Cart
-          </Link>
+                <div className="nav-links">
+                    <Link to="/">Home</Link>
+                    <Link to="/products">Medicines</Link>
+                    <Link to="/prescription">Prescription AI</Link>
 
-          <Link className="nav-link" to="/login">
-            Login
-          </Link>
+                    {token && (
+                        <>
+                            <Link to="/orders">Orders</Link>
+                            <Link to="/cart" className="cart-link">
+                                🛒 Cart
+                            </Link>
+                        </>
+                    )}
 
-          <Link className="nav-link" to="/register">
-            Register
-          </Link>
+                    <Link to="/chatbot" className="ai-link">
+                        🤖 AI Assistant
+                    </Link>
 
-          <Link className="nav-link" to="/admin/products">
-            Admin
-          </Link>
-        </div>
-      </div>
-    </nav>
-  );
-}
+                    {token ? (
+                        <button onClick={handleLogout} className="nav-button">
+                            Logout
+                        </button>
+                    ) : (
+                        <>
+                            <Link to="/login" className="login-link">
+                                Login
+                            </Link>
+                            <Link to="/register" className="register-link">
+                                Get Started
+                            </Link>
+                        </>
+                    )}
+                </div>
+
+            </div>
+        </nav>
+    );
+};
 
 export default Navbar;
