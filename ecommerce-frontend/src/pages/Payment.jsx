@@ -50,7 +50,7 @@ function Payment() {
 
     const options = {
 
-                key: "rzp_test_TEdwiuvXS4duTr",
+        key: "rzp_test_TEdwiuvXS4duTr",
 
     
         
