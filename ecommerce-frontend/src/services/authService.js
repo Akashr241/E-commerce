@@ -1,22 +1,46 @@
-import API from "./api";
+import api from "./api";
 
-export const registerUser = (userData) => {
-    return API.post("/auth/register", userData);
+export const registerUser = async (userData) => {
+
+    try {
+
+        const response = await api.post(
+            "/auth/register",
+            userData
+        );
+
+        return response.data;
+
+    } catch (error) {
+
+        console.error(
+            "Registration error:",
+            error
+        );
+
+        throw error;
+    }
 };
 
-export const loginUser = (loginData) => {
-    return API.post("/auth/login", loginData);
-};
 
-export const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-};
+export const loginUser = async (credentials) => {
 
-export const getToken = () => {
-    return localStorage.getItem("token");
-};
+    try {
 
-export const isAuthenticated = () => {
-    return !!localStorage.getItem("token");
+        const response = await api.post(
+            "/auth/login",
+            credentials
+        );
+
+        return response.data;
+
+    } catch (error) {
+
+        console.error(
+            "Login error:",
+            error
+        );
+
+        throw error;
+    }
 };

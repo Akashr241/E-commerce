@@ -1,59 +1,230 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
+
+    const { isLoggedIn, logout } = useAuth();
+
     const navigate = useNavigate();
-    const token = localStorage.getItem("token");
+
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
+
+        logout();
+
         navigate("/login");
     };
 
-    return (
-        <nav className="main-navbar">
-            <div className="navbar-container">
 
-                <Link to="/" className="brand">
-                    <span className="brand-icon">✚</span>
-                    <span>Medi<span>AI</span></span>
+    return (
+        <nav className="navbar navbar-expand-lg bg-white border-bottom shadow-sm sticky-top">
+
+            <div className="container">
+
+
+                {/* BRAND */}
+
+                <Link
+                    to="/"
+                    className="navbar-brand d-flex align-items-center gap-2 fw-bold"
+                >
+
+                    <span
+                        className="
+                            bg-success
+                            text-white
+                            rounded-3
+                            d-flex
+                            align-items-center
+                            justify-content-center
+                        "
+                        style={{
+                            width: "42px",
+                            height: "42px"
+                        }}
+                    >
+                        ⚕
+                    </span>
+
+                    <span>
+                        Medi<span className="text-success">Pharm</span>
+                    </span>
+
                 </Link>
 
-                <div className="nav-links">
-                    <Link to="/">Home</Link>
-                    <Link to="/products">Medicines</Link>
-                    <Link to="/prescription">Prescription AI</Link>
 
-                    {token && (
-                        <>
-                            <Link to="/orders">Orders</Link>
-                            <Link to="/cart" className="cart-link">
-                                🛒 Cart
-                            </Link>
-                        </>
-                    )}
+                {/* MOBILE BUTTON */}
 
-                    <Link to="/chatbot" className="ai-link">
-                        🤖 AI Assistant
-                    </Link>
+                <button
+                    className="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#pharmacyNavbar"
+                    aria-controls="pharmacyNavbar"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+                >
 
-                    {token ? (
-                        <button onClick={handleLogout} className="nav-button">
-                            Logout
-                        </button>
-                    ) : (
-                        <>
-                            <Link to="/login" className="login-link">
-                                Login
+                    <span className="navbar-toggler-icon"></span>
+
+                </button>
+
+
+                {/* NAVIGATION */}
+
+                <div
+                    className="collapse navbar-collapse"
+                    id="pharmacyNavbar"
+                >
+
+                    <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+
+
+                        {/* HOME */}
+
+                        <li className="nav-item">
+
+                            <Link
+                                to="/"
+                                className="nav-link fw-semibold"
+                            >
+                                Home
                             </Link>
-                            <Link to="/register" className="register-link">
-                                Get Started
+
+                        </li>
+
+
+                        {/* MEDICINES */}
+
+                        <li className="nav-item">
+
+                            <Link
+                                to="/products"
+                                className="nav-link fw-semibold"
+                            >
+                                Medicines
                             </Link>
-                        </>
-                    )}
+
+                        </li>
+
+
+                        {/* PRESCRIPTION */}
+
+                        <li className="nav-item">
+
+                            <Link
+                                to="/prescription"
+                                className="nav-link fw-semibold"
+                            >
+                                Prescription AI
+                            </Link>
+
+                        </li>
+
+
+                        {/* ORDERS */}
+
+                        {isLoggedIn && (
+
+                            <li className="nav-item">
+
+                                <Link
+                                    to="/orders"
+                                    className="nav-link fw-semibold"
+                                >
+                                    Orders
+                                </Link>
+
+                            </li>
+
+                        )}
+
+
+                        {/* CART */}
+
+                        {isLoggedIn && (
+
+                            <li className="nav-item">
+
+                                <Link
+                                    to="/cart"
+                                    className="nav-link fw-semibold"
+                                >
+                                    🛒 Cart
+                                </Link>
+
+                            </li>
+
+                        )}
+
+
+                        {/* CHATBOT */}
+
+                        <li className="nav-item">
+
+                            <Link
+                                to="/chatbot"
+                                className="nav-link fw-semibold"
+                            >
+                                🤖 MediAI
+                            </Link>
+
+                        </li>
+
+
+                        {/* AUTH */}
+
+                        {!isLoggedIn ? (
+
+                            <>
+
+                                <li className="nav-item">
+
+                                    <Link
+                                        to="/login"
+                                        className="btn btn-outline-success px-3 ms-lg-2"
+                                    >
+                                        Login
+                                    </Link>
+
+                                </li>
+
+                                <li className="nav-item">
+
+                                    <Link
+                                        to="/register"
+                                        className="btn btn-success px-3"
+                                    >
+                                        Register
+                                    </Link>
+
+                                </li>
+
+                            </>
+
+                        ) : (
+
+                            <li className="nav-item">
+
+                                <button
+                                    type="button"
+                                    onClick={handleLogout}
+                                    className="btn btn-outline-danger px-3 ms-lg-2"
+                                >
+                                    Logout
+                                </button>
+
+                            </li>
+
+                        )}
+
+                    </ul>
+
                 </div>
 
             </div>
+
         </nav>
     );
 };

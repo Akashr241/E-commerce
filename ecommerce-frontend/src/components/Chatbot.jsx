@@ -4,27 +4,33 @@ import { sendChatMessage } from "../services/chatbotService";
 const Chatbot = () => {
 
     const [open, setOpen] = useState(false);
+
     const [message, setMessage] = useState("");
-    const [loading, setLoading] = useState(false);
 
     const [messages, setMessages] = useState([
         {
             sender: "ai",
-            text: "Hello! 👋 I'm MediAI. How can I help you with your medicines today?"
+            text: "Hello! 👋 I'm MediAI. How can I help you today?"
         }
     ]);
+
+    const [loading, setLoading] = useState(false);
 
 
     const sendMessage = async () => {
 
-        // Don't send empty messages
-        if (!message.trim() || loading) {
-            return;
-        }
+        console.log("Current input:", message);
 
         const userMessage = message.trim();
 
-        // Show user's message immediately
+        console.log("User message:", userMessage);
+
+        if (!userMessage) {
+            console.log("Message is empty. Not sending.");
+            return;
+        }
+
+        // Show user message
         setMessages((previousMessages) => [
             ...previousMessages,
             {
@@ -33,20 +39,26 @@ const Chatbot = () => {
             }
         ]);
 
-        // Clear input
+        // Clear input AFTER saving the value
         setMessage("");
 
-        // Start loading
         setLoading(true);
 
         try {
 
-            // Call Spring Boot backend
-            const response = await sendChatMessage(userMessage);
+            console.log(
+                "Sending to chatbot service:",
+                userMessage
+            );
 
-            console.log("AI Response:", response);
+            const response =
+                await sendChatMessage(userMessage);
 
-            // Add AI response
+            console.log(
+                "AI response received:",
+                response
+            );
+
             setMessages((previousMessages) => [
                 ...previousMessages,
                 {
@@ -57,13 +69,17 @@ const Chatbot = () => {
 
         } catch (error) {
 
-            console.error("Chatbot error:", error);
+            console.error(
+                "Chatbot error:",
+                error
+            );
 
             setMessages((previousMessages) => [
                 ...previousMessages,
                 {
                     sender: "ai",
-                    text: "Sorry, I'm having trouble connecting to MediAI right now. Please try again."
+                    text:
+                        "Sorry, I couldn't connect to MediAI right now."
                 }
             ]);
 
@@ -75,10 +91,12 @@ const Chatbot = () => {
     };
 
 
-    // Press Enter to send
     const handleKeyDown = (event) => {
 
-        if (event.key === "Enter" && !event.shiftKey) {
+        if (
+            event.key === "Enter" &&
+            !event.shiftKey
+        ) {
 
             event.preventDefault();
 
@@ -90,9 +108,7 @@ const Chatbot = () => {
     return (
         <>
 
-            {/* =========================
-                CHAT WINDOW
-            ========================== */}
+            {/* CHAT WINDOW */}
 
             {open && (
 
@@ -117,9 +133,7 @@ const Chatbot = () => {
                     }}
                 >
 
-                    {/* =========================
-                        HEADER
-                    ========================== */}
+                    {/* HEADER */}
 
                     <div className="bg-success text-white p-3">
 
@@ -158,7 +172,6 @@ const Chatbot = () => {
 
                             </div>
 
-
                             <button
                                 type="button"
                                 className="btn text-white fs-4 p-0"
@@ -172,9 +185,7 @@ const Chatbot = () => {
                     </div>
 
 
-                    {/* =========================
-                        CHAT MESSAGES
-                    ========================== */}
+                    {/* MESSAGES */}
 
                     <div
                         className="p-3 bg-light overflow-auto"
@@ -217,8 +228,6 @@ const Chatbot = () => {
                         ))}
 
 
-                        {/* Loading */}
-
                         {loading && (
 
                             <div className="d-flex justify-content-start mb-3">
@@ -240,9 +249,7 @@ const Chatbot = () => {
                     </div>
 
 
-                    {/* =========================
-                        INPUT
-                    ========================== */}
+                    {/* INPUT */}
 
                     <div className="bg-white border-top p-2">
 
@@ -250,12 +257,19 @@ const Chatbot = () => {
 
                             <input
                                 type="text"
-                                className="form-control border-0 shadow-none"
-                                placeholder="Ask about your medicine..."
+                                className="form-control"
+                                placeholder="Ask MediAI..."
                                 value={message}
-                                onChange={(event) =>
-                                    setMessage(event.target.value)
-                                }
+                                onChange={(event) => {
+                                    console.log(
+                                        "Input changed:",
+                                        event.target.value
+                                    );
+
+                                    setMessage(
+                                        event.target.value
+                                    );
+                                }}
                                 onKeyDown={handleKeyDown}
                                 disabled={loading}
                             />
@@ -281,9 +295,7 @@ const Chatbot = () => {
             )}
 
 
-            {/* =========================
-                FLOATING CHAT BUTTON
-            ========================== */}
+            {/* FLOATING BUTTON */}
 
             <button
                 type="button"
@@ -308,11 +320,8 @@ const Chatbot = () => {
                     fontSize: "25px"
                 }}
                 onClick={() => setOpen(!open)}
-                aria-label="Open MediAI Assistant"
             >
-
                 {open ? "×" : "🤖"}
-
             </button>
 
         </>
