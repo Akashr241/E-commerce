@@ -9,7 +9,9 @@ import {
 import Navbar from "./components/Navbar";
 import Chatbot from "./components/Chatbot";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ReminderManager from "./components/ReminderManager";
 
+import MedicineReminder from "./pages/MedicineReminder";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -30,6 +32,7 @@ const ProtectedPage = ({ children }) => {
 
     return (
         <ProtectedRoute>
+            <ReminderManager/>
 
             <Navbar />
 
@@ -82,6 +85,7 @@ function App() {
                     }
                 />
 
+
                 <Route
                     path="/products/:id"
                     element={
@@ -91,6 +95,13 @@ function App() {
                     }
                 />
 
+                <Route path="/reminder/:id" element={
+                    <ProtectedPage>
+                        <MedicineReminder />
+                    </ProtectedPage>
+                }
+                />
+                
                 <Route
                     path="/cart"
                     element={
@@ -162,6 +173,7 @@ function App() {
                         </ProtectedPage>
                     }
                 />
+              
 
             </Routes>
 
