@@ -1,13 +1,25 @@
 package com.example.demo.checkout.dto;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 
 public class CheckoutRequestDto {
-
+    @NotBlank(message = "Full name is required")
+    @Size(min = 2, max = 50, message = "Full name must be between 2 and 50 characters")
     private String fullName;
+    @NotNull(message = "Phone number is required")
+    @Size(min = 10, max = 11, message = "Phone number must be between 10 and 11 characters")
     private String phone;
+    @NotBlank(message = "Address is required")
     private String address;
+    @NotBlank(message = "City is required")
     private String city;
+    @NotBlank(message = "State is required")
     private String state;
+    @NotBlank(message = "Country is required")
     private String country;
+    @NotBlank(message = "Pincode is required")
     private String pincode;
 
     public CheckoutRequestDto() {
