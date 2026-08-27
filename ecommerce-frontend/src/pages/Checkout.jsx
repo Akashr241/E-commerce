@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CheckoutForm from "../components/CheckoutForm";
 import OrderSummary from "../components/OrderSummary";
 import { checkout } from "../services/checkoutService";
 import { useNavigate } from "react-router-dom";
-import {useEffect} from "react";
 import { myCart } from "../services/cartService";
 
 function Checkout() {
@@ -22,18 +21,30 @@ function Checkout() {
 
     const [cart, setCart] = useState(null);
 
-useEffect(() => {
-    loadCart();
-}, []);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
-const loadCart = async () => {
-    try {
-        const response = await myCart();
-        setCart(response);
-    } catch (error) {
-        console.log(error);
-    }
-};
+    useEffect(() => {
+        loadCart();
+    }, []);
+
+    const loadCart = async () => {
+
+        try {
+
+            const response = await myCart();
+
+            setCart(response);
+
+        } catch (error) {
+
+            console.log("Cart loading error:", error);
+
+            setErrorMessage("Unable to load your cart.");
+
+        }
+
+    };
 
     const handleChange = (e) => {
 
@@ -42,44 +53,184 @@ const loadCart = async () => {
             [e.target.name]: e.target.value
         });
 
+        // Remove old error when user starts typing
+        setErrorMessage("");
     };
+
+
+    // ==============================
+    // FORM VALIDATION
+    // ==============================
+
+    const validateForm = () => {
+
+        if (!formData.fullName.trim()) {
+            return "Please enter your full name.";
+        }
+
+        if (!formData.phone.trim()) {
+            return "Please enter your phone number.";
+        }
+
+        if (!/^[0-9]{10}$/.test(formData.phone)) {
+            return "Please enter a valid 10-digit phone number.";
+        }
+
+        if (!formData.address.trim()) {
+            return "Please enter your address.";
+        }
+
+        if (!formData.city.trim()) {
+            return "Please enter your city.";
+        }
+
+        if (!formData.state.trim()) {
+            return "Please enter your state.";
+        }
+
+        if (!formData.country.trim()) {
+            return "Please enter your country.";
+        }
+
+        if (!formData.pincode.trim()) {
+            return "Please enter your pincode.";
+        }
+
+        if (!/^[0-9]{6}$/.test(formData.pincode)) {
+            return "Please enter a valid 6-digit pincode.";
+        }
+
+        return null;
+    };
+
+
+    // ==============================
+    // CHECKOUT
+    // ==============================
 
     const handleCheckout = async () => {
 
-    try {
+        // Clear previous message
+        setErrorMessage("");
 
-        const response = await checkout(formData);
+        // First validate React form
+        const validationError = validateForm();
 
-        console.log(response);
-        console.log(" passing to payment page",{
-            total: response.total,
-            items: response.items
-        });
+        if (validationError) {
 
-        alert("Order placed successfully!");
+            setErrorMessage(validationError);
 
-        navigate("/payment", {
-    state: {
-        total: response.total,
-        items: response.items
-    }
-});
+            // Alert message
+            alert(validationError);
 
-    } catch (error) {
+            return;
+        }
 
-        console.log(error);
+        // Check cart
+        if (!cart || !cart.cartItems || cart.cartItems.length === 0) {
 
-        alert("Checkout failed!");
+            const message = "Your cart is empty.";
 
-    }
+            setErrorMessage(message);
 
-};
+            alert(message);
+
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+
+            /*
+             * Now request goes to Java backend.
+             *
+             * Java will validate:
+             *
+             * - Cart
+             * - Products
+             * - Prescription requirement
+             * - Prescription validation
+             */
+
+            const response = await checkout(formData);
+
+            console.log("Checkout successful:", response);
+
+            // SUCCESS MESSAGE
+            alert("Checkout successful! Proceeding to payment.");
+
+            // Go to payment ONLY after Java succeeds
+            navigate("/payment", {
+                state: {
+                    total: response.total,
+                    items: response.items
+                }
+            });
+
+        } catch (error) {
+
+            console.log("Checkout error:", error);
+
+            let message = "Checkout failed. Please try again.";
+
+            /*
+             * Backend error
+             */
+
+            if (error.response) {
+
+                if (error.response.data) {
+
+                    if (typeof error.response.data === "string") {
+
+                        message = error.response.data;
+
+                    } else if (error.response.data.message) {
+
+                        message = error.response.data.message;
+
+                    }
+                }
+            }
+
+            setErrorMessage(message);
+
+            alert(message);
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
+
 
     return (
 
         <div className="container mt-4">
 
+            {/* ==============================
+                ERROR MESSAGE
+            ============================== */}
+
+            {errorMessage && (
+
+                <div
+                    className="alert alert-danger"
+                    role="alert"
+                >
+                    {errorMessage}
+                </div>
+
+            )}
+
+
             <div className="row">
+
+                {/* ==============================
+                    CHECKOUT FORM
+                ============================== */}
 
                 <div className="col-md-8">
 
@@ -90,11 +241,17 @@ const loadCart = async () => {
 
                 </div>
 
+
+                {/* ==============================
+                    ORDER SUMMARY
+                ============================== */}
+
                 <div className="col-md-4">
 
                     <OrderSummary
-                    cart={cart}
+                        cart={cart}
                         onCheckout={handleCheckout}
+                        loading={loading}
                     />
 
                 </div>
@@ -104,7 +261,6 @@ const loadCart = async () => {
         </div>
 
     );
-
 }
 
 export default Checkout;

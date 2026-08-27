@@ -1,7 +1,19 @@
-import api from "./api";
 
-export const getMyOrders = () => {
+import axios from "axios";
 
-    return api.get("/orders/my-orders");
+export const placeOrder = async () => {
 
+    const token = localStorage.getItem("token");
+
+    const response = await axios.post(
+        "http://localhost:8080/orders/place/",
+        {},
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+
+    return response.data;
 };

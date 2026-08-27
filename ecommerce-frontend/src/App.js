@@ -10,7 +10,7 @@ import Navbar from "./components/Navbar";
 import Chatbot from "./components/Chatbot";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ReminderManager from "./components/ReminderManager";
-
+import OrderDetails from "./pages/OrderDetails";
 import MedicineReminder from "./pages/MedicineReminder";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -128,6 +128,11 @@ function App() {
                         </ProtectedPage>
                     }
                 />
+
+                <Route
+    path="/orders/:orderId"
+    element={<OrderDetails />}
+/>
 
                 <Route
                     path="/prescription"

@@ -1,203 +1,146 @@
 import React, { useEffect, useState } from "react";
-import api from "../services/api";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
-const Orders = () => {
+function Orders() {
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     useEffect(() => {
-
-        const loadOrders = async () => {
-
-            try {
-
-                const response = await api.get("/orders");
-
-                setOrders(response.data);
-
-            } catch (error) {
-
-                console.error(
-                    "Error fetching orders:",
-                    error
-                );
-
-            } finally {
-
-                setLoading(false);
-
-            }
-        };
-
         loadOrders();
-
     }, []);
 
+    const loadOrders = async () => {
+
+        try {
+
+            const token = localStorage.getItem("token");
+
+            const response = await axios.get(
+                "http://localhost:8080/orders/my-orders",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            console.log("My Orders:", response.data);
+
+            setOrders(response.data);
+
+        } catch (error) {
+
+            console.log("Error loading orders:", error);
+
+            setError("Unable to load your orders.");
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="container mt-5 text-center">
+                <h4>Loading your orders...</h4>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container mt-5">
+                <div className="alert alert-danger">
+                    {error}
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="bg-light min-vh-100">
 
-            <div className="container py-5">
+        <div className="container mt-4">
 
+            <h2 className="fw-bold mb-4">
+                My Orders
+            </h2>
 
-                <div className="mb-5">
+            {orders.length === 0 ? (
 
-                    <span className="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
-                        📦 Your purchases
-                    </span>
+                <div className="text-center mt-5">
 
-                    <h1 className="fw-bold mt-3">
-                        My Orders
-                    </h1>
+                    <h4>No orders found</h4>
 
                     <p className="text-muted">
-                        Track and view your MediPharm orders.
+                        You haven't placed any orders yet.
                     </p>
 
                 </div>
 
+            ) : (
 
-                {loading ? (
+                orders.map((order) => (
 
-                    <div className="text-center py-5">
+                    <div
+                        className="card shadow-sm border-0 mb-3"
+                        key={order.id}
+                    >
 
-                        <div
-                            className="spinner-border text-success"
-                            role="status"
-                        />
+                        <div className="card-body">
 
-                        <p className="text-muted mt-3">
-                            Loading your orders...
-                        </p>
+                            <div className="row align-items-center">
 
-                    </div>
+                                <div className="col-md-7">
 
-                ) : orders.length === 0 ? (
+                                    <h5 className="fw-bold">
+                                        Order #{order.id}
+                                    </h5>
 
-                    <div className="card border-0 shadow-sm rounded-4">
+                                    <p className="mb-1">
+                                        Total Amount:
+                                        <strong className="ms-2">
+                                            ₹{order.totalPrice}
+                                        </strong>
+                                    </p>
 
-                        <div className="card-body text-center py-5">
+                                </div>
 
-                            <div className="display-3">
-                                📦
-                            </div>
+                                <div className="col-md-2">
 
-                            <h4 className="fw-bold mt-3">
-                                No orders yet
-                            </h4>
+                                    <span className="badge bg-success">
+                                        {order.status}
+                                    </span>
 
-                            <p className="text-muted">
-                                Your completed orders will appear here.
-                            </p>
+                                </div>
 
-                            <a
-                                href="/products"
-                                className="btn btn-success rounded-pill px-4"
-                            >
-                                Browse Medicines
-                            </a>
+                                <div className="col-md-3 text-md-end mt-3 mt-md-0">
 
-                        </div>
-
-                    </div>
-
-                ) : (
-
-                    <div className="row g-4">
-
-                        {orders.map((order) => (
-
-                            <div
-                                className="col-12"
-                                key={order.id}
-                            >
-
-                                <div className="card border-0 shadow-sm rounded-4">
-
-                                    <div className="card-body p-4">
-
-
-                                        <div className="row align-items-center">
-
-
-                                            <div className="col-md-2">
-
-                                                <small className="text-muted">
-                                                    Order
-                                                </small>
-
-                                                <h6 className="fw-bold">
-                                                    #{order.id}
-                                                </h6>
-
-                                            </div>
-
-
-                                            <div className="col-md-3">
-
-                                                <small className="text-muted">
-                                                    Date
-                                                </small>
-
-                                                <div className="fw-semibold">
-                                                    {order.createdAt ||
-                                                        "Recently"}
-                                                </div>
-
-                                            </div>
-
-
-                                            <div className="col-md-3">
-
-                                                <small className="text-muted">
-                                                    Total
-                                                </small>
-
-                                                <div className="fw-bold text-success">
-                                                    ₹{order.totalAmount}
-                                                </div>
-
-                                            </div>
-
-
-                                            <div className="col-md-2">
-
-                                                <span className="badge bg-success-subtle text-success rounded-pill px-3 py-2">
-                                                    ✓ Confirmed
-                                                </span>
-
-                                            </div>
-
-
-                                            <div className="col-md-2 text-md-end mt-3 mt-md-0">
-
-                                                <button
-                                                    className="btn btn-outline-success rounded-pill"
-                                                >
-                                                    View Order
-                                                </button>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
+                                    <Link
+                                        to={`/orders/${order.id}`}
+                                        className="btn btn-outline-success rounded-pill"
+                                    >
+                                        View Order →
+                                    </Link>
 
                                 </div>
 
                             </div>
 
-                        ))}
+                        </div>
 
                     </div>
 
-                )}
+                ))
 
-            </div>
+            )}
 
         </div>
     );
-};
+}
 
 export default Orders;
