@@ -1,4 +1,6 @@
-import api from "./api";
+import axios from "axios";
+
+const API_URL = "http://localhost:8080/api/prescription";
 
 export const uploadPrescription = async (file) => {
 
@@ -6,9 +8,16 @@ export const uploadPrescription = async (file) => {
 
     formData.append("file", file);
 
-    const response = await api.post(
-        "/api/prescription/analyze",
-        formData
+    const token = localStorage.getItem("token");
+
+    const response = await axios.post(
+        `${API_URL}/analyze`,
+        formData,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
     );
 
     return response.data;
