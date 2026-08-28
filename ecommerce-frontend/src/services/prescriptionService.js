@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/prescription";
+const API_URL = "http://localhost:8080";
 
-export const uploadPrescription = async (file) => {
+export const analyzePrescription = async (file) => {
 
     const formData = new FormData();
 
@@ -10,15 +10,41 @@ export const uploadPrescription = async (file) => {
 
     const token = localStorage.getItem("token");
 
-    const response = await axios.post(
-        `${API_URL}/analyze`,
-        formData,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        }
-    );
+    try {
 
-    return response.data;
+        console.log("========== PRESCRIPTION UPLOAD ==========");
+
+        console.log("File:", file);
+        console.log("File name:", file?.name);
+        console.log("File type:", file?.type);
+        console.log("File size:", file?.size);
+        console.log("Token exists:", !!token);
+
+        const response = await axios.post(
+            `${API_URL}/api/prescription/analyze`,
+            formData,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data"
+                }
+            }
+        );
+
+        console.log("========== PRESCRIPTION RESPONSE ==========");
+        console.log("Status:", response.status);
+        console.log("Response:", response.data);
+
+        return response.data;
+
+    } catch (error) {
+
+        console.error("========== PRESCRIPTION ERROR ==========");
+
+        console.error("Status:", error.response?.status);
+        console.error("Response:", error.response?.data);
+        console.error("Message:", error.message);
+
+        throw error;
+    }
 };
