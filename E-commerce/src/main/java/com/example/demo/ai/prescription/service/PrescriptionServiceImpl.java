@@ -1,204 +1,377 @@
 package com.example.demo.ai.prescription.service;
 
 import com.example.demo.ai.chatbot.client.GeminiClient;
-import com.example.demo.ai.chatbot.service.AiService;
+import com.example.demo.ai.prescription.dto.PrescriptionResponseDto;
 import com.example.demo.ai.prescription.util.MedicineNameNormalizer;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.example.demo.ai.prescription.dto.MedicineResponseDto;
-import com.example.demo.ai.prescription.service.MedicineService;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class PrescriptionServiceImpl implements PrescriptionService {
+public class PrescriptionServiceImpl
+        implements PrescriptionService {
 
     private final GeminiClient geminiClient;
-    private final AiService aiService;
     private final ObjectMapper objectMapper;
     private final MedicineService medicineService;
     private final MedicineNameNormalizer normalizer;
 
     public PrescriptionServiceImpl(
             GeminiClient geminiClient,
-            AiService aiService,
             ObjectMapper objectMapper,
             MedicineService medicineService,
             MedicineNameNormalizer normalizer) {
 
         this.geminiClient = geminiClient;
-        this.aiService = aiService;
         this.objectMapper = objectMapper;
         this.medicineService = medicineService;
         this.normalizer = normalizer;
     }
 
-@Override
-public String analyzePrescription(String extractedText) {
 
-    System.out.println(
-            "========== PRESCRIPTION SERVICE =========="
-    );
+    @Override
+    public List<PrescriptionResponseDto>
+    analyzePrescription(String extractedText) {
 
-    System.out.println("OCR TEXT:");
-    System.out.println(extractedText);
+        System.out.println(
+                "========== PRESCRIPTION SERVICE =========="
+        );
 
-    System.out.println(
-            "=========================================="
-    );
+        System.out.println("OCR TEXT:");
+        System.out.println(extractedText);
 
-
-    // ================================
-    // STEP 1: GEMINI
-    // ================================
-
-    String aiResult = geminiClient.askGemini(
-
-            "Analyze this doctor's prescription.\n\n"
-
-            + "Identify every medicine prescribed.\n"
-
-            + "OCR text may contain spelling mistakes.\n"
-
-            + "Correct obvious OCR mistakes using medical context.\n"
-
-            + "Return ONLY the medicine names.\n"
-
-            + "Return one medicine per line.\n"
-
-            + "Do not include explanations.\n"
-
-            + "Do not include dosage instructions.\n"
-
-            + "Do not include numbering.\n\n"
-
-            + "Prescription OCR:\n"
-
-            + extractedText
-    );
+        System.out.println(
+                "=========================================="
+        );
 
 
-    System.out.println(
-            "========== GEMINI RESULT =========="
-    );
+        // ==========================================
+        // STEP 1: GEMINI AI ANALYSIS
+        // ==========================================
 
-    System.out.println(aiResult);
+        String prompt = """
+
+                You are a prescription analysis AI.
+
+                Analyze the following OCR text extracted
+                from a doctor's prescription.
+
+                Identify every medicine prescribed.
+
+                OCR text may contain spelling mistakes.
+                Correct obvious OCR mistakes using medical context.
+
+                For every medicine return:
+
+                - medicineName
+                - dosage
+                - frequency
+                - duration
+
+                Return ONLY valid JSON.
+
+                Do NOT return markdown.
+                Do NOT return explanations.
+                Do NOT use ```json.
+
+                Return an array using exactly this format:
+
+                [
+                  {
+                    "medicineName": "Calpol",
+                    "dosage": "500mg",
+                    "frequency": "twice daily",
+                    "duration": "5 days"
+                  }
+                ]
+
+                Rules:
+
+                medicineName:
+                The name of the medicine.
+
+                dosage:
+                The strength or dosage such as 500mg,
+                5ml, etc.
+
+                frequency:
+                How often the medicine should be taken.
+
+                duration:
+                How long the medicine should be taken.
+
+                Do not invent information.
+
+                If information is not present,
+                return an empty string.
+
+                PRESCRIPTION OCR:
+                """ + extractedText;
 
 
-    // ================================
-    // STEP 2: SPLIT MEDICINES
-    // ================================
-
-    String[] medicines =
-            aiResult.split("\\R");
+        String aiResult =
+                geminiClient.askGemini(prompt);
 
 
-    List<MedicineResponseDto> finalResults =
-            new ArrayList<>();
+        System.out.println(
+                "========== GEMINI RESULT =========="
+        );
+
+        System.out.println(aiResult);
 
 
-    // ================================
-    // STEP 3: SEARCH DATABASE
-    // ================================
+        // ==========================================
+        // STEP 2: CLEAN GEMINI RESPONSE
+        // ==========================================
 
-    for (String medicineName : medicines) {
+        String cleanResult =
+                cleanJson(aiResult);
 
-        medicineName = medicineName.trim();
 
-        if (medicineName.isEmpty()) {
-            continue;
+        List<PrescriptionResponseDto> finalResults =
+                new ArrayList<>();
+
+
+        try {
+
+            JsonNode medicines =
+                    objectMapper.readTree(cleanResult);
+
+
+            // ==========================================
+            // STEP 3: PROCESS EACH MEDICINE
+            // ==========================================
+
+            for (JsonNode medicineNode : medicines) {
+
+                String medicineName =
+                        medicineNode
+                                .path("medicineName")
+                                .asText();
+
+                String dosage =
+                        medicineNode
+                                .path("dosage")
+                                .asText();
+
+                String frequency =
+                        medicineNode
+                                .path("frequency")
+                                .asText();
+
+                String duration =
+                        medicineNode
+                                .path("duration")
+                                .asText();
+
+
+                if (medicineName == null ||
+                        medicineName.trim().isEmpty()) {
+
+                    continue;
+                }
+
+
+                System.out.println(
+                        "========== MEDICINE =========="
+                );
+
+                System.out.println(
+                        "Gemini Medicine: "
+                                + medicineName
+                );
+
+                System.out.println(
+                        "Dosage: " + dosage
+                );
+
+                System.out.println(
+                        "Frequency: " + frequency
+                );
+
+                System.out.println(
+                        "Duration: " + duration
+                );
+
+
+                // ======================================
+                // STEP 4: NORMALIZE MEDICINE NAME
+                // ======================================
+
+                String normalizedName =
+                        normalizer.normalize(
+                                medicineName
+                        );
+
+                System.out.println(
+                        "Normalized Medicine: "
+                                + normalizedName
+                );
+
+
+                // ======================================
+                // STEP 5: SEARCH DATABASE
+                // ======================================
+
+                var results =
+                        medicineService.searchMedicine(
+                                normalizedName
+                        );
+
+
+                System.out.println(
+                        "Database Matches: "
+                                + results.size()
+                );
+
+
+                // ======================================
+                // STEP 6: BEST MATCH
+                // ======================================
+
+                if (!results.isEmpty()) {
+
+                    var bestMedicine =
+                            results.get(0);
+
+
+                    PrescriptionResponseDto dto =
+                            new PrescriptionResponseDto();
+
+
+                    // AI information
+                    dto.setMedicineName(
+                            medicineName
+                    );
+
+                    dto.setDosage(
+                            dosage
+                    );
+
+                    dto.setFrequency(
+                            frequency
+                    );
+
+                    dto.setDuration(
+                            duration
+                    );
+
+
+                    // Database information
+                    dto.setProductId(
+                            bestMedicine.getId()
+                    );
+
+                    dto.setProductName(
+                            bestMedicine.getName()
+                    );
+
+                    dto.setPrice(
+                            bestMedicine.getPrice()
+                    );
+
+                    dto.setManufacturerName(
+                            bestMedicine.getManufacturerName()
+                    );
+
+                    dto.setType(
+                            bestMedicine.getType()
+                    );
+
+                    dto.setPackSizeLabel(
+                            bestMedicine.getPackSizeLabel()
+                    );
+
+                    dto.setShortComposition1(
+                            bestMedicine.getShortComposition1()
+                    );
+
+                    dto.setShortComposition2(
+                            bestMedicine.getShortComposition2()
+                    );
+
+
+                    finalResults.add(dto);
+
+
+                    System.out.println(
+                            "BEST MATCH: "
+                                    + bestMedicine.getName()
+                    );
+
+                } else {
+
+                    System.out.println(
+                            "NO MEDICINE FOUND: "
+                                    + medicineName
+                    );
+                }
+            }
+
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "ERROR PROCESSING GEMINI RESPONSE"
+            );
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Unable to process prescription AI response",
+                    e
+            );
         }
 
 
-        System.out.println(
-                "========== MEDICINE =========="
-        );
-
-        System.out.println(
-                "Gemini Medicine: "
-                        + medicineName
-        );
+        return finalResults;
+    }
 
 
-        // ================================
-        // NORMALIZATION
-        // ================================
+    // ==============================================
+    // CLEAN GEMINI JSON
+    // ==============================================
 
-        String normalizedName =
-                normalizer.normalize(
-                        medicineName
-                );
+    private String cleanJson(String response) {
 
-        System.out.println(
-                "Normalized Medicine: "
-                        + normalizedName
-        );
+        if (response == null) {
 
-
-        // ================================
-        // DATABASE SEARCH + RANKING
-        // ================================
-
-        List<MedicineResponseDto> results =
-                medicineService.searchMedicine(
-                        normalizedName
-                );
-
-
-        System.out.println(
-                "Database Matches: "
-                        + results.size()
-        );
-
-
-        // ================================
-        // BEST MATCH
-        // ================================
-
-        if (!results.isEmpty()) {
-
-            MedicineResponseDto bestMedicine =
-                    results.get(0);
-
-            finalResults.add(
-                    bestMedicine
-            );
-
-            System.out.println(
-                    "BEST MATCH: "
-                            + bestMedicine.getName()
-            );
-
-        } else {
-
-            System.out.println(
-                    "NO MEDICINE FOUND"
+            throw new RuntimeException(
+                    "Gemini returned empty response"
             );
         }
+
+        response = response.trim();
+
+
+        if (response.startsWith("```json")) {
+
+            response =
+                    response.substring(7);
+        }
+
+
+        if (response.startsWith("```")) {
+
+            response =
+                    response.substring(3);
+        }
+
+
+        if (response.endsWith("```")) {
+
+            response =
+                    response.substring(
+                            0,
+                            response.length() - 3
+                    );
+        }
+
+
+        return response.trim();
     }
-
-
-    // ================================
-    // STEP 4: RETURN JSON
-    // ================================
-
-    try {
-
-        return objectMapper.writeValueAsString(
-                finalResults
-        );
-
-    } catch (JsonProcessingException e) {
-
-        System.out.println(
-                "ERROR CONVERTING MEDICINE RESULTS TO JSON"
-        );
-
-        e.printStackTrace();
-
-        return "{\"message\":\"Unable to create medicine response\"}";
-    }
-}
 }

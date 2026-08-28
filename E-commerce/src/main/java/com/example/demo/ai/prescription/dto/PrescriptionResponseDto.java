@@ -1,107 +1,119 @@
 package com.example.demo.ai.prescription.dto;
 
-import java.util.List;
-
 public class PrescriptionResponseDto {
 
-    private String patientName;
-    private String date;
-    private List<MedicineDto> medicines;
-    private String clinicalDescription;
-    private String warnings;
+    // AI extracted information
+    private String medicineName;
+    private String dosage;
+    private String frequency;
+    private String duration;
+
+    // Database product information
+    private Long productId;
+    private String productName;
+    private Double price;
+    private String manufacturerName;
+    private String type;
+    private String packSizeLabel;
+    private String shortComposition1;
+    private String shortComposition2;
 
     public PrescriptionResponseDto() {
     }
 
-    public String getPatientName() {
-        return patientName;
+    public String getMedicineName() {
+        return medicineName;
     }
 
-    public void setPatientName(String patientName) {
-        this.patientName = patientName;
+    public void setMedicineName(String medicineName) {
+        this.medicineName = medicineName;
     }
 
-    public String getDate() {
-        return date;
+    public String getDosage() {
+        return dosage;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setDosage(String dosage) {
+        this.dosage = dosage;
     }
 
-    public List<MedicineDto> getMedicines() {
-        return medicines;
+    public String getFrequency() {
+        return frequency;
     }
 
-    public void setMedicines(List<MedicineDto> medicines) {
-        this.medicines = medicines;
+    public void setFrequency(String frequency) {
+        this.frequency = frequency;
     }
 
-    public String getClinicalDescription() {
-        return clinicalDescription;
+    public String getDuration() {
+        return duration;
     }
 
-    public void setClinicalDescription(String clinicalDescription) {
-        this.clinicalDescription = clinicalDescription;
+    public void setDuration(String duration) {
+        this.duration = duration;
     }
 
-    public String getWarnings() {
-        return warnings;
+    public Long getProductId() {
+        return productId;
     }
 
-    public void setWarnings(String warnings) {
-        this.warnings = warnings;
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
-    public static class MedicineDto {
+    public String getProductName() {
+        return productName;
+    }
 
-        private String medicineName;
-        private String dosage;
-        private String frequency;
-        private String duration;
-        private String instructions;
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
 
-        public MedicineDto() {
-        }
+    public Double getPrice() {
+        return price;
+    }
 
-        public String getMedicineName() {
-            return medicineName;
-        }
+    public void setPrice(Double price) {
+        this.price = price;
+    }
 
-        public void setMedicineName(String medicineName) {
-            this.medicineName = medicineName;
-        }
+    public String getManufacturerName() {
+        return manufacturerName;
+    }
 
-        public String getDosage() {
-            return dosage;
-        }
+    public void setManufacturerName(String manufacturerName) {
+        this.manufacturerName = manufacturerName;
+    }
 
-        public void setDosage(String dosage) {
-            this.dosage = dosage;
-        }
+    public String getType() {
+        return type;
+    }
 
-        public String getFrequency() {
-            return frequency;
-        }
+    public void setType(String type) {
+        this.type = type;
+    }
 
-        public void setFrequency(String frequency) {
-            this.frequency = frequency;
-        }
+    public String getPackSizeLabel() {
+        return packSizeLabel;
+    }
 
-        public String getDuration() {
-            return duration;
-        }
+    public void setPackSizeLabel(String packSizeLabel) {
+        this.packSizeLabel = packSizeLabel;
+    }
 
-        public void setDuration(String duration) {
-            this.duration = duration;
-        }
+    public String getShortComposition1() {
+        return shortComposition1;
+    }
 
-        public String getInstructions() {
-            return instructions;
-        }
+    public void setShortComposition1(String shortComposition1) {
+        this.shortComposition1 = shortComposition1;
+    }
 
-        public void setInstructions(String instructions) {
-            this.instructions = instructions;
-        }
+    public String getShortComposition2() {
+        return shortComposition2;
+    }
+
+    public void setShortComposition2(String shortComposition2) {
+        this.shortComposition2 = shortComposition2;
     }
 }

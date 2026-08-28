@@ -2,12 +2,14 @@ package com.example.demo.ai.prescription.controller;
 
 import com.example.demo.ai.prescription.service.OCRService;
 import jakarta.servlet.http.HttpServletRequest;
-
+import java.util.List;
+import com.example.demo.ai.prescription.dto.PrescriptionResponseDto;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.ai.prescription.service.PrescriptionService;
+
 import com.example.demo.ai.prescription.service.FDAService;
 @RestController
 @RequestMapping("/api/prescription")
@@ -43,13 +45,12 @@ public ResponseEntity<String> testFDA(
     value = "/analyze",
     consumes = MediaType.MULTIPART_FORM_DATA_VALUE
 )
-public ResponseEntity<String> analyzePrescription(
+public ResponseEntity<List<PrescriptionResponseDto>> analyzePrescription(
         @RequestParam("file") MultipartFile file) {
 
     String extractedText = ocrService.extractText(file);
 
-    String result =
-            prescriptionService.analyzePrescription(extractedText);
+    List<PrescriptionResponseDto> result = prescriptionService.analyzePrescription(extractedText);
 
     return ResponseEntity.ok(result);
 }
