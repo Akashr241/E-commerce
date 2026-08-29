@@ -50,6 +50,10 @@ public class SecurityConfig {
                          // auth and register
                         .requestMatchers(HttpMethod.GET,"/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/auth/register").permitAll()
+
+                        //admin can get the user detail creaditals
+                        .requestMatchers(HttpMethod.GET, "/users").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users/**").hasAuthority("ADMIN")
  
                         // checkout API access user
                         .requestMatchers(HttpMethod.POST,"/checkout/**").permitAll()
