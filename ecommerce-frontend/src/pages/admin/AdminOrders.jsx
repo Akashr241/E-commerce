@@ -5,12 +5,14 @@ import {
     updateOrderStatus
 } from "../../services/adminOrderService";
 
+import "./AdminOrders.css";
+
 
 function AdminOrders() {
 
     const [orders, setOrders] = useState([]);
-
     const [loading, setLoading] = useState(true);
+    const [updatingOrderId, setUpdatingOrderId] = useState(null);
 
 
     // ===============================
@@ -71,7 +73,7 @@ function AdminOrders() {
 
 
     // ===============================
-    // UPDATE STATUS
+    // UPDATE ORDER STATUS
     // ===============================
 
     const handleStatusChange = async (
@@ -87,6 +89,8 @@ function AdminOrders() {
                 status
             );
 
+            setUpdatingOrderId(orderId);
+
             await updateOrderStatus(
                 orderId,
                 status
@@ -96,7 +100,7 @@ function AdminOrders() {
                 "Order status updated successfully"
             );
 
-            loadOrders();
+            await loadOrders();
 
         } catch (error) {
 
@@ -105,6 +109,68 @@ function AdminOrders() {
                 error
             );
 
+            if (error.response) {
+
+                console.error(
+                    "Status:",
+                    error.response.status
+                );
+
+                console.error(
+                    "Backend:",
+                    error.response.data
+                );
+
+            }
+
+        } finally {
+
+            setUpdatingOrderId(null);
+
+        }
+
+    };
+
+
+    // ===============================
+    // STATUS COUNT
+    // ===============================
+
+    const getStatusCount = (status) => {
+
+        return orders.filter(
+            order => order.status === status
+        ).length;
+
+    };
+
+
+    // ===============================
+    // STATUS CLASS
+    // ===============================
+
+    const getStatusClass = (status) => {
+
+        switch (status) {
+
+            case "PENDING":
+                return "status-pending";
+
+            case "CONFIRMED":
+                return "status-confirmed";
+
+            case "SHIPPED":
+                return "status-shipped";
+
+            case "DELIVERED":
+                return "status-delivered";
+
+            case "CANCELLED":
+                return "status-cancelled";
+
+            default:
+                return "status-default";
+
         }
 
     };
@@ -112,147 +178,448 @@ function AdminOrders() {
 
     return (
 
-        <div className="container py-4">
-
-            <h2 className="mb-4">
-                Order Management
-            </h2>
+        <div className="admin-orders-page">
 
 
-            {loading ? (
+            {/* =================================
+                HEADER
+            ================================= */}
 
-                <p>
-                    Loading orders...
-                </p>
+            <div className="admin-orders-header">
 
-            ) : orders.length === 0 ? (
+                <div>
 
-                <div className="alert alert-info">
-                    No orders found.
+                    <p className="admin-page-label">
+                        ADMIN PANEL
+                    </p>
+
+                    <h2>
+                        Order Management
+                    </h2>
+
+                    <p className="admin-page-description">
+                        Manage customer orders and update
+                        their delivery status.
+                    </p>
+
                 </div>
 
-            ) : (
 
-                <div className="table-responsive">
+                <div className="total-orders-box">
 
-                    <table className="table table-hover">
+                    <span>
+                        Total Orders
+                    </span>
 
-                        <thead>
+                    <strong>
+                        {orders.length}
+                    </strong>
 
-                            <tr>
+                </div>
 
-                                <th>Order ID</th>
-
-                                <th>User</th>
-
-                                <th>Total</th>
-
-                                <th>Status</th>
-
-                                <th>Action</th>
-
-                            </tr>
-
-                        </thead>
+            </div>
 
 
-                        <tbody>
 
-                            {orders.map(
-                                (order) => (
+            {/* =================================
+                STATUS SUMMARY
+            ================================= */}
 
-                                <tr key={order.id}>
-
-                                    <td>
-                                        #{order.id}
-                                    </td>
+            <div className="order-summary">
 
 
-                                    <td>
+                <div className="summary-card">
 
-                                        {order.userEmail ||
-                                            order.email ||
-                                            "User"}
+                    <div className="summary-icon pending">
+                        ⏳
+                    </div>
 
-                                    </td>
+                    <div>
 
+                        <span>
+                            Pending
+                        </span>
 
-                                    <td>
+                        <strong>
+                            {getStatusCount("PENDING")}
+                        </strong>
 
-                                        ₹
-                                        {order.totalAmount ||
-                                            order.total ||
-                                            0}
+                    </div>
 
-                                    </td>
-
-
-                                    <td>
-
-                                        <span className="badge bg-secondary">
-
-                                            {order.status}
-
-                                        </span>
-
-                                    </td>
+                </div>
 
 
-                                    <td>
+                <div className="summary-card">
 
-                                        <select
-                                            className="form-select form-select-sm"
-                                            value={
-                                                order.status
-                                            }
-                                            onChange={(e) =>
-                                                handleStatusChange(
-                                                    order.id,
-                                                    e.target.value
-                                                )
-                                            }
-                                        >
+                    <div className="summary-icon confirmed">
+                        ✓
+                    </div>
 
-                                            <option value="PENDING">
-                                                PENDING
-                                            </option>
+                    <div>
 
-                                            <option value="CONFIRMED">
-                                                CONFIRMED
-                                            </option>
+                        <span>
+                            Confirmed
+                        </span>
 
-                                            <option value="SHIPPED">
-                                                SHIPPED
-                                            </option>
+                        <strong>
+                            {getStatusCount("CONFIRMED")}
+                        </strong>
 
-                                            <option value="DELIVERED">
-                                                DELIVERED
-                                            </option>
+                    </div>
 
-                                            <option value="CANCELLED">
-                                                CANCELLED
-                                            </option>
+                </div>
 
-                                        </select>
 
-                                    </td>
+                <div className="summary-card">
+
+                    <div className="summary-icon shipped">
+                        🚚
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Shipped
+                        </span>
+
+                        <strong>
+                            {getStatusCount("SHIPPED")}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div className="summary-card">
+
+                    <div className="summary-icon delivered">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Delivered
+                        </span>
+
+                        <strong>
+                            {getStatusCount("DELIVERED")}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div className="summary-card">
+
+                    <div className="summary-icon cancelled">
+                        ×
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Cancelled
+                        </span>
+
+                        <strong>
+                            {getStatusCount("CANCELLED")}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            {/* =================================
+                ORDERS TABLE
+            ================================= */}
+
+            <div className="orders-container">
+
+
+                <div className="orders-container-header">
+
+                    <div>
+
+                        <h4>
+                            All Orders
+                        </h4>
+
+                        <p>
+                            View and manage customer orders
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        className="refresh-btn"
+                        onClick={loadOrders}
+                        disabled={loading}
+                    >
+
+                        ↻ Refresh
+
+                    </button>
+
+                </div>
+
+
+
+                {loading ? (
+
+                    <div className="orders-loading">
+
+                        <div className="spinner-border">
+                        </div>
+
+                        <p>
+                            Loading orders...
+                        </p>
+
+                    </div>
+
+                ) : orders.length === 0 ? (
+
+                    <div className="orders-empty">
+
+                        <div className="empty-icon">
+                            📦
+                        </div>
+
+                        <h4>
+                            No Orders Found
+                        </h4>
+
+                        <p>
+                            There are currently no customer orders.
+                        </p>
+
+                    </div>
+
+                ) : (
+
+                    <div className="table-responsive">
+
+                        <table className="admin-orders-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        ORDER
+                                    </th>
+
+                                    <th>
+                                        CUSTOMER
+                                    </th>
+
+                                    <th>
+                                        TOTAL
+                                    </th>
+
+                                    <th>
+                                        STATUS
+                                    </th>
+
+                                    <th>
+                                        UPDATE STATUS
+                                    </th>
 
                                 </tr>
 
-                            ))}
+                            </thead>
 
-                        </tbody>
 
-                    </table>
+                            <tbody>
 
-                </div>
+                                {orders.map(
+                                    (order) => (
 
-            )}
+                                        <tr
+                                            key={order.id}
+                                        >
+
+
+                                            {/* ORDER ID */}
+
+                                            <td>
+
+                                                <div className="order-id">
+
+                                                    <span>
+                                                        #
+                                                    </span>
+
+                                                    {order.id}
+
+                                                </div>
+
+                                            </td>
+
+
+
+                                            {/* CUSTOMER */}
+
+                                            <td>
+
+                                                <div className="customer-info">
+
+                                                    <div className="customer-avatar">
+
+                                                        {(order.userEmail ||
+                                                            order.email ||
+                                                            "U")
+                                                            .charAt(0)
+                                                            .toUpperCase()}
+
+                                                    </div>
+
+                                                    <div>
+
+                                                        <strong>
+                                                            {order.userEmail ||
+                                                                order.email ||
+                                                                "User"}
+                                                        </strong>
+
+                                                        <small>
+                                                            Customer
+                                                        </small>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+
+
+                                            {/* TOTAL */}
+
+                                            <td>
+
+                                                <strong className="order-price">
+
+                                                    ₹
+                                                    {order.totalAmount ||
+                                                        order.total ||
+                                                        0}
+
+                                                </strong>
+
+                                            </td>
+
+
+
+                                            {/* STATUS */}
+
+                                            <td>
+
+                                                <span
+                                                    className={`order-status ${getStatusClass(
+                                                        order.status
+                                                    )}`}
+                                                >
+
+                                                    <span className="status-dot">
+                                                    </span>
+
+                                                    {order.status}
+
+                                                </span>
+
+                                            </td>
+
+
+
+                                            {/* UPDATE */}
+
+                                            <td>
+
+                                                <select
+                                                    className="status-select"
+                                                    value={
+                                                        order.status
+                                                    }
+                                                    disabled={
+                                                        updatingOrderId ===
+                                                        order.id
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleStatusChange(
+                                                            order.id,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                >
+
+                                                    <option value="PENDING">
+                                                        PENDING
+                                                    </option>
+
+                                                    <option value="CONFIRMED">
+                                                        CONFIRMED
+                                                    </option>
+
+                                                    <option value="SHIPPED">
+                                                        SHIPPED
+                                                    </option>
+
+                                                    <option value="DELIVERED">
+                                                        DELIVERED
+                                                    </option>
+
+                                                    <option value="CANCELLED">
+                                                        CANCELLED
+                                                    </option>
+
+                                                </select>
+
+
+                                                {updatingOrderId ===
+                                                    order.id && (
+
+                                                    <small className="updating-text">
+
+                                                        Updating...
+
+                                                    </small>
+
+                                                )}
+
+                                            </td>
+
+
+                                        </tr>
+
+                                    )
+                                )}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                )}
+
+            </div>
+
 
         </div>
 
     );
 
 }
+
 
 export default AdminOrders;
