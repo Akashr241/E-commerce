@@ -22,12 +22,15 @@ import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import Prescription from "./components/Prescription";
 import ChatbotPage from "./pages/ChatbotPage";
+import "./App.css";
 
 import Payment from "./pages/Payment";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFailure from "./pages/PaymentFailure";
 
-
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminOrders from "./pages/admin/AdminOrders";
 const ProtectedPage = ({ children }) => {
 
     return (
@@ -151,6 +154,22 @@ function App() {
                         </ProtectedPage>
                     }
                 />
+
+
+                <Route
+    path="/admin/dashboard"
+    element={<AdminDashboard />}
+/>
+
+<Route
+    path="/admin/products"
+    element={<AdminProducts />}
+/>
+
+<Route
+    path="/admin/orders"
+    element={<AdminOrders />}
+/>
 
                 <Route
                     path="/payment"
