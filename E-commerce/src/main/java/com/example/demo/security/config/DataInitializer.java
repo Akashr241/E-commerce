@@ -33,6 +33,14 @@ CommandLineRunner initAdmin(UserRepository userRepository,
 
             System.out.println("Admin created.");
 
+                            System.out.println("=================================");
+                System.out.println("ADMIN CREATED");
+                System.out.println("Email: admin@gmail.com");
+                System.out.println("Password: admin123");
+                System.out.println("Role: ADMIN");
+                System.out.println("=================================");
+
+
         } else {
 
             User admin = optionalAdmin.get();
@@ -43,6 +51,13 @@ CommandLineRunner initAdmin(UserRepository userRepository,
 
                 userRepository.save(admin);
 
+
+                                System.out.println("=================================");
+                System.out.println("ADMIN UPDATED");
+                System.out.println("Email: admin@gmail.com");
+                System.out.println("Password: admin123");
+                System.out.println("Role: " + admin.getRole());
+                System.out.println("=================================");
                 System.out.println("Admin role updated.");
 
             }

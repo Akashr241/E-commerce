@@ -45,6 +45,9 @@ public class SecurityConfig {
                          .requestMatchers(HttpMethod.GET,"/products").permitAll()
                          .requestMatchers(HttpMethod.GET,"/products/{id}").permitAll()
                          .requestMatchers(HttpMethod.GET,"/products/**").permitAll()
+                         .requestMatchers(HttpMethod.DELETE,"/products/**").hasAuthority("USER")
+                         .requestMatchers(HttpMethod.PUT,"/products/**").hasAuthority("USER")
+                         
                          // auth and register
                         .requestMatchers(HttpMethod.GET,"/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/auth/register").permitAll()
