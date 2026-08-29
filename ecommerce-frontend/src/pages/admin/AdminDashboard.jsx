@@ -5,73 +5,107 @@ import { Link } from "react-router-dom";
 function AdminDashboard() {
 
     return (
-        <div>
 
-            <AdminNavbar />
+        <div className="container py-5">
 
-            <div className="admin-dashboard">
+            <h1 className="mb-2">
+                Admin Dashboard
+            </h1>
 
-                <div className="admin-header">
-                    <h1>Admin Dashboard</h1>
+            <p className="text-muted mb-5">
+                Manage your pharmacy store
+            </p>
 
-                    <p>
-                        Manage your MediPharm store from here.
-                    </p>
+
+            <div className="row g-4">
+
+                {/* PRODUCTS */}
+
+                <div className="col-md-4">
+
+                    <div className="card shadow-sm h-100">
+
+                        <div className="card-body">
+
+                            <h4>
+                                Products
+                            </h4>
+
+                            <p className="text-muted">
+                                Add, edit and manage
+                                pharmacy products.
+                            </p>
+
+                            <Link
+                                to="/admin/products"
+                                className="btn btn-success"
+                            >
+                                Manage Products
+                            </Link>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
 
-                <div className="admin-cards">
+                {/* ORDERS */}
 
-                    {/* Products */}
+                <div className="col-md-4">
 
-                    <div className="admin-card">
+                    <div className="card shadow-sm h-100">
 
-                        <h2>Products</h2>
+                        <div className="card-body">
 
-                        <p>
-                            Add, update and manage medicines
-                            available in your store.
-                        </p>
+                            <h4>
+                                Orders
+                            </h4>
 
-                        <Link to="/admin/products">
-                            Manage Products
-                        </Link>
+                            <p className="text-muted">
+                                View orders and update
+                                order status.
+                            </p>
 
-                    </div>
+                            <Link
+                                to="/admin/orders"
+                                className="btn btn-success"
+                            >
+                                Manage Orders
+                            </Link>
 
-
-                    {/* Orders */}
-
-                    <div className="admin-card">
-
-                        <h2>Orders</h2>
-
-                        <p>
-                            View customer orders and update
-                            their order status.
-                        </p>
-
-                        <Link to="/admin/orders">
-                            Manage Orders
-                        </Link>
+                        </div>
 
                     </div>
 
+                </div>
 
-                    {/* Users */}
 
-                    <div className="admin-card">
+                {/* USERS */}
 
-                        <h2>Users</h2>
+                <div className="col-md-4">
 
-                        <p>
-                            View registered users of the
-                            MediPharm application.
-                        </p>
+                    <div className="card shadow-sm h-100">
 
-                        <button disabled>
-                            Manage Users
-                        </button>
+                        <div className="card-body">
+
+                            <h4>
+                                Users
+                            </h4>
+
+                            <p className="text-muted">
+                                View registered users
+                                and their roles.
+                            </p>
+
+                            <Link
+                                to="/admin/users"
+                                className="btn btn-success"
+                            >
+                                Manage Users
+                            </Link>
+
+                        </div>
 
                     </div>
 
@@ -80,7 +114,9 @@ function AdminDashboard() {
             </div>
 
         </div>
+
     );
+
 }
 
 export default AdminDashboard;

@@ -27,9 +27,9 @@ import "./App.css";
 import Payment from "./pages/Payment";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFailure from "./pages/PaymentFailure";
-
+import AdminUsers from "./pages/admin/AdminUsers";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminProducts from "./pages/admin/AdminProducts";
+import AdminProducts from "./pages/admin/AddProduct";
 import AdminOrders from "./pages/admin/AdminOrders";
 const ProtectedPage = ({ children }) => {
 
@@ -170,6 +170,7 @@ function App() {
     path="/admin/orders"
     element={<AdminOrders />}
 />
+<Route path="/admin/users" element={<AdminUsers />} />
 
                 <Route
                     path="/payment"
