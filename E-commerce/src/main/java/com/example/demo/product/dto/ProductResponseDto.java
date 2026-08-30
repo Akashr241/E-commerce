@@ -7,19 +7,22 @@ public class ProductResponseDto {
     private String description;
     private double price;
     private int stock;
+    private String category;
 
     public ProductResponseDto(
             Long id,
             String name,
             String description,
             double price,
-            int stock) {
+            int stock,
+            String category) {
 
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.stock = stock;
+        this.category=category;
     }
 
     // getters setters
@@ -30,6 +33,13 @@ public class ProductResponseDto {
     public String getName() {
         return name;
     }
+    public String getCategory() {
+    return category;
+}
+
+public void setCategory(String category) {
+    this.category = category;
+}
 
     public String getDescription() {
         return description;

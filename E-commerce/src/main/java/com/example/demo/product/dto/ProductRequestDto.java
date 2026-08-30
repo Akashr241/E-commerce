@@ -18,6 +18,9 @@ public class ProductRequestDto {
     @Min(value = 0, message = "Stock cannot be negative")
     private int stock;
 
+    @NotBlank(message = "Category is required")
+    private String category;
+
     // getters setters
     public String getName() {
         return name;
@@ -26,6 +29,13 @@ public class ProductRequestDto {
     public void setName(String name) {
         this.name = name;
     }
+    public String getCategory() {
+    return category;
+}
+
+public void setCategory(String category) {
+    this.category = category;
+}
 
     public String getDescription() {
         return description;

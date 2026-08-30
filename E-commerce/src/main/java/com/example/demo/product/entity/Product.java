@@ -18,6 +18,7 @@ public class Product {
 
     private int stock;
 
+    private String category;
     // getters setters
 
     public Long getId() {
@@ -58,5 +59,12 @@ public class Product {
 
     public void setStock(int stock) {
         this.stock = stock;
+    }
+    public String getCategory(){
+        return category;
+
+    }
+    public void setCategory(String category){
+        this.category=category;
     }
 }
