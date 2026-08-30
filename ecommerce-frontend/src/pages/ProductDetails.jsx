@@ -22,9 +22,9 @@ const ProductDetails = () => {
     const [message, setMessage] = useState("");
 
 
-    /*
-     * Load product from Spring Boot
-     */
+    // ==========================================
+    // LOAD PRODUCT
+    // ==========================================
 
     useEffect(() => {
 
@@ -68,9 +68,9 @@ const ProductDetails = () => {
     }, [id]);
 
 
-    /*
-     * Add product to cart
-     */
+    // ==========================================
+    // ADD TO CART
+    // ==========================================
 
     const handleAddToCart = async () => {
 
@@ -112,13 +112,14 @@ const ProductDetails = () => {
     };
 
 
-    /*
-     * Loading
-     */
+    // ==========================================
+    // LOADING
+    // ==========================================
 
     if (loading) {
 
         return (
+
             <div className="min-vh-100 bg-light d-flex justify-content-center align-items-center">
 
                 <div className="text-center">
@@ -135,18 +136,20 @@ const ProductDetails = () => {
                 </div>
 
             </div>
+
         );
 
     }
 
 
-    /*
-     * Error
-     */
+    // ==========================================
+    // ERROR
+    // ==========================================
 
     if (error || !product) {
 
         return (
+
             <div className="container py-5">
 
                 <div className="alert alert-danger rounded-4">
@@ -155,12 +158,15 @@ const ProductDetails = () => {
 
                 <button
                     className="btn btn-success rounded-pill"
-                    onClick={() => navigate("/products")}
+                    onClick={() =>
+                        navigate("/products")
+                    }
                 >
-                    ← Back to Medicines
+                    Back to Medicines
                 </button>
 
             </div>
+
         );
 
     }
@@ -173,7 +179,9 @@ const ProductDetails = () => {
             <div className="container py-5">
 
 
-                {/* Breadcrumb */}
+                {/* =================================
+                    BREADCRUMB
+                ================================= */}
 
                 <div className="mb-4">
 
@@ -197,185 +205,170 @@ const ProductDetails = () => {
                 </div>
 
 
-                {/* MAIN PRODUCT CARD */}
+                {/* =================================
+                    MAIN CARD
+                ================================= */}
 
-                <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div className="card border-0 shadow-sm rounded-4">
 
                     <div className="row g-0">
 
 
-                        {/* ========================= */}
-                        {/* LEFT SIDE */}
-                        {/* ========================= */}
+                        {/* =================================
+                            LEFT SIDE
+                        ================================= */}
 
-                        <div className="col-lg-6">
+                        <div className="col-lg-7">
 
-                            <div className="p-4 p-lg-5 h-100">
+                            <div className="p-4 p-lg-5">
 
 
-                                {/* Product Image */}
+                                {/* PRODUCT IMAGE */}
 
-                                <div
-                                    className="
-                                        bg-success-subtle
-                                        rounded-4
-                                        d-flex
-                                        align-items-center
-                                        justify-content-center
-                                        mb-5
-                                    "
-                                    style={{
-                                        minHeight: "330px"
-                                    }}
-                                >
+                                {product.imageUrl && (
 
-                                    {product.imageUrl ? (
+                                    <div className="bg-white border rounded-4 p-4 mb-4 text-center">
 
                                         <img
-                                            src={
-                                                product.imageUrl
-                                            }
-                                            alt={
-                                                product.name
-                                            }
+                                            src={product.imageUrl}
+                                            alt={product.name}
                                             className="img-fluid"
                                             style={{
-                                                maxHeight:
-                                                    "280px",
-                                                objectFit:
-                                                    "contain"
+                                                maxHeight: "260px",
+                                                objectFit: "contain"
                                             }}
                                         />
 
-                                    ) : (
+                                    </div>
 
-                                        <div className="text-center">
-
-                                            <div
-                                                style={{
-                                                    fontSize:
-                                                        "100px"
-                                                }}
-                                            >
-                                                💊
-                                            </div>
-
-                                            <span className="badge bg-success rounded-pill px-3 py-2">
-                                                MediPharm
-                                            </span>
-
-                                        </div>
-
-                                    )}
-
-                                </div>
+                                )}
 
 
-                                {/* Product Description */}
+                                {/* MEDICINE INFORMATION */}
 
-                                <div>
+                                <span className="badge bg-success-subtle text-success rounded-pill px-3 py-2">
 
-                                    <span className="badge bg-success-subtle text-success rounded-pill px-3 py-2">
-                                        Medicine Information
-                                    </span>
+                                    Medicine Information
 
-                                    <h3 className="fw-bold mt-3 mb-3">
-                                        About this medicine
-                                    </h3>
-
-                                    <p className="text-secondary fs-6 lh-lg">
-                                        {product.description ||
-                                            "No description available for this medicine."}
-                                    </p>
-
-                                </div>
+                                </span>
 
 
-                                {/* Product Information */}
+                                <h2 className="fw-bold mt-3 mb-3">
 
-                                <div className="mt-4">
+                                    About this medicine
 
-                                    <h5 className="fw-bold mb-3">
-                                        Product Details
-                                    </h5>
+                                </h2>
 
 
-                                    <div className="row g-3">
+                                <p className="text-secondary lh-lg mb-4">
 
-                                        <div className="col-sm-6">
+                                    {product.description ||
+                                        "No description available for this medicine."}
 
-                                            <div className="bg-light rounded-3 p-3">
-
-                                                <small className="text-muted d-block">
-                                                    Category
-                                                </small>
-
-                                                <strong>
-                                                    {product.category ||
-                                                        "Healthcare"}
-                                                </strong>
-
-                                            </div>
-
-                                        </div>
+                                </p>
 
 
-                                        <div className="col-sm-6">
+                                {/* =================================
+                                    PRODUCT DETAILS
+                                ================================= */}
 
-                                            <div className="bg-light rounded-3 p-3">
+                                <h5 className="fw-bold mb-3">
 
-                                                <small className="text-muted d-block">
-                                                    Medicine
-                                                </small>
+                                    Product Details
 
-                                                <strong>
-                                                    {product.name}
-                                                </strong>
+                                </h5>
 
-                                            </div>
+
+                                <div className="row g-3 mb-4">
+
+
+                                    <div className="col-md-6">
+
+                                        <div className="bg-light rounded-3 p-3">
+
+                                            <small className="text-muted d-block mb-1">
+                                                Medicine
+                                            </small>
+
+                                            <strong>
+                                                {product.name}
+                                            </strong>
 
                                         </div>
 
                                     </div>
 
+
+                                    <div className="col-md-6">
+
+                                        <div className="bg-light rounded-3 p-3">
+
+                                            <small className="text-muted d-block mb-1">
+                                                Category
+                                            </small>
+
+                                            <strong>
+                                                {product.category ||
+                                                    "Healthcare"}
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+
                                 </div>
 
 
-                                {/* Dosage / Duration */}
+                                {/* =================================
+                                    USAGE INFORMATION
+                                ================================= */}
 
-                                <div className="mt-4">
+                                <h5 className="fw-bold mb-3">
 
-                                    <h5 className="fw-bold mb-3">
-                                        💊 Usage Information
-                                    </h5>
+                                    Usage Information
 
-                                    <div className="alert alert-success border-0 rounded-4">
+                                </h5>
 
-                                        <p className="mb-2">
-                                            <strong>
-                                                Dosage:
-                                            </strong>{" "}
+
+                                <div className="bg-success-subtle rounded-4 p-4">
+
+                                    <div className="mb-3">
+
+                                        <small className="text-muted d-block">
+                                            Dosage
+                                        </small>
+
+                                        <strong>
                                             Follow the dosage
-                                            prescribed by your
-                                            doctor.
-                                        </p>
+                                            prescribed by your doctor.
+                                        </strong>
 
-                                        <p className="mb-2">
-                                            <strong>
-                                                Duration:
-                                            </strong>{" "}
+                                    </div>
+
+
+                                    <div className="mb-3">
+
+                                        <small className="text-muted d-block">
+                                            Duration
+                                        </small>
+
+                                        <strong>
                                             Follow the prescribed
                                             treatment duration.
-                                        </p>
-
-                                        <p className="mb-0 small text-muted">
-                                            Do not change the dosage
-                                            or duration without
-                                            consulting a healthcare
-                                            professional.
-                                        </p>
+                                        </strong>
 
                                     </div>
+
+
+                                    <p className="small text-muted mb-0">
+
+                                        Do not change the dosage or
+                                        treatment duration without
+                                        consulting a healthcare
+                                        professional.
+
+                                    </p>
 
                                 </div>
 
@@ -384,90 +377,94 @@ const ProductDetails = () => {
                         </div>
 
 
-                        {/* ========================= */}
-                        {/* RIGHT SIDE */}
-                        {/* ========================= */}
+                        {/* =================================
+                            RIGHT SIDE
+                        ================================= */}
 
-                        <div className="col-lg-6">
+                        <div className="col-lg-5 border-start">
 
-                            <div className="p-4 p-lg-5 h-100 border-start-lg">
+                            <div className="p-4 p-lg-5">
 
+
+                                {/* CATEGORY */}
 
                                 <span className="badge bg-success-subtle text-success rounded-pill px-3 py-2">
+
                                     Healthcare Product
+
                                 </span>
 
 
-                                <h1 className="fw-bold display-6 mt-4">
+                                {/* PRODUCT NAME */}
+
+                                <h1 className="fw-bold mt-4 mb-2">
+
                                     {product.name}
+
                                 </h1>
 
 
-                                <p className="text-muted fs-5">
+                                <p className="text-muted mb-4">
+
                                     {product.category ||
                                         "Quality healthcare medicine"}
+
                                 </p>
 
 
-                                <hr className="my-4" />
+                                <hr />
 
 
-                                {/* Price */}
+                                {/* PRICE */}
 
-                                <div>
+                                <div className="mt-4">
 
-                                    <span className="text-muted">
+                                    <small className="text-muted">
                                         Price
-                                    </span>
+                                    </small>
 
-                                    <div className="display-5 fw-bold text-success mt-1">
+                                    <div className="display-5 fw-bold text-success">
 
-                                        ₹
-                                        {product.price}
-
-                                    </div>
-
-                                </div>
-
-
-                                {/* Quality */}
-
-                                <div className="bg-success-subtle rounded-4 p-4 mt-4">
-
-                                    <div className="d-flex gap-3">
-
-                                        <div className="fs-4">
-                                            ✓
-                                        </div>
-
-                                        <div>
-
-                                            <strong>
-                                                Quality healthcare
-                                            </strong>
-
-                                            <p className="mb-0 text-muted mt-1">
-                                                Shop medicines
-                                                conveniently through
-                                                MediPharm.
-                                            </p>
-
-                                        </div>
+                                        ₹{product.price}
 
                                     </div>
 
                                 </div>
 
 
-                                {/* Quantity */}
+                                {/* QUALITY INFORMATION */}
+
+                                <div className="bg-light border rounded-4 p-4 mt-4">
+
+                                    <strong>
+                                        Quality healthcare
+                                    </strong>
+
+                                    <p className="text-muted small mb-0 mt-2">
+
+                                        Shop medicines conveniently
+                                        through MediPharm.
+
+                                    </p>
+
+                                </div>
+
+
+                                {/* =================================
+                                    QUANTITY
+                                ================================= */}
 
                                 <div className="mt-4">
 
                                     <label className="form-label fw-semibold">
+
                                         Quantity
+
                                     </label>
 
+
                                     <div className="input-group">
+
 
                                         <button
                                             className="btn btn-outline-secondary"
@@ -483,6 +480,7 @@ const ProductDetails = () => {
                                             −
                                         </button>
 
+
                                         <input
                                             type="number"
                                             className="form-control text-center"
@@ -493,13 +491,13 @@ const ProductDetails = () => {
                                                     Math.max(
                                                         1,
                                                         Number(
-                                                            e.target
-                                                                .value
+                                                            e.target.value
                                                         )
                                                     )
                                                 )
                                             }
                                         />
+
 
                                         <button
                                             className="btn btn-outline-secondary"
@@ -512,35 +510,31 @@ const ProductDetails = () => {
                                             +
                                         </button>
 
+
                                     </div>
 
                                 </div>
 
 
-                                {/* Cart message */}
+                                {/* MESSAGE */}
 
                                 {message && (
 
                                     <div className="alert alert-success border-0 rounded-4 mt-4">
 
-                                        ✓ {message}
+                                        {message}
 
                                     </div>
 
                                 )}
 
 
-                                {/* ADD TO CART */}
+                                {/* =================================
+                                    ADD TO CART
+                                ================================= */}
 
                                 <button
-                                    className="
-                                        btn
-                                        btn-success
-                                        btn-lg
-                                        rounded-pill
-                                        w-100
-                                        mt-4
-                                    "
+                                    className="btn btn-success btn-lg rounded-pill w-100 mt-4 fw-semibold"
                                     onClick={
                                         handleAddToCart
                                     }
@@ -550,6 +544,7 @@ const ProductDetails = () => {
                                     {cartLoading ? (
 
                                         <>
+
                                             <span
                                                 className="spinner-border spinner-border-sm me-2"
                                             />
@@ -560,26 +555,19 @@ const ProductDetails = () => {
 
                                     ) : (
 
-                                        <>
-                                            🛒 Add to Cart
-                                        </>
+                                        "Add to Cart"
 
                                     )}
 
                                 </button>
 
 
-                                {/* REMINDER */}
+                                {/* =================================
+                                    REMINDER
+                                ================================= */}
 
                                 <button
-                                    className="
-                                        btn
-                                        btn-outline-success
-                                        btn-lg
-                                        rounded-pill
-                                        w-100
-                                        mt-3
-                                    "
+                                    className="btn btn-outline-success btn-lg rounded-pill w-100 mt-3 fw-semibold"
                                     onClick={() =>
                                         navigate(
                                             `/reminder/${product.id}`
@@ -587,67 +575,65 @@ const ProductDetails = () => {
                                     }
                                 >
 
-                                    ⏰ Set Medicine Reminder
+                                    Set Medicine Reminder
 
                                 </button>
 
 
-                                {/* BACK */}
+                                {/* =================================
+                                    BACK
+                                ================================= */}
 
                                 <button
-                                    className="
-                                        btn
-                                        btn-link
-                                        text-secondary
-                                        w-100
-                                        mt-3
-                                    "
+                                    className="btn btn-link text-secondary w-100 mt-3"
                                     onClick={() =>
                                         navigate("/products")
                                     }
                                 >
-                                    ← Back to Medicines
+
+                                    Back to Medicines
+
                                 </button>
 
 
-                                {/* SAFETY */}
+                                {/* =================================
+                                    SAFETY
+                                ================================= */}
 
-                                <div className="mt-5 pt-4 border-top">
+                                <div className="border-top mt-5 pt-4">
 
-                                    <div className="d-flex gap-3 mb-3">
 
-                                        <span>🔒</span>
+                                    <div className="mb-4">
 
-                                        <div>
-                                            <strong>
-                                                Secure ordering
-                                            </strong>
+                                        <strong>
+                                            Secure ordering
+                                        </strong>
 
-                                            <small className="d-block text-muted">
-                                                Your order information
-                                                is securely handled.
-                                            </small>
-                                        </div>
+                                        <small className="d-block text-muted mt-1">
+
+                                            Your order information
+                                            is securely handled.
+
+                                        </small>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <strong>
+                                            Prescription guidance
+                                        </strong>
+
+                                        <small className="d-block text-muted mt-1">
+
+                                            Always follow your
+                                            doctor's prescription.
+
+                                        </small>
 
                                     </div>
 
-
-                                    <div className="d-flex gap-3">
-
-                                        <span>👨‍⚕️</span>
-
-                                        <div>
-                                            <strong>
-                                                Prescription guidance
-                                            </strong>
-
-                                            <small className="d-block text-muted">
-                                                Always follow your
-                                                doctor's prescription.
-                                            </small>
-                                        </div>
-
-                                    </div>
 
                                 </div>
 
@@ -664,6 +650,7 @@ const ProductDetails = () => {
         </div>
 
     );
+
 };
 
 export default ProductDetails;
