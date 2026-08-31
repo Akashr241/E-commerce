@@ -16,6 +16,20 @@ const Login = () => {
     e.preventDefault();
     setError("");
     setLoading(true);
+    
+    console.log("=================================");
+    console.log("LOGOUT");
+    console.log("Old token:", localStorage.getItem("token"));
+    console.log("=================================");
+
+    localStorage.removeItem("token");
+
+    console.log(
+        "Token after logout:",
+        localStorage.getItem("token")
+    );
+
+
 
     try {
       const response = await api.post("/auth/login", {

@@ -255,7 +255,7 @@ function Cart() {
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M7 11V7a5 5 0 0110 0v4" />
                   </svg>
-                  <span>Safe & Secure 256-bit Checkout</span>
+                  <span>Safe & Secure  </span>
                 </div>
               </div>
 
