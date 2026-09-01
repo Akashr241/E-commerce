@@ -41,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
         user.setRole(Role.USER);
 
         userRepository.save(user);
-        String token= jwtService.generateToken(user.getEmail());
+        String token= jwtService.generateToken(user.getEmail(),user.getRole().name());
 
         return new AuthResponseDto(token);
     }
@@ -61,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
                 if(!isPasswordMatch) {
                     throw new RuntimeException("Invalid credentials");
                 }
-        String token = jwtService.generateToken(user.getEmail());
+        String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
 
         return new AuthResponseDto(token);
     }

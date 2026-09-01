@@ -1,7 +1,11 @@
 import React, { useState } from "react";
+
 import { Link, useNavigate } from "react-router-dom";
+
 import { loginUser } from "../services/authService";
+
 import { useAuth } from "../context/AuthContext";
+
 
 const Login = () => {
 
@@ -9,16 +13,28 @@ const Login = () => {
 
     const { login } = useAuth();
 
+
     const [formData, setFormData] = useState({
         email: "",
         password: ""
     });
 
-    const [showPassword, setShowPassword] = useState(false);
 
-    const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] =
+        useState(false);
 
-    const [error, setError] = useState("");
+
+    const [loading, setLoading] =
+        useState(false);
+
+
+    const [error, setError] =
+        useState("");
+
+
+    // ==========================================
+    // HANDLE INPUT CHANGE
+    // ==========================================
 
     const handleChange = (event) => {
 
@@ -33,34 +49,106 @@ const Login = () => {
     };
 
 
+    // ==========================================
+    // LOGIN
+    // ==========================================
+
     const handleSubmit = async (event) => {
 
         event.preventDefault();
 
         setError("");
 
+
+        // ==========================================
+        // VALIDATION
+        // ==========================================
+
         if (!formData.email || !formData.password) {
 
-            setError("Please enter your email and password.");
+            console.log(
+                "LOGIN FAILED → Email or password is empty"
+            );
+
+            setError(
+                "Please enter your email and password."
+            );
 
             return;
         }
+
 
         try {
 
             setLoading(true);
 
-            const response = await loginUser(formData);
 
-            /*
-             * Adjust this if your backend returns
-             * the JWT using another property name.
-             */
+            // ==========================================
+            // DEBUG: LOGIN START
+            // ==========================================
+
+            console.log("=================================");
+            console.log("LOGIN STARTED");
+            console.log("Email:", formData.email);
+
+            console.log(
+                "Old token:",
+                localStorage.getItem("token")
+            );
+
+            console.log("=================================");
+
+
+            // ==========================================
+            // LOGIN API REQUEST
+            // ==========================================
+
+            console.log(
+                "Sending login request..."
+            );
+
+            const response =
+                await loginUser(formData);
+
+
+            // ==========================================
+            // DEBUG: LOGIN RESPONSE
+            // ==========================================
+
+            console.log(
+                "========== LOGIN RESPONSE =========="
+            );
+
+            console.log(
+                "Response:",
+                response
+            );
+
+
+            // ==========================================
+            // GET JWT TOKEN
+            // ==========================================
+
             const token =
                 response.token ||
                 response.jwtToken;
 
+
+            console.log(
+                "JWT Token:",
+                token
+            );
+
+
+            // ==========================================
+            // TOKEN VALIDATION
+            // ==========================================
+
             if (!token) {
+
+                console.error(
+                    "LOGIN ERROR → JWT token not found"
+                );
 
                 setError(
                     "Login successful, but authentication token was not received."
@@ -69,28 +157,216 @@ const Login = () => {
                 return;
             }
 
+
+            // ==========================================
+            // DECODE JWT
+            // ==========================================
+
+            const payload =
+                token.split(".")[1];
+
+
+            console.log(
+                "Encoded JWT payload:",
+                payload
+            );
+
+
+            const decodedPayload =
+                JSON.parse(
+                    atob(
+                        payload
+                            .replace(/-/g, "+")
+                            .replace(/_/g, "/")
+                    )
+                );
+
+
+            // ==========================================
+            // DEBUG: JWT DATA
+            // ==========================================
+
+            console.log(
+                "========== JWT PAYLOAD =========="
+            );
+
+            console.log(
+                decodedPayload
+            );
+
+            console.log(
+                "JWT Email:",
+                decodedPayload.sub
+            );
+
+            console.log(
+                "JWT Role:",
+                decodedPayload.role
+            );
+
+
+            // ==========================================
+            // CHECK ROLE
+            // ==========================================
+
+            const role =
+                decodedPayload.role;
+
+
+            if (!role) {
+
+                console.error(
+                    "JWT ERROR → Role is missing from token!"
+                );
+
+                console.error(
+                    "Decoded payload:",
+                    decodedPayload
+                );
+            }
+
+
+            // ==========================================
+            // SAVE LOGIN
+            // ==========================================
+
+            console.log(
+                "Saving token to AuthContext..."
+            );
+
             login(token);
 
-            navigate("/");
+
+            console.log(
+                "Token after login:",
+                localStorage.getItem("token")
+            );
+
+
+            // ==========================================
+            // ROLE BASED REDIRECT
+            // ==========================================
+
+            console.log(
+                "========== USER ROLE =========="
+            );
+
+            console.log(
+                "Logged in email:",
+                decodedPayload.sub
+            );
+
+            console.log(
+                "Logged in role:",
+                role
+            );
+
+
+            if (role === "ADMIN") {
+
+                console.log(
+                    "================================="
+                );
+
+                console.log(
+                    "ADMIN DETECTED"
+                );
+
+                console.log(
+                    "ADMIN LOGIN → /admin"
+                );
+
+                console.log(
+                    "================================="
+                );
+
+                navigate("/admin/dashboard");
+
+            } else {
+
+                console.log(
+                    "================================="
+                );
+
+                console.log(
+                    "NORMAL USER DETECTED"
+                );
+
+                console.log(
+                    "USER LOGIN → /"
+                );
+
+                console.log(
+                    "================================="
+                );
+
+                navigate("/");
+            }
+
 
         } catch (error) {
 
-            console.error("Login failed:", error);
+            // ==========================================
+            // DEBUG: LOGIN ERROR
+            // ==========================================
+
+            console.error(
+                "================================="
+            );
+
+            console.error(
+                "LOGIN FAILED"
+            );
+
+            console.error(
+                "Full error:",
+                error
+            );
+
+            console.error(
+                "Error response:",
+                error.response
+            );
+
+            console.error(
+                "Error data:",
+                error.response?.data
+            );
+
+            console.error(
+                "================================="
+            );
+
 
             const message =
                 error.response?.data?.message ||
                 "Invalid email or password. Please try again.";
 
+
             setError(message);
 
+
         } finally {
+
+            // ==========================================
+            // DEBUG: LOGIN FINISHED
+            // ==========================================
+
+            console.log(
+                "LOGIN PROCESS FINISHED"
+            );
 
             setLoading(false);
         }
     };
 
 
+    // ==========================================
+    // UI
+    // ==========================================
+
     return (
+
         <div
             className="min-vh-100 d-flex align-items-center py-5"
             style={{
@@ -104,6 +380,7 @@ const Login = () => {
                 <div className="row justify-content-center">
 
                     <div className="col-12 col-md-9 col-lg-7 col-xl-6">
+
 
                         <div className="text-center mb-4">
 
@@ -126,9 +403,16 @@ const Login = () => {
                                 ⚕
                             </div>
 
+
                             <h2 className="fw-bold mt-3 mb-1">
-                                Medi<span className="text-success">Pharm</span>
+
+                                Medi
+                                <span className="text-success">
+                                    Pharm
+                                </span>
+
                             </h2>
+
 
                             <p className="text-muted mb-0">
                                 Your intelligent pharmacy assistant
@@ -140,6 +424,7 @@ const Login = () => {
                         <div className="card border-0 shadow-lg rounded-4">
 
                             <div className="card-body p-4 p-md-5">
+
 
                                 <div className="mb-4">
 
@@ -153,6 +438,8 @@ const Login = () => {
 
                                 </div>
 
+
+                                {/* ERROR */}
 
                                 {error && (
 
@@ -170,7 +457,10 @@ const Login = () => {
                                 )}
 
 
+                                {/* LOGIN FORM */}
+
                                 <form onSubmit={handleSubmit}>
+
 
                                     {/* EMAIL */}
 
@@ -182,6 +472,7 @@ const Login = () => {
                                         >
                                             Email address
                                         </label>
+
 
                                         <input
                                             id="email"
@@ -208,6 +499,7 @@ const Login = () => {
                                             Password
                                         </label>
 
+
                                         <div className="input-group">
 
                                             <input
@@ -224,6 +516,7 @@ const Login = () => {
                                                 onChange={handleChange}
                                                 autoComplete="current-password"
                                             />
+
 
                                             <button
                                                 type="button"
@@ -288,7 +581,9 @@ const Login = () => {
 
                                     <span className="text-muted">
                                         Don't have an account?
-                                    </span>{" "}
+                                    </span>
+
+                                    {" "}
 
                                     <Link
                                         to="/register"
@@ -303,6 +598,7 @@ const Login = () => {
 
                                 </div>
 
+
                             </div>
 
                         </div>
@@ -316,6 +612,7 @@ const Login = () => {
 
                         </div>
 
+
                     </div>
 
                 </div>
@@ -325,5 +622,6 @@ const Login = () => {
         </div>
     );
 };
+
 
 export default Login;
