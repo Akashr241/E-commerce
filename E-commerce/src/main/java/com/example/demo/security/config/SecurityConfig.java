@@ -57,7 +57,8 @@ public class SecurityConfig {
  
                         // checkout API access user
                         .requestMatchers(HttpMethod.POST,"/checkout/**").permitAll()
-
+                        .requestMatchers(HttpMethod.DELETE,"/cart/remove/{cartItemId}").hasAuthority("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/cart/remove/**").hasAuthority("USER")
                         // payment api 
                         .requestMatchers("/api/payments/**").permitAll()
 

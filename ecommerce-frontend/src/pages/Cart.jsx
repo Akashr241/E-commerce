@@ -6,12 +6,6 @@ import {
     removeFromCart
 } from "../services/cartService";
 
-import {
-    getMyOrders,
-    placeOrder,
-    deleteOrderItem
-} from "../services/orderService";
-
 
 const Cart = () => {
 
@@ -26,8 +20,8 @@ const Cart = () => {
 
     const [loading, setLoading] = useState(true);
 
-    const [checkoutLoading, setCheckoutLoading] =
-        useState(false);
+    const [removingItemId, setRemovingItemId] =
+        useState(null);
 
 
     // ==========================================
@@ -42,7 +36,7 @@ const Cart = () => {
                 "========== FETCHING CART =========="
             );
 
-            const response = await getMyOrders();
+            const response = await myCart();
 
             console.log(
                 "Cart response:",
@@ -88,8 +82,8 @@ const Cart = () => {
     // REMOVE CART ITEM
     // ==========================================
 
-    const handleRemoveFromOrder =
-        async (orderItemId) => {
+    const handleRemoveFromCart =
+        async (cartItemId) => {
 
             try {
 
@@ -99,13 +93,18 @@ const Cart = () => {
 
                 console.log(
                     "Cart Item ID:",
-                    orderItemId
+                    cartItemId
                 );
 
 
-                // DELETE FROM BACKEND
+                setRemovingItemId(cartItemId);
 
-                await removeFromCart(deleteOrderItem);
+
+                // ==================================
+                // DELETE CART ITEM FROM DATABASE
+                // ==================================
+
+                await removeFromCart(cartItemId);
 
 
                 console.log(
@@ -113,9 +112,9 @@ const Cart = () => {
                 );
 
 
-                // ======================================
+                // ==================================
                 // UPDATE UI IMMEDIATELY
-                // ======================================
+                // ==================================
 
                 setCart((previousCart) => {
 
@@ -123,28 +122,54 @@ const Cart = () => {
                         return previousCart;
                     }
 
+                    const updatedItems =
+                        previousCart.cartItems.filter(
+                            (item) =>
+                                item.id !== cartItemId
+                        );
+
+
+                    const updatedTotal =
+                        updatedItems.reduce(
+                            (sum, item) => {
+
+                                return sum +
+                                    Number(
+                                        item.subTotal ||
+                                        item.subtotal ||
+                                        0
+                                    );
+
+                            },
+                            0
+                        );
+
 
                     return {
 
                         ...previousCart,
 
-                        orderItemId:
+                        cartItems:
+                            updatedItems,
 
-                            previousCart.orderItemId.filter(
-                                (item) =>
-                                    item.id !== orderItemId
-                            )
+                        total:
+                            updatedTotal
 
                     };
 
                 });
 
 
-                // ======================================
-                // FETCH UPDATED CART FROM BACKEND
-                // ======================================
+                console.log(
+                    "UI updated successfully"
+                );
 
-                await fetchCart();
+
+                // ==================================
+                // OPTIONAL: FETCH BACKEND AGAIN
+                // ==================================
+
+                // await fetchCart();
 
 
             } catch (error) {
@@ -158,97 +183,46 @@ const Cart = () => {
                     "Failed to remove product from cart."
                 );
 
+            } finally {
+
+                setRemovingItemId(null);
+
             }
 
         };
 
 
     // ==========================================
-    // CHECKOUT
+    // PROCEED TO CHECKOUT
     // ==========================================
 
-    const handleCheckout = async () => {
+    const handleCheckout = () => {
 
-        try {
-
-            if (
-
-                !cart ||
-
-                !cart.cartItems ||
-
-                cart.cartItems.length === 0
-
-            ) {
-
-                alert(
-                    "Your cart is empty."
-                );
-
-                return;
-
-            }
+        console.log(
+            "========== NAVIGATING TO CHECKOUT =========="
+        );
 
 
-            setCheckoutLoading(true);
-
-
-            console.log(
-                "========== CHECKOUT STARTED =========="
-            );
-
-
-            // ======================================
-            // PLACE ORDER
-            // ======================================
-
-            const response =
-                await placeOrder();
-
-
-            console.log(
-                "Order placed:",
-                response
-            );
-
+        if (
+            !cart ||
+            !cart.cartItems ||
+            cart.cartItems.length === 0
+        ) {
 
             alert(
-                "Order placed successfully!"
+                "Your cart is empty."
             );
 
-
-            // ======================================
-            // REFRESH CART
-            // ======================================
-
-            await fetchCart();
-
-
-            // ======================================
-            // OPTIONAL
-            // NAVIGATE TO ORDERS PAGE
-            // ======================================
-
-            // navigate("/orders");
-
-
-        } catch (error) {
-
-            console.error(
-                "Checkout failed:",
-                error
-            );
-
-
-            alert(
-                "Failed to place order."
-            );
-
-        } finally {
-
-            setCheckoutLoading(false);
+            return;
 
         }
+
+
+        // ==================================
+        // GO TO CHECKOUT PAGE
+        // ==================================
+
+        navigate("/checkout");
 
     };
 
@@ -259,18 +233,11 @@ const Cart = () => {
 
     const handleContinueShopping = () => {
 
+        console.log(
+            "CONTINUE SHOPPING → /products"
+        );
+
         navigate("/products");
-
-    };
-
-
-    // ==========================================
-    // GO TO ORDERS PAGE
-    // ==========================================
-
-    const handleGoToOrders = () => {
-
-        navigate("/orders");
 
     };
 
@@ -286,10 +253,7 @@ const Cart = () => {
             <div className="container py-5 text-center">
 
                 <div
-                    className="
-                        spinner-border
-                        text-success
-                    "
+                    className="spinner-border text-success"
                     role="status"
                 />
 
@@ -307,37 +271,41 @@ const Cart = () => {
 
 
     // ==========================================
-    // CALCULATE CART TOTAL
+    // CART ITEMS
+    // ==========================================
+
+    const cartItems =
+        cart?.cartItems || [];
+
+
+    // ==========================================
+    // CALCULATE TOTAL
     // ==========================================
 
     const total =
 
-        cart?.total ||
+        cartItems.reduce(
 
-        cart?.totalPrice ||
+            (sum, item) => {
 
-        cart?.cartItems?.reduce(
+                return sum +
 
-            (sum, item) =>
+                    Number(
+                        item.subTotal ||
+                        item.subtotal ||
+                        0
+                    );
 
-                sum +
-
-                (
-
-                    item.subTotal ||
-
-                    item.subtotal ||
-
-                    0
-
-                ),
+            },
 
             0
 
-        ) ||
+        );
 
-        0;
 
+    // ==========================================
+    // UI
+    // ==========================================
 
     return (
 
@@ -368,27 +336,11 @@ const Cart = () => {
 
                     <p className="text-muted mb-0">
 
-                        Review your medicines before checkout
+                        Review your products before checkout
 
                     </p>
 
                 </div>
-
-
-                <button
-
-                    className="
-                        btn
-                        btn-outline-success
-                    "
-
-                    onClick={handleGoToOrders}
-
-                >
-
-                    My Orders
-
-                </button>
 
             </div>
 
@@ -397,7 +349,7 @@ const Cart = () => {
 
 
                 {/* ==================================
-                    CART ITEMS
+                    CART PRODUCTS
                 ================================== */}
 
                 <div className="col-lg-8">
@@ -420,186 +372,173 @@ const Cart = () => {
                             </h5>
 
 
-                            {
+                            {cartItems.length > 0 ? (
 
-                                cart?.cartItems?.length > 0
+                                cartItems.map(
 
-                                    ? (
+                                    (item) => (
 
-                                        cart.cartItems.map(
+                                        <div
 
-                                            (item) => (
+                                            key={item.id}
 
-                                                <div
+                                            className="
+                                                d-flex
+                                                justify-content-between
+                                                align-items-center
+                                                border-bottom
+                                                py-3
+                                            "
 
-                                                    key={item.id}
+                                        >
+
+
+                                            {/* ======================
+                                                PRODUCT DETAILS
+                                            ====================== */}
+
+                                            <div>
+
+                                                <h6
+                                                    className="
+                                                        fw-bold
+                                                        mb-1
+                                                    "
+                                                >
+
+                                                    {
+                                                        item.product?.name ||
+                                                        item.productName ||
+                                                        "Product"
+                                                    }
+
+                                                </h6>
+
+
+                                                <p
+                                                    className="
+                                                        text-muted
+                                                        small
+                                                        mb-0
+                                                    "
+                                                >
+
+                                                    Quantity:{" "}
+
+                                                    {item.quantity}
+
+                                                </p>
+
+                                            </div>
+
+
+                                            {/* ======================
+                                                PRICE + REMOVE
+                                            ====================== */}
+
+                                            <div className="text-end">
+
+
+                                                <h6
+                                                    className="
+                                                        fw-bold
+                                                        text-success
+                                                        mb-2
+                                                    "
+                                                >
+
+                                                    ₹
+                                                    {
+                                                        item.subTotal ||
+                                                        item.subtotal ||
+                                                        0
+                                                    }
+
+                                                </h6>
+
+
+                                                <button
 
                                                     className="
-                                                        d-flex
-                                                        justify-content-between
-                                                        align-items-center
-                                                        border-bottom
-                                                        py-3
+                                                        btn
+                                                        btn-outline-danger
+                                                        btn-sm
                                                     "
+
+                                                    disabled={
+                                                        removingItemId ===
+                                                        item.id
+                                                    }
+
+                                                    onClick={() =>
+                                                        handleRemoveFromCart(
+                                                            item.id
+                                                        )
+                                                    }
 
                                                 >
 
+                                                    {
 
-                                                    {/* PRODUCT DETAILS */}
+                                                        removingItemId ===
+                                                        item.id
 
-                                                    <div>
+                                                            ? "Removing..."
 
-                                                        <h6
-                                                            className="
-                                                                fw-bold
-                                                                mb-1
-                                                            "
-                                                        >
+                                                            : "Remove"
 
-                                                            {
+                                                    }
 
-                                                                item.product?.name ||
-
-                                                                item.productName ||
-
-                                                                "Product"
-
-                                                            }
-
-                                                        </h6>
+                                                </button>
 
 
-                                                        <p
-                                                            className="
-                                                                text-muted
-                                                                small
-                                                                mb-0
-                                                            "
-                                                        >
-
-                                                            Quantity:{" "}
-
-                                                            {item.quantity}
-
-                                                        </p>
-
-                                                    </div>
-
-
-                                                    {/* PRICE + REMOVE */}
-
-                                                    <div
-                                                        className="
-                                                            text-end
-                                                        "
-                                                    >
-
-                                                        <h6
-                                                            className="
-                                                                fw-bold
-                                                                text-success
-                                                            "
-                                                        >
-
-                                                            ₹
-
-                                                            {
-
-                                                                item.subTotal ||
-
-                                                                item.subtotal ||
-
-                                                                0
-
-                                                            }
-
-                                                        </h6>
-
-
-                                                        {/* ======================
-                                                            REMOVE FROM CART
-                                                        ====================== */}
-
-                                                        <button
-
-                                                            className="
-                                                                btn
-                                                                btn-outline-danger
-                                                                btn-sm
-                                                            "
-
-                                                            onClick={() =>
-
-                                                                handleRemoveFromOrder(
-
-                                                                    item.id
-
-                                                                )
-
-                                                            }
-
-                                                        >
-
-                                                            Remove
-
-                                                        </button>
-
-                                                    </div>
-
-                                                </div>
-
-                                            )
-
-                                        )
-
-                                    )
-
-                                    : (
-
-
-                                        /* ==============================
-                                            EMPTY CART
-                                        ============================== */
-
-                                        <div className="text-center py-5">
-
-
-                                            <h5>
-
-                                                Your cart is empty
-
-                                            </h5>
-
-
-                                            <p className="text-muted">
-
-                                                Add products to continue.
-
-                                            </p>
-
-
-                                            <button
-
-                                                className="
-                                                    btn
-                                                    btn-success
-                                                "
-
-                                                onClick={
-                                                    handleContinueShopping
-                                                }
-
-                                            >
-
-                                                Browse Products
-
-                                            </button>
+                                            </div>
 
                                         </div>
 
                                     )
 
-                            }
+                                )
+
+                            ) : (
+
+                                <div className="text-center py-5">
+
+
+                                    <h5>
+
+                                        Your cart is empty
+
+                                    </h5>
+
+
+                                    <p className="text-muted">
+
+                                        Add products to continue shopping.
+
+                                    </p>
+
+
+                                    <button
+
+                                        className="
+                                            btn
+                                            btn-success
+                                        "
+
+                                        onClick={
+                                            handleContinueShopping
+                                        }
+
+                                    >
+
+                                        Browse Products
+
+                                    </button>
+
+                                </div>
+
+                            )}
 
                         </div>
 
@@ -641,7 +580,9 @@ const Cart = () => {
                             </h5>
 
 
-                            {/* TOTAL */}
+                            {/* ======================
+                                TOTAL
+                            ====================== */}
 
                             <div
 
@@ -669,9 +610,12 @@ const Cart = () => {
                             </div>
 
 
-                            {/* ==========================
-                                CHECKOUT
-                            ========================== */}
+                            <hr />
+
+
+                            {/* ======================
+                                CHECKOUT BUTTON
+                            ====================== */}
 
                             <button
 
@@ -683,33 +627,23 @@ const Cart = () => {
                                 "
 
                                 disabled={
-
-                                    checkoutLoading ||
-
-                                    !cart?.cartItems?.length
-
+                                    cartItems.length === 0
                                 }
 
-                                onClick={handleCheckout}
+                                onClick={
+                                    handleCheckout
+                                }
 
                             >
 
-                                {
-
-                                    checkoutLoading
-
-                                        ? "Processing..."
-
-                                        : "Proceed to Checkout"
-
-                                }
+                                Proceed to Checkout
 
                             </button>
 
 
-                            {/* ==========================
+                            {/* ======================
                                 CONTINUE SHOPPING
-                            ========================== */}
+                            ====================== */}
 
                             <button
 
@@ -729,11 +663,13 @@ const Cart = () => {
 
                             </button>
 
+
                         </div>
 
                     </div>
 
                 </div>
+
 
             </div>
 
