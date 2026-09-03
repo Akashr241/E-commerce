@@ -10,6 +10,10 @@ API.interceptors.request.use(
     (config) => {
 
         const token = localStorage.getItem("token");
+        console.log("========== API REQUEST ==========");
+        console.log("URL:", config.url);
+        console.log("JWT Token:", token);
+
 
         if (token) {
 

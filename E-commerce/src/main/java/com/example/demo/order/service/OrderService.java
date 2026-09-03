@@ -15,4 +15,5 @@ List<OrderResponseDto> getOrdersByStatus(String status);
 OrderResponseDto getOrderById(Long orderId);
 List<OrderResponseDto> getAllOrders();
 void cancelOrder(Long orderId);
+void deleteOrderItem(Long orderItemId);
 }

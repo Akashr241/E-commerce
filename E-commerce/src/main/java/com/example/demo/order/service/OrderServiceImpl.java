@@ -24,7 +24,7 @@ import com.example.demo.security.user.repository.UserRepository;
 
 
 
-
+import com.example.demo.order.repository.OrderItemRepository;
 import com.example.demo.security.user.entity.User;
 import org.springframework.security.core.Authentication;
 import com.example.demo.order.entity.OrderStatus;
@@ -38,16 +38,20 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final OrderItemRepository orderItemRepository;
     public OrderServiceImpl(OrderRepository orderRepository,
                             CartRepository cartRepository,
                             ProductRepository productRepository,
-                            UserRepository userRepository, CartItemService cartItemService
+                            UserRepository userRepository,
+                            OrderItemRepository orderItemRepository,
+                            CartItemService cartItemService
     ) {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.cartItemService = cartItemService;
+        this.orderItemRepository = orderItemRepository;
     }
     @Transactional
     @Override
@@ -63,6 +67,7 @@ String email = SecurityContextHolder
                     new RuntimeException("User not found"));
  
 
+                    
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Cart not found with user id: " + user.getId()));
                 if(cart.getCartItems().isEmpty()) {
@@ -70,6 +75,7 @@ String email = SecurityContextHolder
                 } if (!cart.getUser().getId().equals(user.getId())) {
                     throw new RuntimeException("Unauthorized cart");
 }
+
         Order order = new Order();
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
@@ -198,4 +204,60 @@ public void cancelOrder(Long orderId) {
 
     orderRepository.save(order);
 }
+
+@Override
+@Transactional
+public void deleteOrderItem(Long orderItemId) {
+
+    // Get currently logged-in user email
+    String email = SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+
+    // Find logged-in user
+    User user = userRepository
+            .findByEmail(email)
+            .orElseThrow(() ->
+                    new RuntimeException("User not found"));
+
+    // Find order item
+    OrderItem orderItem = orderItemRepository
+            .findById(orderItemId)
+            .orElseThrow(() ->
+                    new RuntimeException(
+                            "Order item not found with id: "
+                                    + orderItemId
+                    ));
+
+    // Get the order containing this item
+    Order order = orderItem.getOrder();
+
+    // Security check:
+    // User can delete only their own order item
+    if (!order.getUser().getId().equals(user.getId())) {
+
+        throw new RuntimeException(
+                "You are not authorized to delete this order item"
+        );
+    }
+
+    // Optional: prevent deletion after delivery
+    if (order.getStatus() == OrderStatus.DELIVERED) {
+
+        throw new RuntimeException(
+                "Delivered order items cannot be deleted"
+        );
+    }
+
+    // Delete the order item
+    orderItemRepository.delete(orderItem);
+
+    System.out.println(
+            "Order item deleted successfully. ID: "
+                    + orderItemId
+    );
+}
+
+
 }

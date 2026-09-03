@@ -140,33 +140,39 @@ export const getOrderById = async (id) => {
 
 
 // ==========================================
-// CANCEL ORDER
+// DELETE ORDER ITEM
 // USER ONLY
 // ==========================================
 
-export const cancelOrder = async (orderId) => {
+export const deleteOrderItem = async (orderItemId) => {
+
+    console.log(
+        "========== DELETE ORDER ITEM =========="
+    );
+    console.log("Delete order item ");
+    console.log("Order Item ID:", orderItemId);
+    console.log("================Delete Order Item====================");
 
     try {
 
         console.log(
-            "========== CANCEL ORDER =========="
+            "========== DELETE ORDER ITEM =========="
         );
 
         console.log(
-            "Order ID:",
-            orderId
+            "Order Item ID:",
+            orderItemId
         );
 
-        const response = await axios.put(
-            `${API_URL}/orders/${orderId}/cancel`,
-            {},
+        const response = await axios.delete(
+            `${API_URL}/orders/items/${orderItemId}`,
             {
                 headers: getAuthHeaders()
             }
         );
 
         console.log(
-            "Order cancelled:"
+            "Order item deleted:"
         );
 
         console.log(
@@ -178,7 +184,7 @@ export const cancelOrder = async (orderId) => {
     } catch (error) {
 
         console.error(
-            "Failed to cancel order:",
+            "Failed to delete order item:",
             error
         );
 
@@ -201,5 +207,3 @@ export const cancelOrder = async (orderId) => {
     }
 
 };
-
-
