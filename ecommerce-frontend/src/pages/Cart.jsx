@@ -7,8 +7,8 @@ import {
 } from "../services/cartService";
 
 import {
-    placeOrder,
     getMyOrders,
+    placeOrder,
     deleteOrderItem
 } from "../services/orderService";
 
@@ -17,15 +17,17 @@ const Cart = () => {
 
     const navigate = useNavigate();
 
-    const [cart, setCart] = useState(null);
 
-    const [orders, setOrders] = useState([]);
+    // ==========================================
+    // STATE
+    // ==========================================
+
+    const [cart, setCart] = useState(null);
 
     const [loading, setLoading] = useState(true);
 
     const [checkoutLoading, setCheckoutLoading] =
         useState(false);
-
 
 
     // ==========================================
@@ -40,7 +42,7 @@ const Cart = () => {
                 "========== FETCHING CART =========="
             );
 
-            const response = await myCart();
+            const response = await getMyOrders();
 
             console.log(
                 "Cart response:",
@@ -62,59 +64,22 @@ const Cart = () => {
 
 
     // ==========================================
-    // FETCH MY ORDERS
-    // ==========================================
-
-    const fetchOrders = async () => {
-
-        try {
-
-            console.log(
-                "========== FETCHING MY ORDERS =========="
-            );
-
-            const response =
-                await getMyOrders();
-
-            console.log(
-                "Orders response:",
-                response
-            );
-
-            setOrders(response);
-
-        } catch (error) {
-
-            console.error(
-                "Failed to load orders:",
-                error
-            );
-
-        }
-
-    };
-
-
-    // ==========================================
-    // LOAD DATA
+    // LOAD CART
     // ==========================================
 
     useEffect(() => {
 
-        const loadData = async () => {
+        const loadCart = async () => {
 
             setLoading(true);
 
-            await Promise.all([
-                fetchCart(),
-                fetchOrders()
-            ]);
+            await fetchCart();
 
             setLoading(false);
 
         };
 
-        loadData();
+        loadCart();
 
     }, []);
 
@@ -123,19 +88,64 @@ const Cart = () => {
     // REMOVE CART ITEM
     // ==========================================
 
-    const handleRemoveFromCart =
-        async (cartItemId) => {
+    const handleRemoveFromOrder =
+        async (orderItemId) => {
 
             try {
 
                 console.log(
-                    "Removing cart item:",
-                    cartItemId
+                    "========== REMOVE CART ITEM =========="
                 );
 
-                await removeFromCart(cartItemId);
+                console.log(
+                    "Cart Item ID:",
+                    orderItemId
+                );
+
+
+                // DELETE FROM BACKEND
+
+                await removeFromCart(deleteOrderItem);
+
+
+                console.log(
+                    "Cart item removed successfully"
+                );
+
+
+                // ======================================
+                // UPDATE UI IMMEDIATELY
+                // ======================================
+
+                setCart((previousCart) => {
+
+                    if (!previousCart) {
+                        return previousCart;
+                    }
+
+
+                    return {
+
+                        ...previousCart,
+
+                        orderItemId:
+
+                            previousCart.orderItemId.filter(
+                                (item) =>
+                                    item.id !== orderItemId
+                            )
+
+                    };
+
+                });
+
+
+                // ======================================
+                // FETCH UPDATED CART FROM BACKEND
+                // ======================================
 
                 await fetchCart();
+
 
             } catch (error) {
 
@@ -144,43 +154,8 @@ const Cart = () => {
                     error
                 );
 
-            }
-
-        };
-
-
-    // ==========================================
-    // DELETE ORDER ITEM
-    // ==========================================
-
-    const handleDeleteOrderItem =
-        async (orderItemId) => {
-
-            try {
-
-                console.log(
-                    "========== DELETE ORDER ITEM =========="
-                );
-
-                console.log(
-                    "Order Item ID:",
-                    orderItemId
-                );
-
-                await deleteOrderItem(orderItemId);
-
-                console.log(
-                    "Order item deleted successfully"
-                );
-
-                await fetchCart();
-                await getMyOrders();
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to delete order item:",
-                    error
+                alert(
+                    "Failed to remove product from cart."
                 );
 
             }
@@ -197,9 +172,13 @@ const Cart = () => {
         try {
 
             if (
+
                 !cart ||
+
                 !cart.cartItems ||
+
                 cart.cartItems.length === 0
+
             ) {
 
                 alert(
@@ -210,32 +189,48 @@ const Cart = () => {
 
             }
 
+
             setCheckoutLoading(true);
+
 
             console.log(
                 "========== CHECKOUT STARTED =========="
             );
 
+
+            // ======================================
+            // PLACE ORDER
+            // ======================================
+
             const response =
                 await placeOrder();
+
 
             console.log(
                 "Order placed:",
                 response
             );
 
+
             alert(
                 "Order placed successfully!"
             );
 
-            // Refresh cart and order history
+
+            // ======================================
+            // REFRESH CART
+            // ======================================
 
             await fetchCart();
 
-            await fetchOrders();
 
-            // Later you can redirect to payment
-            // navigate("/payment");
+            // ======================================
+            // OPTIONAL
+            // NAVIGATE TO ORDERS PAGE
+            // ======================================
+
+            // navigate("/orders");
+
 
         } catch (error) {
 
@@ -243,6 +238,7 @@ const Cart = () => {
                 "Checkout failed:",
                 error
             );
+
 
             alert(
                 "Failed to place order."
@@ -263,11 +259,18 @@ const Cart = () => {
 
     const handleContinueShopping = () => {
 
-        console.log(
-            "CONTINUE SHOPPING → /products"
-        );
-
         navigate("/products");
+
+    };
+
+
+    // ==========================================
+    // GO TO ORDERS PAGE
+    // ==========================================
+
+    const handleGoToOrders = () => {
+
+        navigate("/orders");
 
     };
 
@@ -283,12 +286,17 @@ const Cart = () => {
             <div className="container py-5 text-center">
 
                 <div
-                    className="spinner-border text-success"
+                    className="
+                        spinner-border
+                        text-success
+                    "
                     role="status"
                 />
 
                 <p className="mt-3">
+
                     Loading your cart...
+
                 </p>
 
             </div>
@@ -299,7 +307,7 @@ const Cart = () => {
 
 
     // ==========================================
-    // CART TOTAL
+    // CALCULATE CART TOTAL
     // ==========================================
 
     const total =
@@ -313,7 +321,16 @@ const Cart = () => {
             (sum, item) =>
 
                 sum +
-                (item.subTotal || item.subtotal || 0),
+
+                (
+
+                    item.subTotal ||
+
+                    item.subtotal ||
+
+                    0
+
+                ),
 
             0
 
@@ -328,22 +345,50 @@ const Cart = () => {
 
 
             {/* ======================================
-                PAGE TITLE
+                PAGE HEADER
             ====================================== */}
 
-            <div className="d-flex justify-content-between align-items-center mb-4">
+            <div
+                className="
+                    d-flex
+                    justify-content-between
+                    align-items-center
+                    mb-4
+                "
+            >
 
                 <div>
 
                     <h2 className="fw-bold mb-1">
+
                         My Cart
+
                     </h2>
 
+
                     <p className="text-muted mb-0">
+
                         Review your medicines before checkout
+
                     </p>
 
                 </div>
+
+
+                <button
+
+                    className="
+                        btn
+                        btn-outline-success
+                    "
+
+                    onClick={handleGoToOrders}
+
+                >
+
+                    My Orders
+
+                </button>
 
             </div>
 
@@ -357,124 +402,204 @@ const Cart = () => {
 
                 <div className="col-lg-8">
 
-                    <div className="card border-0 shadow-sm">
+                    <div
+                        className="
+                            card
+                            border-0
+                            shadow-sm
+                        "
+                    >
 
                         <div className="card-body p-4">
 
+
                             <h5 className="fw-bold mb-4">
+
                                 Cart Items
+
                             </h5>
 
 
-                            {cart?.cartItems?.length > 0 ? (
+                            {
 
-                                cart.cartItems.map(
-                                    (item) => (
+                                cart?.cartItems?.length > 0
 
-                                        <div
-                                            key={item.id}
-                                            className="
-                                                d-flex
-                                                justify-content-between
-                                                align-items-center
-                                                border-bottom
-                                                py-3
-                                            "
-                                        >
+                                    ? (
 
-                                            <div>
+                                        cart.cartItems.map(
 
-                                                <h6 className="fw-bold mb-1">
+                                            (item) => (
 
-                                                    {
-                                                        item.product?.name ||
-                                                        item.productName
-                                                    }
+                                                <div
 
-                                                </h6>
+                                                    key={item.id}
 
-                                                <p className="text-muted small mb-0">
-
-                                                    Quantity:
-                                                    {" "}
-                                                    {item.quantity}
-
-                                                </p>
-
-                                            </div>
-
-
-                                            <div className="text-end">
-
-                                                <h6 className="fw-bold text-success">
-
-                                                    ₹
-                                                    {
-                                                        item.subTotal ||
-                                                        item.subtotal ||
-                                                        0
-                                                    }
-
-                                                </h6>
-
-
-                                                <button
                                                     className="
-                                                        btn
-                                                        btn-outline-danger
-                                                        btn-sm
+                                                        d-flex
+                                                        justify-content-between
+                                                        align-items-center
+                                                        border-bottom
+                                                        py-3
                                                     "
-                                                    onClick={() =>
-                                                        deleteOrderItem(
-                                                            item.id
-                                                        )
-                                                    }
+
                                                 >
 
-                                                    Remove
 
-                                                </button>
+                                                    {/* PRODUCT DETAILS */}
 
-                                            </div>
+                                                    <div>
+
+                                                        <h6
+                                                            className="
+                                                                fw-bold
+                                                                mb-1
+                                                            "
+                                                        >
+
+                                                            {
+
+                                                                item.product?.name ||
+
+                                                                item.productName ||
+
+                                                                "Product"
+
+                                                            }
+
+                                                        </h6>
+
+
+                                                        <p
+                                                            className="
+                                                                text-muted
+                                                                small
+                                                                mb-0
+                                                            "
+                                                        >
+
+                                                            Quantity:{" "}
+
+                                                            {item.quantity}
+
+                                                        </p>
+
+                                                    </div>
+
+
+                                                    {/* PRICE + REMOVE */}
+
+                                                    <div
+                                                        className="
+                                                            text-end
+                                                        "
+                                                    >
+
+                                                        <h6
+                                                            className="
+                                                                fw-bold
+                                                                text-success
+                                                            "
+                                                        >
+
+                                                            ₹
+
+                                                            {
+
+                                                                item.subTotal ||
+
+                                                                item.subtotal ||
+
+                                                                0
+
+                                                            }
+
+                                                        </h6>
+
+
+                                                        {/* ======================
+                                                            REMOVE FROM CART
+                                                        ====================== */}
+
+                                                        <button
+
+                                                            className="
+                                                                btn
+                                                                btn-outline-danger
+                                                                btn-sm
+                                                            "
+
+                                                            onClick={() =>
+
+                                                                handleRemoveFromOrder(
+
+                                                                    item.id
+
+                                                                )
+
+                                                            }
+
+                                                        >
+
+                                                            Remove
+
+                                                        </button>
+
+                                                    </div>
+
+                                                </div>
+
+                                            )
+
+                                        )
+
+                                    )
+
+                                    : (
+
+
+                                        /* ==============================
+                                            EMPTY CART
+                                        ============================== */
+
+                                        <div className="text-center py-5">
+
+
+                                            <h5>
+
+                                                Your cart is empty
+
+                                            </h5>
+
+
+                                            <p className="text-muted">
+
+                                                Add products to continue.
+
+                                            </p>
+
+
+                                            <button
+
+                                                className="
+                                                    btn
+                                                    btn-success
+                                                "
+
+                                                onClick={
+                                                    handleContinueShopping
+                                                }
+
+                                            >
+
+                                                Browse Products
+
+                                            </button>
 
                                         </div>
 
                                     )
 
-                                )
-
-                            ) : (
-
-                                <div className="text-center py-5">
-
-                                    <h5>
-                                        Your cart is empty
-                                    </h5>
-
-                                    <p className="text-muted">
-
-                                        Add medicines to continue.
-
-                                    </p>
-
-
-                                    <button
-                                        className="
-                                            btn
-                                            btn-success
-                                        "
-                                        onClick={
-                                            handleContinueShopping
-                                        }
-                                    >
-
-                                        Browse Products
-
-                                    </button>
-
-                                </div>
-
-                            )}
+                            }
 
                         </div>
 
@@ -490,35 +615,50 @@ const Cart = () => {
                 <div className="col-lg-4">
 
                     <div
+
                         className="
                             card
                             border-0
                             shadow-sm
                             sticky-top
                         "
+
                         style={{
+
                             top: "100px"
+
                         }}
+
                     >
 
                         <div className="card-body p-4">
 
+
                             <h5 className="fw-bold mb-4">
+
                                 Order Summary
+
                             </h5>
 
 
+                            {/* TOTAL */}
+
                             <div
+
                                 className="
                                     d-flex
                                     justify-content-between
                                     mb-3
                                 "
+
                             >
 
                                 <span>
+
                                     Total
+
                                 </span>
+
 
                                 <strong className="text-success">
 
@@ -529,44 +669,60 @@ const Cart = () => {
                             </div>
 
 
-                            {/* CHECKOUT */}
+                            {/* ==========================
+                                CHECKOUT
+                            ========================== */}
 
                             <button
+
                                 className="
                                     btn
                                     btn-success
                                     w-100
                                     mb-3
                                 "
+
                                 disabled={
+
                                     checkoutLoading ||
+
                                     !cart?.cartItems?.length
+
                                 }
+
                                 onClick={handleCheckout}
+
                             >
 
-                                {checkoutLoading
+                                {
 
-                                    ? "Processing..."
+                                    checkoutLoading
 
-                                    : "Proceed to Checkout"
+                                        ? "Processing..."
+
+                                        : "Proceed to Checkout"
 
                                 }
 
                             </button>
 
 
-                            {/* CONTINUE SHOPPING */}
+                            {/* ==========================
+                                CONTINUE SHOPPING
+                            ========================== */}
 
                             <button
+
                                 className="
                                     btn
                                     btn-outline-secondary
                                     w-100
                                 "
+
                                 onClick={
                                     handleContinueShopping
                                 }
+
                             >
 
                                 ← Continue Shopping
@@ -578,202 +734,6 @@ const Cart = () => {
                     </div>
 
                 </div>
-
-            </div>
-
-
-            {/* ======================================
-                ORDER HISTORY
-            ====================================== */}
-
-            <div className="mt-5">
-
-                <h3 className="fw-bold mb-4">
-                    Order History
-                </h3>
-
-
-                {orders.length === 0 ? (
-
-                    <div
-                        className="
-                            alert
-                            alert-light
-                            border
-                        "
-                    >
-
-                        No previous orders found.
-
-                    </div>
-
-                ) : (
-
-                    <div className="row g-3">
-
-                        {orders.map(
-                            (order) => (
-
-                                <div
-                                    key={order.id}
-                                    className="col-12"
-                                >
-
-                                    <div
-                                        className="
-                                            card
-                                            border-0
-                                            shadow-sm
-                                        "
-                                    >
-
-                                        <div className="card-body">
-
-                                            <div
-                                                className="
-                                                    d-flex
-                                                    justify-content-between
-                                                    align-items-center
-                                                "
-                                            >
-
-                                                <div>
-
-                                                    <h6 className="fw-bold mb-1">
-
-                                                        Order
-                                                        {" #"}
-                                                        {order.id}
-
-                                                    </h6>
-
-
-                                                    <span
-                                                        className="
-                                                            badge
-                                                            bg-success
-                                                        "
-                                                    >
-
-                                                        {order.status}
-
-                                                    </span>
-
-                                                </div>
-
-
-                                                <div className="text-end">
-
-                                                    <strong
-                                                        className="
-                                                            text-success
-                                                        "
-                                                    >
-
-                                                        ₹
-                                                        {
-                                                            order.totalPrice ||
-                                                            order.totalAmount ||
-                                                            0
-                                                        }
-
-                                                    </strong>
-
-                                                </div>
-
-                                            </div>
-
-
-                                            {/* ORDER ITEMS */}
-
-                                            {order.orderItems &&
-                                                order.orderItems.length > 0 && (
-
-                                                <div className="mt-3">
-
-                                                    {order.orderItems.map(
-                                                        (item) => (
-
-                                                            <div
-                                                                key={item.id}
-                                                                className="
-                                                                    d-flex
-                                                                    justify-content-between
-                                                                    align-items-center
-                                                                    border-top
-                                                                    pt-2
-                                                                    mt-2
-                                                                "
-                                                            >
-
-                                                                <div>
-
-                                                                    <strong>
-
-                                                                        {
-                                                                            item.productName
-                                                                        }
-
-                                                                    </strong>
-
-                                                                    <div
-                                                                        className="
-                                                                            small
-                                                                            text-muted
-                                                                        "
-                                                                    >
-
-                                                                        Quantity:
-                                                                        {" "}
-                                                                        {
-                                                                            item.quantity
-                                                                        }
-
-                                                                    </div>
-
-                                                                </div>
-
-
-                                                                <button
-                                                                    className="
-                                                                        btn
-                                                                        btn-outline-danger
-                                                                        btn-sm
-                                                                    "
-                                                                    onClick={() =>
-                                                                        handleDeleteOrderItem(
-                                                                            item.id
-                                                                        )
-                                                                    }
-                                                                >
-
-                                                                    Delete
-
-                                                                </button>
-
-                                                            </div>
-
-                                                        )
-
-                                                    )}
-
-                                                </div>
-
-                                            )}
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            )
-
-                        )}
-
-                    </div>
-
-                )}
 
             </div>
 
