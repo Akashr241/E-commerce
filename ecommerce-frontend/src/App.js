@@ -13,7 +13,8 @@ import ReminderManager from "./components/ReminderManager";
 import OrderDetails from "./pages/OrderDetails";
 import MedicineReminder from "./pages/MedicineReminder";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
+
+import Login from "./context/login";
 import Register from "./pages/Register";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";

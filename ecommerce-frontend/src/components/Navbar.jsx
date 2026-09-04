@@ -159,18 +159,6 @@ const Navbar = () => {
                         )}
 
 
-                        {/* CHATBOT */}
-
-                        <li className="nav-item">
-
-                            <Link
-                                to="/chatbot"
-                                className="nav-link fw-semibold"
-                            >
-                                🤖 MediAI
-                            </Link>
-
-                        </li>
 
 
                         {/* AUTH */}
