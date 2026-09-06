@@ -575,7 +575,7 @@ const Cart = () => {
 
                             <h5 className="fw-bold mb-4">
 
-                                Order Summary
+                                Cart Summary
 
                             </h5>
 
