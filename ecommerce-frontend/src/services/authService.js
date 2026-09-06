@@ -23,6 +23,18 @@ export const registerUser = async (userData) => {
 };
 
 
+// ==========================================
+// GOOGLE LOGIN
+// ==========================================
+
+export const loginWithGoogle = () => {
+
+    // Redirect user to Spring Boot
+    // Google OAuth2 authorization endpoint
+    window.location.href =
+        "http://localhost:8080/oauth2/authorization/google";
+};
+
 export const loginUser = async (credentials) => {
 
     try {

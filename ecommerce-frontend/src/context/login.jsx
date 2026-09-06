@@ -1,11 +1,15 @@
+
 import React, { useState } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
 
-import { loginUser } from "../services/authService";
+import {
+    loginUser,
+    loginWithGoogle
+} from "../services/authService";
 
 import { useAuth } from "../context/AuthContext";
-import {Home} from "../pages/Home";
+
 
 const Login = () => {
 
@@ -14,19 +18,25 @@ const Login = () => {
     const { login } = useAuth();
 
 
+    // ==========================================
+    // FORM DATA
+    // ==========================================
+
     const [formData, setFormData] = useState({
         email: "",
         password: ""
     });
 
 
+    // ==========================================
+    // STATES
+    // ==========================================
+
     const [showPassword, setShowPassword] =
         useState(false);
 
-
     const [loading, setLoading] =
         useState(false);
-
 
     const [error, setError] =
         useState("");
@@ -50,7 +60,7 @@ const Login = () => {
 
 
     // ==========================================
-    // LOGIN
+    // NORMAL LOGIN
     // ==========================================
 
     const handleSubmit = async (event) => {
@@ -66,10 +76,6 @@ const Login = () => {
 
         if (!formData.email || !formData.password) {
 
-            console.log(
-                "LOGIN FAILED → Email or password is empty"
-            );
-
             setError(
                 "Please enter your email and password."
             );
@@ -84,45 +90,11 @@ const Login = () => {
 
 
             // ==========================================
-            // DEBUG: LOGIN START
-            // ==========================================
-
-            console.log("=================================");
-            console.log("LOGIN STARTED");
-            console.log("Email:", formData.email);
-
-            console.log(
-                "Old token:",
-                localStorage.getItem("token")
-            );
-
-            console.log("=================================");
-
-
-            // ==========================================
             // LOGIN API REQUEST
             // ==========================================
 
-            console.log(
-                "Sending login request..."
-            );
-
             const response =
                 await loginUser(formData);
-
-
-            // ==========================================
-            // DEBUG: LOGIN RESPONSE
-            // ==========================================
-
-            console.log(
-                "========== LOGIN RESPONSE =========="
-            );
-
-            console.log(
-                "Response:",
-                response
-            );
 
 
             // ==========================================
@@ -134,27 +106,16 @@ const Login = () => {
                 response.jwtToken;
 
 
-            console.log(
-                "JWT Token:",
-                token
-            );
-
-
             // ==========================================
             // TOKEN VALIDATION
             // ==========================================
 
             if (!token) {
 
-                console.error(
-                    "LOGIN ERROR → JWT token not found"
-                );
-
                 setError(
                     "Login successful, but authentication token was not received."
                 );
 
-                
                 return;
             }
 
@@ -165,12 +126,6 @@ const Login = () => {
 
             const payload =
                 token.split(".")[1];
-
-
-            console.log(
-                "Encoded JWT payload:",
-                payload
-            );
 
 
             const decodedPayload =
@@ -184,122 +139,31 @@ const Login = () => {
 
 
             // ==========================================
-            // DEBUG: JWT DATA
-            // ==========================================
-
-            console.log(
-                "========== JWT PAYLOAD =========="
-            );
-
-            console.log(
-                decodedPayload
-            );
-
-            console.log(
-                "JWT Email:",
-                decodedPayload.sub
-            );
-
-            console.log(
-                "JWT Role:",
-                decodedPayload.role
-            );
-
-
-            // ==========================================
-            // CHECK ROLE
+            // GET USER ROLE
             // ==========================================
 
             const role =
                 decodedPayload.role;
 
 
-            if (!role) {
-
-                console.error(
-                    "JWT ERROR → Role is missing from token!"
-                );
-
-                console.error(
-                    "Decoded payload:",
-                    decodedPayload
-                );
-            }
-
-
             // ==========================================
             // SAVE LOGIN
             // ==========================================
 
-            console.log(
-                "Saving token to AuthContext..."
-            );
-
             login(token);
-
-
-            console.log(
-                "Token after login:",
-                localStorage.getItem("token")
-            );
 
 
             // ==========================================
             // ROLE BASED REDIRECT
             // ==========================================
 
-            console.log(
-                "========== USER ROLE =========="
-            );
-
-            console.log(
-                "Logged in email:",
-                decodedPayload.sub
-            );
-
-            console.log(
-                "Logged in role:",
-                role
-            );
-
-
             if (role === "ADMIN") {
 
-                console.log(
-                    "================================="
+                navigate(
+                    "/admin/dashboard"
                 );
-
-                console.log(
-                    "ADMIN DETECTED"
-                );
-
-                console.log(
-                    "ADMIN LOGIN → /admin"
-                );
-
-                console.log(
-                    "================================="
-                );
-
-                navigate("/admin/dashboard");
 
             } else {
-
-                console.log(
-                    "================================="
-                );
-
-                console.log(
-                    "NORMAL USER DETECTED"
-                );
-
-                console.log(
-                    "USER LOGIN → /"
-                );
-
-                console.log(
-                    "================================="
-                );
 
                 navigate("/");
             }
@@ -307,35 +171,9 @@ const Login = () => {
 
         } catch (error) {
 
-            // ==========================================
-            // DEBUG: LOGIN ERROR
-            // ==========================================
-
             console.error(
-                "================================="
-            );
-
-            console.error(
-                "LOGIN FAILED"
-            );
-
-            console.error(
-                "Full error:",
+                "LOGIN FAILED:",
                 error
-            );
-
-            console.error(
-                "Error response:",
-                error.response
-            );
-
-            console.error(
-                "Error data:",
-                error.response?.data
-            );
-
-            console.error(
-                "================================="
             );
 
 
@@ -349,16 +187,22 @@ const Login = () => {
 
         } finally {
 
-            // ==========================================
-            // DEBUG: LOGIN FINISHED
-            // ==========================================
-
-            console.log(
-                "LOGIN PROCESS FINISHED"
-            );
-
             setLoading(false);
         }
+    };
+
+
+    // ==========================================
+    // GOOGLE LOGIN
+    // ==========================================
+
+    const handleGoogleLogin = () => {
+
+        console.log(
+            "GOOGLE LOGIN STARTED"
+        );
+
+        loginWithGoogle();
     };
 
 
@@ -382,6 +226,10 @@ const Login = () => {
 
                     <div className="col-12 col-md-9 col-lg-7 col-xl-6">
 
+
+                        {/* ========================================== */}
+                        {/* LOGO */}
+                        {/* ========================================== */}
 
                         <div className="text-center mb-4">
 
@@ -408,6 +256,7 @@ const Login = () => {
                             <h2 className="fw-bold mt-3 mb-1">
 
                                 Medi
+
                                 <span className="text-success">
                                     Pharm
                                 </span>
@@ -422,10 +271,18 @@ const Login = () => {
                         </div>
 
 
+                        {/* ========================================== */}
+                        {/* LOGIN CARD */}
+                        {/* ========================================== */}
+
                         <div className="card border-0 shadow-lg rounded-4">
 
                             <div className="card-body p-4 p-md-5">
 
+
+                                {/* ========================================== */}
+                                {/* HEADER */}
+                                {/* ========================================== */}
 
                                 <div className="mb-4">
 
@@ -440,7 +297,9 @@ const Login = () => {
                                 </div>
 
 
+                                {/* ========================================== */}
                                 {/* ERROR */}
+                                {/* ========================================== */}
 
                                 {error && (
 
@@ -458,9 +317,13 @@ const Login = () => {
                                 )}
 
 
+                                {/* ========================================== */}
                                 {/* LOGIN FORM */}
+                                {/* ========================================== */}
 
-                                <form onSubmit={handleSubmit}>
+                                <form
+                                    onSubmit={handleSubmit}
+                                >
 
 
                                     {/* EMAIL */}
@@ -479,7 +342,11 @@ const Login = () => {
                                             id="email"
                                             type="email"
                                             name="email"
-                                            className="form-control form-control-lg rounded-3"
+                                            className="
+                                                form-control
+                                                form-control-lg
+                                                rounded-3
+                                            "
                                             placeholder="you@example.com"
                                             value={formData.email}
                                             onChange={handleChange}
@@ -511,7 +378,11 @@ const Login = () => {
                                                         : "password"
                                                 }
                                                 name="password"
-                                                className="form-control form-control-lg rounded-start-3"
+                                                className="
+                                                    form-control
+                                                    form-control-lg
+                                                    rounded-start-3
+                                                "
                                                 placeholder="Enter your password"
                                                 value={formData.password}
                                                 onChange={handleChange}
@@ -521,16 +392,22 @@ const Login = () => {
 
                                             <button
                                                 type="button"
-                                                className="btn btn-outline-secondary rounded-end-3"
+                                                className="
+                                                    btn
+                                                    btn-outline-secondary
+                                                    rounded-end-3
+                                                "
                                                 onClick={() =>
                                                     setShowPassword(
                                                         !showPassword
                                                     )
                                                 }
                                             >
-                                                {showPassword
-                                                    ? "Hide"
-                                                    : "Show"}
+                                                {
+                                                    showPassword
+                                                        ? "Hide"
+                                                        : "Show"
+                                                }
                                             </button>
 
                                         </div>
@@ -538,7 +415,9 @@ const Login = () => {
                                     </div>
 
 
-                                    {/* LOGIN BUTTON */}
+                                    {/* ========================================== */}
+                                    {/* NORMAL LOGIN BUTTON */}
+                                    {/* ========================================== */}
 
                                     <button
                                         type="submit"
@@ -556,6 +435,7 @@ const Login = () => {
                                         {loading ? (
 
                                             <>
+
                                                 <span
                                                     className="
                                                         spinner-border
@@ -565,6 +445,7 @@ const Login = () => {
                                                 />
 
                                                 Signing in...
+
                                             </>
 
                                         ) : (
@@ -577,6 +458,63 @@ const Login = () => {
 
                                 </form>
 
+
+                                {/* ========================================== */}
+                                {/* OR DIVIDER */}
+                                {/* ========================================== */}
+
+                                <div className="d-flex align-items-center my-4">
+
+                                    <hr className="flex-grow-1" />
+
+                                    <span className="mx-3 text-muted small">
+                                        OR
+                                    </span>
+
+                                    <hr className="flex-grow-1" />
+
+                                </div>
+
+
+                                {/* ========================================== */}
+                                {/* GOOGLE LOGIN */}
+                                {/* ========================================== */}
+
+                                <button
+                                    type="button"
+                                    className="
+                                        btn
+                                        btn-outline-secondary
+                                        btn-lg
+                                        w-100
+                                        rounded-3
+                                        fw-semibold
+                                        d-flex
+                                        align-items-center
+                                        justify-content-center
+                                        gap-2
+                                    "
+                                    onClick={handleGoogleLogin}
+                                    disabled={loading}
+                                >
+
+                                    <span
+                                        style={{
+                                            fontSize: "20px",
+                                            fontWeight: "bold"
+                                        }}
+                                    >
+                                        G
+                                    </span>
+
+                                    Continue with Google
+
+                                </button>
+
+
+                                {/* ========================================== */}
+                                {/* REGISTER */}
+                                {/* ========================================== */}
 
                                 <div className="text-center mt-4">
 
@@ -605,6 +543,10 @@ const Login = () => {
                         </div>
 
 
+                        {/* ========================================== */}
+                        {/* SECURITY MESSAGE */}
+                        {/* ========================================== */}
+
                         <div className="text-center mt-3">
 
                             <small className="text-muted">
@@ -626,3 +568,4 @@ const Login = () => {
 
 
 export default Login;
+
