@@ -51,5 +51,11 @@ public class Cart {
 public void setUser(User user) {
     this.user = user;
 }
+public void removeCartItem(CartItem cartItem) {
+
+        cartItems.remove(cartItem);
+
+        cartItem.setCart(null);
+    }
  
 }

@@ -25,7 +25,7 @@ const Cart = () => {
 
 
     // ==========================================
-    // FETCH CART
+    // FETCH LATEST CART FROM BACKEND
     // ==========================================
 
     const fetchCart = async () => {
@@ -33,13 +33,13 @@ const Cart = () => {
         try {
 
             console.log(
-                "========== FETCHING CART =========="
+                "========== FETCHING LATEST CART =========="
             );
 
             const response = await myCart();
 
             console.log(
-                "Cart response:",
+                "Latest Cart Response:",
                 response
             );
 
@@ -52,13 +52,15 @@ const Cart = () => {
                 error
             );
 
+            setCart(null);
+
         }
 
     };
 
 
     // ==========================================
-    // LOAD CART
+    // LOAD CART WHEN PAGE OPENS
     // ==========================================
 
     useEffect(() => {
@@ -82,114 +84,87 @@ const Cart = () => {
     // REMOVE CART ITEM
     // ==========================================
 
-    const handleRemoveFromCart =
-        async (cartItemId) => {
+    const handleRemoveFromCart = async (
+        cartItemId
+    ) => {
 
-            try {
+        try {
 
-                console.log(
-                    "========== REMOVE CART ITEM =========="
-                );
+            console.log(
+                "========== REMOVE CART ITEM =========="
+            );
 
-                console.log(
-                    "Cart Item ID:",
-                    cartItemId
-                );
-
-
-                setRemovingItemId(cartItemId);
+            console.log(
+                "Cart Item ID:",
+                cartItemId
+            );
 
 
-                // ==================================
-                // DELETE CART ITEM FROM DATABASE
-                // ==================================
+            // Show loading state on button
 
-                await removeFromCart(cartItemId);
+            setRemovingItemId(cartItemId);
 
 
-                console.log(
-                    "Cart item removed successfully"
-                );
+            // ==================================
+            // DELETE FROM BACKEND
+            // ==================================
+
+            await removeFromCart(cartItemId);
 
 
-                // ==================================
-                // UPDATE UI IMMEDIATELY
-                // ==================================
-
-                setCart((previousCart) => {
-
-                    if (!previousCart) {
-                        return previousCart;
-                    }
-
-                    const updatedItems =
-                        previousCart.cartItems.filter(
-                            (item) =>
-                                item.id !== cartItemId
-                        );
+            console.log(
+                "Cart item deleted successfully"
+            );
 
 
-                    const updatedTotal =
-                        updatedItems.reduce(
-                            (sum, item) => {
+            // ==================================
+            // IMPORTANT:
+            // FETCH THE NEW CART FROM BACKEND
+            // ==================================
 
-                                return sum +
-                                    Number(
-                                        item.subTotal ||
-                                        item.subtotal ||
-                                        0
-                                    );
+            console.log(
+                "Fetching updated cart after deletion..."
+            );
 
-                            },
-                            0
-                        );
+            const updatedCart =
+                await myCart();
 
 
-                    return {
-
-                        ...previousCart,
-
-                        cartItems:
-                            updatedItems,
-
-                        total:
-                            updatedTotal
-
-                    };
-
-                });
+            console.log(
+                "Updated Cart:",
+                updatedCart
+            );
 
 
-                console.log(
-                    "UI updated successfully"
-                );
+            // Update React state
+
+            setCart(updatedCart);
 
 
-                // ==================================
-                // OPTIONAL: FETCH BACKEND AGAIN
-                // ==================================
-
-                // await fetchCart();
+            console.log(
+                "Cart UI updated successfully"
+            );
 
 
-            } catch (error) {
+        } catch (error) {
 
-                console.error(
-                    "Failed to remove cart item:",
-                    error
-                );
+            console.error(
+                "Failed to remove product:",
+                error
+            );
 
-                alert(
-                    "Failed to remove product from cart."
-                );
+            alert(
+                "Failed to remove product from cart."
+            );
 
-            } finally {
 
-                setRemovingItemId(null);
+        } finally {
 
-            }
+            setRemovingItemId(null);
 
-        };
+        }
+
+    };
 
 
     // ==========================================
@@ -203,11 +178,11 @@ const Cart = () => {
         );
 
 
-        if (
-            !cart ||
-            !cart.cartItems ||
-            cart.cartItems.length === 0
-        ) {
+        const cartItems =
+            cart?.cartItems || [];
+
+
+        if (cartItems.length === 0) {
 
             alert(
                 "Your cart is empty."
@@ -217,10 +192,6 @@ const Cart = () => {
 
         }
 
-
-        // ==================================
-        // GO TO CHECKOUT PAGE
-        // ==================================
 
         navigate("/checkout");
 
@@ -232,10 +203,6 @@ const Cart = () => {
     // ==========================================
 
     const handleContinueShopping = () => {
-
-        console.log(
-            "CONTINUE SHOPPING → /products"
-        );
 
         navigate("/products");
 
@@ -271,7 +238,7 @@ const Cart = () => {
 
 
     // ==========================================
-    // CART ITEMS
+    // CART DATA
     // ==========================================
 
     const cartItems =
@@ -282,25 +249,23 @@ const Cart = () => {
     // CALCULATE TOTAL
     // ==========================================
 
-    const total =
+    const total = cartItems.reduce(
 
-        cartItems.reduce(
+        (sum, item) => {
 
-            (sum, item) => {
+            return sum +
 
-                return sum +
+                Number(
+                    item.subTotal ||
+                    item.subtotal ||
+                    0
+                );
 
-                    Number(
-                        item.subTotal ||
-                        item.subtotal ||
-                        0
-                    );
+        },
 
-            },
+        0
 
-            0
-
-        );
+    );
 
 
     // ==========================================
@@ -393,9 +358,7 @@ const Cart = () => {
                                         >
 
 
-                                            {/* ======================
-                                                PRODUCT DETAILS
-                                            ====================== */}
+                                            {/* PRODUCT DETAILS */}
 
                                             <div>
 
@@ -432,9 +395,7 @@ const Cart = () => {
                                             </div>
 
 
-                                            {/* ======================
-                                                PRICE + REMOVE
-                                            ====================== */}
+                                            {/* PRICE AND REMOVE */}
 
                                             <div className="text-end">
 
@@ -494,6 +455,7 @@ const Cart = () => {
 
                                             </div>
 
+
                                         </div>
 
                                     )
@@ -536,6 +498,7 @@ const Cart = () => {
 
                                     </button>
 
+
                                 </div>
 
                             )}
@@ -548,7 +511,7 @@ const Cart = () => {
 
 
                 {/* ==================================
-                    ORDER SUMMARY
+                    CART SUMMARY
                 ================================== */}
 
                 <div className="col-lg-4">
@@ -580,18 +543,40 @@ const Cart = () => {
                             </h5>
 
 
-                            {/* ======================
-                                TOTAL
-                            ====================== */}
+                            {/* TOTAL ITEMS */}
 
                             <div
-
                                 className="
                                     d-flex
                                     justify-content-between
                                     mb-3
                                 "
+                            >
 
+                                <span>
+
+                                    Total Items
+
+                                </span>
+
+
+                                <strong>
+
+                                    {cartItems.length}
+
+                                </strong>
+
+                            </div>
+
+
+                            {/* TOTAL AMOUNT */}
+
+                            <div
+                                className="
+                                    d-flex
+                                    justify-content-between
+                                    mb-3
+                                "
                             >
 
                                 <span>
@@ -613,9 +598,7 @@ const Cart = () => {
                             <hr />
 
 
-                            {/* ======================
-                                CHECKOUT BUTTON
-                            ====================== */}
+                            {/* CHECKOUT BUTTON */}
 
                             <button
 
@@ -641,9 +624,7 @@ const Cart = () => {
                             </button>
 
 
-                            {/* ======================
-                                CONTINUE SHOPPING
-                            ====================== */}
+                            {/* CONTINUE SHOPPING */}
 
                             <button
 
@@ -672,6 +653,7 @@ const Cart = () => {
 
 
             </div>
+
 
         </div>
 

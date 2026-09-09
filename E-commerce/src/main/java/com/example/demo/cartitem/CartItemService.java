@@ -162,10 +162,11 @@ public class CartItemService {
 
         }
 
+    cart.removeCartItem(cartItem);
 
         // 6. DELETE ONLY CART ITEM
 
-        cartItemRepository.delete(cartItem);
+        cartRepository.save(cart);
 
 
         System.out.println(

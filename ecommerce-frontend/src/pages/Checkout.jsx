@@ -1,460 +1,230 @@
 import React, { useEffect, useState } from "react";
-
-import CheckoutForm from "../components/CheckoutForm";
-import OrderSummary from "../components/OrderSummary";
-
-import { checkout } from "../services/checkoutService";
-import { myCart } from "../services/cartService";
-
+import {
+myCart,
+removeFromCart
+} from "../services/cartService";
 import { useNavigate } from "react-router-dom";
 
+function Cart() {
 
-function Checkout() {
 
-    const navigate = useNavigate();
+const navigate = useNavigate();
 
+// ==========================================
+// CART STATE
+// ==========================================
 
-    // ==========================================
-    // FORM STATE
-    // ==========================================
+const [cart, setCart] = useState(null);
 
-    const [formData, setFormData] = useState({
+const [loading, setLoading] = useState(true);
 
-        fullName: "",
-        phone: "",
-        address: "",
-        city: "",
-        state: "",
-        country: "",
-        pincode: ""
+const [deletingItemId, setDeletingItemId] =
+    useState(null);
 
-    });
+const [errorMessage, setErrorMessage] =
+    useState("");
 
 
-    // ==========================================
-    // CART STATE
-    // ==========================================
+// ==========================================
+// LOAD CART FROM BACKEND
+// ==========================================
 
-    const [cart, setCart] = useState(null);
+const loadCart = async () => {
 
-    const [cartLoading, setCartLoading] = useState(true);
+    try {
 
-
-    // ==========================================
-    // OTHER STATES
-    // ==========================================
-
-    const [errorMessage, setErrorMessage] = useState("");
-
-    const [loading, setLoading] = useState(false);
-
-
-    // ==========================================
-    // LOAD LATEST CART
-    // ==========================================
-
-    const loadCart = async () => {
-
-        try {
-
-            // Start loading
-            setCartLoading(true);
-
-
-            console.log(
-                "========== CHECKOUT LOADING LATEST CART =========="
-            );
-
-
-            // Fetch latest cart from backend
-            const response = await myCart();
-
-
-            console.log(
-                "Latest cart received:",
-                JSON.stringify(response, null, 2)
-            );
-
-
-            // Update cart state
-            setCart(response);
-
-
-        } catch (error) {
-
-            console.error(
-                "Cart loading error:",
-                error
-            );
-
-
-            setErrorMessage(
-                "Unable to load your cart."
-            );
-
-
-        } finally {
-
-            // VERY IMPORTANT
-            // Stop loading whether API succeeds or fails
-            setCartLoading(false);
-
-        }
-
-    };
-
-
-    // ==========================================
-    // LOAD CART WHEN PAGE OPENS
-    // ==========================================
-
-    useEffect(() => {
-
-        loadCart();
-
-    }, []);
-
-
-    // ==========================================
-    // HANDLE FORM CHANGE
-    // ==========================================
-
-    const handleChange = (e) => {
-
-        setFormData({
-
-            ...formData,
-
-            [e.target.name]: e.target.value
-
-        });
-
-
-        // Clear old error
-        setErrorMessage("");
-
-    };
-
-
-    // ==========================================
-    // FORM VALIDATION
-    // ==========================================
-
-    const validateForm = () => {
-
-        if (!formData.fullName.trim()) {
-
-            return "Please enter your full name.";
-
-        }
-
-
-        if (!formData.phone.trim()) {
-
-            return "Please enter your phone number.";
-
-        }
-
-
-        if (!/^[0-9]{10}$/.test(formData.phone)) {
-
-            return "Please enter a valid 10-digit phone number.";
-
-        }
-
-
-        if (!formData.address.trim()) {
-
-            return "Please enter your address.";
-
-        }
-
-
-        if (!formData.city.trim()) {
-
-            return "Please enter your city.";
-
-        }
-
-
-        if (!formData.state.trim()) {
-
-            return "Please enter your state.";
-
-        }
-
-
-        if (!formData.country.trim()) {
-
-            return "Please enter your country.";
-
-        }
-
-
-        if (!formData.pincode.trim()) {
-
-            return "Please enter your pincode.";
-
-        }
-
-
-        if (!/^[0-9]{6}$/.test(formData.pincode)) {
-
-            return "Please enter a valid 6-digit pincode.";
-
-        }
-
-
-        return null;
-
-    };
-
-
-    // ==========================================
-    // HANDLE CHECKOUT
-    // ==========================================
-
-    const handleCheckout = async () => {
-
-        // Clear previous error
-        setErrorMessage("");
-
-
-        // Validate form
-        const validationError = validateForm();
-
-
-        if (validationError) {
-
-            setErrorMessage(validationError);
-
-            alert(validationError);
-
-            return;
-
-        }
-
-
-        // Check cart
-        if (
-
-            !cart ||
-
-            !cart.cartItems ||
-
-            cart.cartItems.length === 0
-
-        ) {
-
-            const message =
-                "Your cart is empty.";
-
-
-            setErrorMessage(message);
-
-            alert(message);
-
-            return;
-
-        }
-
+        console.log(
+            "========== FETCHING CART =========="
+        );
 
         setLoading(true);
 
+        const response = await myCart();
 
-        try {
+        console.log(
+            "Latest cart received:",
+            JSON.stringify(response, null, 2)
+        );
 
-            console.log(
-                "========== STARTING CHECKOUT =========="
+        setCart(response);
+
+        setErrorMessage("");
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load cart:",
+            error
+        );
+
+        setErrorMessage(
+            "Unable to load your cart."
+        );
+
+    } finally {
+
+        setLoading(false);
+
+    }
+
+};
+
+
+// ==========================================
+// LOAD CART WHEN PAGE OPENS
+// ==========================================
+
+useEffect(() => {
+
+    loadCart();
+
+}, []);
+
+
+// ==========================================
+// REMOVE CART ITEM
+// ==========================================
+
+const handleRemoveItem = async (cartItemId) => {
+
+    try {
+
+        console.log(
+            "========== REMOVE CART ITEM =========="
+        );
+
+        console.log(
+            "Cart Item ID:",
+            cartItemId
+        );
+
+        setDeletingItemId(cartItemId);
+
+        // ----------------------------------
+        // DELETE FROM BACKEND
+        // ----------------------------------
+
+        await removeFromCart(cartItemId);
+
+        console.log(
+            "Cart item deleted successfully"
+        );
+
+
+        // ----------------------------------
+        // IMPORTANT:
+        // FETCH THE NEW CART FROM BACKEND
+        // ----------------------------------
+
+        console.log(
+            "Fetching updated cart after deletion..."
+        );
+
+        const updatedCart = await myCart();
+
+        console.log(
+            "Updated cart received:",
+            JSON.stringify(updatedCart, null, 2)
+        );
+
+
+        // ----------------------------------
+        // UPDATE REACT STATE
+        // ----------------------------------
+
+        setCart(updatedCart);
+
+        console.log(
+            "Cart UI updated successfully"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Failed to remove cart item:",
+            error
+        );
+
+        setErrorMessage(
+            "Unable to remove item from cart."
+        );
+
+    } finally {
+
+        setDeletingItemId(null);
+
+    }
+
+};
+
+
+// ==========================================
+// CALCULATE CART VALUES
+// ==========================================
+
+const cartItems = cart?.cartItems || [];
+
+const totalItems = cartItems.length;
+
+const totalAmount = cartItems.reduce(
+    (sum, item) => {
+
+        return sum +
+            Number(
+                item.subTotal ||
+                item.subtotal ||
+                (item.price * item.quantity) ||
+                0
             );
 
-
-            // Call backend checkout API
-            const response =
-                await checkout(formData);
-
-
-            console.log(
-                "Checkout successful:",
-                response
-            );
+    },
+    0
+);
 
 
-            alert(
-                "Checkout successful! Proceeding to payment."
-            );
+// ==========================================
+// GO TO CHECKOUT
+// ==========================================
+
+const handleCheckout = () => {
+
+    console.log(
+        "========== NAVIGATING TO CHECKOUT =========="
+    );
+
+    if (cartItems.length === 0) {
+
+        alert(
+            "Your cart is empty."
+        );
+
+        return;
+
+    }
+
+    navigate("/checkout");
+
+};
 
 
-            // Navigate to payment page
-            navigate(
+// ==========================================
+// LOADING
+// ==========================================
 
-                "/payment",
-
-                {
-
-                    state: {
-
-                        total: response.total,
-
-                        items: response.items
-
-                    }
-
-                }
-
-            );
-
-
-        } catch (error) {
-
-            console.error(
-                "Checkout error:",
-                error
-            );
-
-
-            let message =
-                "Checkout failed. Please try again.";
-
-
-            if (error.response?.data) {
-
-                if (
-
-                    typeof error.response.data === "string"
-
-                ) {
-
-                    message =
-                        error.response.data;
-
-                }
-
-                else if (
-
-                    error.response.data.message
-
-                ) {
-
-                    message =
-                        error.response.data.message;
-
-                }
-
-            }
-
-
-            setErrorMessage(message);
-
-            alert(message);
-
-
-        } finally {
-
-            setLoading(false);
-
-        }
-
-    };
-
-
-    // ==========================================
-    // UI
-    // ==========================================
+if (loading) {
 
     return (
 
         <div className="container mt-4">
 
+            <div className="text-center">
 
-            {/* ======================================
-                ERROR MESSAGE
-            ====================================== */}
-
-            {errorMessage && (
-
-                <div
-                    className="alert alert-danger"
-                    role="alert"
-                >
-
-                    {errorMessage}
-
-                </div>
-
-            )}
-
-
-            <div className="row g-4">
-
-
-                {/* ==================================
-                    LEFT SIDE
-                    CHECKOUT FORM
-                ================================== */}
-
-                <div className="col-md-8">
-
-                    <CheckoutForm
-
-                        formData={formData}
-
-                        handleChange={handleChange}
-
-                    />
-
-                </div>
-
-
-                {/* ==================================
-                    RIGHT SIDE
-                    ORDER SUMMARY
-                ================================== */}
-
-                <div className="col-md-4">
-
-
-                    {cartLoading ? (
-
-                        <div className="card shadow-sm p-4">
-
-                            <div className="text-center">
-
-                                <div
-                                    className="spinner-border text-success"
-                                    role="status"
-                                />
-
-                                <p className="mt-3 mb-0">
-
-                                    Loading latest cart...
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    ) : (
-
-                        <OrderSummary
-
-                            cart={cart}
-
-                            onCheckout={handleCheckout}
-
-                            loading={loading}
-
-                        />
-
-                    )}
-
-
-                </div>
-
+                <h4>
+                    Loading cart...
+                </h4>
 
             </div>
-
 
         </div>
 
@@ -463,4 +233,209 @@ function Checkout() {
 }
 
 
-export default Checkout;
+// ==========================================
+// UI
+// ==========================================
+
+return (
+
+    <div className="container mt-4">
+
+        <h2 className="mb-4">
+            My Cart
+        </h2>
+
+
+        {/* ERROR MESSAGE */}
+
+        {errorMessage && (
+
+            <div
+                className="alert alert-danger"
+                role="alert"
+            >
+
+                {errorMessage}
+
+            </div>
+
+        )}
+
+
+        {/* EMPTY CART */}
+
+        {cartItems.length === 0 ? (
+
+            <div className="card shadow-sm p-4">
+
+                <h4>
+                    Your cart is empty.
+                </h4>
+
+            </div>
+
+        ) : (
+
+            <div className="row">
+
+
+                {/* ==========================
+                    LEFT SIDE - CART ITEMS
+                ========================== */}
+
+                <div className="col-md-8">
+
+                    {cartItems.map((item) => (
+
+                        <div
+                            className="card shadow-sm mb-3"
+                            key={item.id}
+                        >
+
+                            <div className="card-body">
+
+                                <div className="d-flex justify-content-between align-items-center">
+
+                                    <div>
+
+                                        <h5>
+                                            {item.productName}
+                                        </h5>
+
+                                        <p className="mb-1">
+
+                                            Price:
+                                            {" "}
+                                            ₹{item.price}
+
+                                        </p>
+
+                                        <p className="mb-1">
+
+                                            Quantity:
+                                            {" "}
+                                            {item.quantity}
+
+                                        </p>
+
+                                        <p className="mb-0">
+
+                                            Subtotal:
+                                            {" "}
+                                            ₹{
+                                                item.subTotal ||
+                                                item.subtotal ||
+                                                (
+                                                    item.price *
+                                                    item.quantity
+                                                )
+                                            }
+
+                                        </p>
+
+                                    </div>
+
+
+                                    <button
+
+                                        className="btn btn-danger"
+
+                                        onClick={() =>
+                                            handleRemoveItem(
+                                                item.id
+                                            )
+                                        }
+
+                                        disabled={
+                                            deletingItemId ===
+                                            item.id
+                                        }
+
+                                    >
+
+                                        {
+                                            deletingItemId === item.id
+                                                ? "Removing..."
+                                                : "Remove"
+                                        }
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    ))}
+
+                </div>
+
+
+                {/* ==========================
+                    RIGHT SIDE - CART SUMMARY
+                ========================== */}
+
+                <div className="col-md-4">
+
+                    <div className="card shadow-sm p-4">
+
+                        <h3>
+                            Cart Summary
+                        </h3>
+
+                        <hr />
+
+                        <p>
+
+                            <strong>
+                                Total Products:
+                            </strong>
+
+                            {" "}
+
+                            {totalItems}
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Total Amount:
+                            </strong>
+
+                            {" "}
+
+                            ₹{totalAmount}
+
+                        </p>
+
+
+                        <button
+
+                            className="btn btn-success w-100"
+
+                            onClick={handleCheckout}
+
+                        >
+
+                            Proceed to Checkout
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        )}
+
+    </div>
+
+);
+
+}
+
+export default Cart;
