@@ -165,6 +165,7 @@ export const myCart = async () => {
         console.log(
             "========== FETCH MY CART =========="
         );
+  
 
         console.log(
             "Request URL: /cart/my-cart"
@@ -187,6 +188,29 @@ export const myCart = async () => {
         console.log(
             "Cart Data:",
             response.data
+        );
+
+        // ==================================
+        // NORMAL OBJECT LOG
+        // ==================================
+
+        console.log(
+            "Cart Data:",
+            response.data
+        );
+
+
+        // ==================================
+        // DETAILED JSON LOG
+        // ==================================
+
+        console.log(
+            "Cart Data JSON:",
+            JSON.stringify(
+                response.data,
+                null,
+                2
+            )
         );
 
 

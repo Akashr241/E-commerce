@@ -15,14 +15,13 @@ import MedicineReminder from "./pages/MedicineReminder";
 import Home from "./pages/Home";
 
 import Login from "./context/login";
-import Register from "./pages/Register";
+import Register from "./context/Register";
 import Products from "./pages/Products";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import Prescription from "./components/Prescription";
-import ChatbotPage from "./pages/ChatbotPage";
 import "./App.css";
 
 import Payment from "./pages/Payment";
@@ -147,14 +146,7 @@ function App() {
                     }
                 />
 
-                <Route
-                    path="/chatbot"
-                    element={
-                        <ProtectedPage>
-                            <ChatbotPage />
-                        </ProtectedPage>
-                    }
-                />
+                
 
 
                 <Route
