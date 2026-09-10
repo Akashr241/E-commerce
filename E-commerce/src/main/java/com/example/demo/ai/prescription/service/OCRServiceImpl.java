@@ -1,4 +1,8 @@
+
 package com.example.demo.ai.prescription.service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.TesseractException;
@@ -6,16 +10,36 @@ import net.sourceforge.tess4j.TesseractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Service;
+
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
 import org.springframework.web.multipart.MultipartFile;
+
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.ImageIO;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+
 import java.awt.image.BufferedImage;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -28,24 +52,114 @@ import java.util.Set;
 @Service
 public class OCRServiceImpl implements OCRService {
 
+
+    // =====================================================
+    // LOGGER
+    // =====================================================
+
     private static final Logger log =
             LoggerFactory.getLogger(OCRServiceImpl.class);
 
 
+    // =====================================================
+    // SIGHTENGINE AI DETECTION URL
+    // =====================================================
+
+    private static final String AI_DETECTION_URL =
+            "https://api.sightengine.com/1.0/check.json";
+
+
+    // =====================================================
+    // DEPENDENCIES
+    // =====================================================
+
     private final ITesseract tesseract;
 
+    private final RestTemplate restTemplate;
+
+    private final ObjectMapper objectMapper;
+
+
+    // =====================================================
+    // SIGHTENGINE CONFIGURATION
+    // =====================================================
+
+    private final String sightengineApiUser;
+
+    private final String sightengineApiSecret;
+
+    private final double aiRejectThreshold;
+
+    private final boolean aiDetectionEnabled;
+
+
+    // =====================================================
+    // CONSTRUCTOR
+    // =====================================================
 
     public OCRServiceImpl(
-            ITesseract tesseract
+
+            ITesseract tesseract,
+
+            @Value("${sightengine.api-user:}")
+            String sightengineApiUser,
+
+            @Value("${sightengine.api-secret:}")
+            String sightengineApiSecret,
+
+            @Value("${prescription.ai-reject-threshold:0.90}")
+            double aiRejectThreshold,
+
+            @Value("${prescription.ai-detection.enabled:true}")
+            boolean aiDetectionEnabled
+
     ) {
 
-        this.tesseract = tesseract;
+        this.tesseract =
+                tesseract;
+
+        this.restTemplate =
+                new RestTemplate();
+
+        this.objectMapper =
+                new ObjectMapper();
+
+        this.sightengineApiUser =
+                sightengineApiUser;
+
+        this.sightengineApiSecret =
+                sightengineApiSecret;
+
+        this.aiRejectThreshold =
+                aiRejectThreshold;
+
+        this.aiDetectionEnabled =
+                aiDetectionEnabled;
+
+
+        log.info("");
+        log.info("=================================================");
+        log.info("           ADVANCED OCR SERVICE READY");
+        log.info("=================================================");
+
+        log.info(
+                "AI Detection Enabled: {}",
+                aiDetectionEnabled
+        );
+
+        log.info(
+                "AI Reject Threshold: {}",
+                aiRejectThreshold
+        );
+
+        log.info("=================================================");
+        log.info("");
     }
 
 
-    // ==========================================
+    // =====================================================
     // MAIN OCR METHOD
-    // ==========================================
+    // =====================================================
 
     @Override
     public String extractText(
@@ -58,22 +172,110 @@ public class OCRServiceImpl implements OCRService {
         log.info("=================================================");
 
 
-        validateFile(file);
+        // =================================================
+        // STEP 1 - VALIDATE FILE
+        // =================================================
 
+        validateFile(
+                file
+        );
+
+
+        // =================================================
+        // STEP 2 - READ FILE BYTES
+        // =================================================
+
+        byte[] imageBytes;
+
+        try {
+
+            imageBytes =
+                    file.getBytes();
+
+
+            log.info(
+                    "[STEP 2] Image bytes read successfully: {} bytes",
+                    imageBytes.length
+            );
+
+
+        } catch (IOException exception) {
+
+            log.error(
+                    "Unable to read uploaded image",
+                    exception
+            );
+
+
+            throw new ResponseStatusException(
+
+                    HttpStatus.BAD_REQUEST,
+
+                    "Unable to read uploaded image",
+
+                    exception
+            );
+        }
+
+
+        // =================================================
+        // STEP 3 - AI GENERATED IMAGE DETECTION
+        // =================================================
+
+        if (aiDetectionEnabled) {
+
+            log.info("");
+            log.info("=================================================");
+            log.info("          AI IMAGE DETECTION STARTED");
+            log.info("=================================================");
+
+
+            rejectIfAiGenerated(
+
+                    imageBytes,
+
+                    file.getOriginalFilename()
+            );
+
+
+            log.info(
+                    "AI image verification PASSED"
+            );
+
+
+        } else {
+
+            log.warn(
+                    "AI image detection is DISABLED"
+            );
+        }
+
+
+        // =================================================
+        // STEP 4 - READ IMAGE
+        // =================================================
 
         BufferedImage originalImage =
-                readImage(file);
+                readImageFromBytes(
+                        imageBytes
+                );
 
+
+        // =================================================
+        // STEP 5 - IMAGE INFORMATION
+        // =================================================
 
         logImageInformation(
+
                 file,
+
                 originalImage
         );
 
 
-        // ==========================================
-        // CREATE IMAGE VARIANTS
-        // ==========================================
+        // =================================================
+        // STEP 6 - CREATE IMAGE VARIANTS
+        // =================================================
 
         BufferedImage grayscaleImage =
                 createGrayscaleImage(
@@ -87,67 +289,101 @@ public class OCRServiceImpl implements OCRService {
                 );
 
 
-        // ==========================================
-        // COLLECT RESULTS FROM ALL VARIANTS
-        // ==========================================
+        // =================================================
+        // STEP 7 - COLLECT OCR RESULTS
+        // =================================================
 
         List<OcrResult> allResults =
                 new ArrayList<>();
 
 
+        // -------------------------------------------------
+        // ORIGINAL IMAGE OCR
+        // -------------------------------------------------
+
         allResults.addAll(
+
                 performAllOcr(
+
                         originalImage,
+
                         "ORIGINAL IMAGE"
                 )
         );
 
 
+        // -------------------------------------------------
+        // GRAYSCALE IMAGE OCR
+        // -------------------------------------------------
+
         allResults.addAll(
+
                 performAllOcr(
+
                         grayscaleImage,
+
                         "GRAYSCALE IMAGE"
                 )
         );
 
 
+        // -------------------------------------------------
+        // PROCESSED IMAGE OCR
+        // -------------------------------------------------
+
         allResults.addAll(
+
                 performAllOcr(
+
                         processedImage,
+
                         "PROCESSED IMAGE"
                 )
         );
 
 
-        // ==========================================
-        // REMOVE EMPTY RESULTS
-        // ==========================================
+        // =================================================
+        // STEP 8 - REMOVE EMPTY RESULTS
+        // =================================================
 
         allResults.removeIf(
+
                 result ->
+
                         result.text == null
-                                || result.text.isBlank()
+
+                                ||
+
+                                result.text.isBlank()
         );
 
 
         if (allResults.isEmpty()) {
 
-            throw new RuntimeException(
+            throw new ResponseStatusException(
+
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+
                     "OCR could not detect readable text"
             );
         }
 
 
-        // ==========================================
-        // SORT RESULTS BY QUALITY
-        // ==========================================
+        // =================================================
+        // STEP 9 - SORT RESULTS BY QUALITY
+        // =================================================
 
         allResults.sort(
+
                 Comparator
+
                         .comparingInt(
+
                                 (OcrResult result) ->
+
                                         result.score
                         )
+
                         .reversed()
         );
 
@@ -158,32 +394,48 @@ public class OCRServiceImpl implements OCRService {
         log.info("=================================================");
 
 
-        for (int i = 0;
-             i < allResults.size();
-             i++) {
+        for (
+
+                int i = 0;
+
+                i < allResults.size();
+
+                i++
+
+        ) {
 
             OcrResult result =
                     allResults.get(i);
 
+
             log.info(
+
                     "Rank {} | Image: {} | PSM: {} | Score: {}",
+
                     i + 1,
+
                     result.imageName,
+
                     result.psmMode,
+
                     result.score
             );
         }
 
 
-        // ==========================================
-        // MERGE MULTIPLE GOOD RESULTS
-        // ==========================================
+        // =================================================
+        // STEP 10 - MERGE BEST RESULTS
+        // =================================================
 
         String mergedText =
                 mergeBestResults(
                         allResults
                 );
 
+
+        // =================================================
+        // STEP 11 - ANALYZE FINAL QUALITY
+        // =================================================
 
         OcrQuality finalQuality =
                 analyzeTextQuality(
@@ -199,13 +451,22 @@ public class OCRServiceImpl implements OCRService {
 
         OcrResult finalResult =
                 new OcrResult(
+
                         mergedText,
+
                         finalScore,
+
                         "MERGED RESULT",
+
                         -1,
+
                         finalQuality
                 );
 
+
+        // =================================================
+        // STEP 12 - LOG FINAL RESULT
+        // =================================================
 
         logFinalResult(
                 finalResult
@@ -216,9 +477,377 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
-    // VALIDATE FILE
-    // ==========================================
+    // =====================================================
+    // AI GENERATED IMAGE DETECTION
+    // =====================================================
+
+    private void rejectIfAiGenerated(
+
+            byte[] imageBytes,
+
+            String originalFilename
+
+    ) {
+
+        boolean userConfigured =
+
+                sightengineApiUser != null
+
+                        &&
+
+                        !sightengineApiUser.isBlank();
+
+
+        boolean secretConfigured =
+
+                sightengineApiSecret != null
+
+                        &&
+
+                        !sightengineApiSecret.isBlank();
+
+
+        if (
+
+                !userConfigured
+
+                        ||
+
+                        !secretConfigured
+
+        ) {
+
+            log.error(
+                    "Sightengine credentials are missing"
+            );
+
+
+            throw new ResponseStatusException(
+
+                    HttpStatus.BAD_GATEWAY,
+
+                    "AI image verification service is not configured"
+            );
+        }
+
+
+        // =================================================
+        // CREATE IMAGE RESOURCE
+        // =================================================
+
+        ByteArrayResource imageResource =
+
+                new ByteArrayResource(
+
+                        imageBytes
+
+                ) {
+
+                    @Override
+                    public String getFilename() {
+
+                        if (
+
+                                originalFilename == null
+
+                                        ||
+
+                                        originalFilename.isBlank()
+
+                        ) {
+
+                            return "prescription-image.jpg";
+                        }
+
+
+                        return originalFilename;
+                    }
+                };
+
+
+        // =================================================
+        // REQUEST BODY
+        // =================================================
+
+        MultiValueMap<String, Object> body =
+                new LinkedMultiValueMap<>();
+
+
+        body.add(
+
+                "media",
+
+                imageResource
+        );
+
+
+        body.add(
+
+                "models",
+
+                "genai"
+        );
+
+
+        body.add(
+
+                "api_user",
+
+                sightengineApiUser
+        );
+
+
+        body.add(
+
+                "api_secret",
+
+                sightengineApiSecret
+        );
+
+
+        // =================================================
+        // HEADERS
+        // =================================================
+
+        HttpHeaders headers =
+                new HttpHeaders();
+
+
+        headers.setContentType(
+                MediaType.MULTIPART_FORM_DATA
+        );
+
+
+        try {
+
+            log.info(
+                    "Sending image to AI detection service..."
+            );
+
+
+            ResponseEntity<String> response =
+
+                    restTemplate.postForEntity(
+
+                            AI_DETECTION_URL,
+
+                            new HttpEntity<>(
+
+                                    body,
+
+                                    headers
+                            ),
+
+                            String.class
+                    );
+
+
+            // =============================================
+            // CHECK RESPONSE
+            // =============================================
+
+            if (
+
+                    response.getBody() == null
+
+                            ||
+
+                            response.getBody().isBlank()
+
+            ) {
+
+                throw new ResponseStatusException(
+
+                        HttpStatus.BAD_GATEWAY,
+
+                        "AI image verification returned an empty response"
+                );
+            }
+
+
+            log.info(
+                    "AI Detection Response: {}",
+                    response.getBody()
+            );
+
+
+            // =============================================
+            // PARSE JSON
+            // =============================================
+
+            JsonNode root =
+
+                    objectMapper.readTree(
+
+                            response.getBody()
+                    );
+
+
+            // =============================================
+            // CHECK PROVIDER STATUS
+            // =============================================
+
+            String providerStatus =
+
+                    root.path("status")
+
+                            .asText();
+
+
+            if (
+
+                    !"success".equals(
+                            providerStatus
+                    )
+
+            ) {
+
+                log.error(
+                        "AI verification failed: {}",
+                        root
+                );
+
+
+                throw new ResponseStatusException(
+
+                        HttpStatus.BAD_GATEWAY,
+
+                        "AI image verification failed"
+                );
+            }
+
+
+            // =============================================
+            // GET AI SCORE
+            // =============================================
+
+            JsonNode aiNode =
+
+                    root
+
+                            .path("type")
+
+                            .path("ai_generated");
+
+
+            double aiScore =
+
+                    aiNode.asDouble(
+                            -1
+                    );
+
+
+            if (aiScore < 0) {
+
+                log.error(
+                        "AI generated score missing: {}",
+                        root
+                );
+
+
+                throw new ResponseStatusException(
+
+                        HttpStatus.BAD_GATEWAY,
+
+                        "AI image verification returned no confidence score"
+                );
+            }
+
+
+            log.info(
+                    "AI Generated Score: {}",
+                    aiScore
+            );
+
+
+            log.info(
+                    "AI Reject Threshold: {}",
+                    aiRejectThreshold
+            );
+
+
+            // =============================================
+            // REJECT AI IMAGE
+            // =============================================
+
+            if (
+
+                    aiScore >= aiRejectThreshold
+
+            ) {
+
+                log.warn(
+                        "IMAGE REJECTED - AI Score: {}",
+                        aiScore
+                );
+
+
+                throw new ResponseStatusException(
+
+                        HttpStatus.UNPROCESSABLE_ENTITY,
+
+                        "This prescription image appears to be "
+                                +
+
+                                "AI-generated or AI-edited. "
+
+                                +
+
+                                "Please upload an original prescription image."
+                );
+            }
+
+
+            log.info(
+                    "IMAGE PASSED AI DETECTION"
+            );
+
+
+        } catch (RestClientException exception) {
+
+            log.error(
+
+                    "Sightengine request failed",
+
+                    exception
+            );
+
+
+            throw new ResponseStatusException(
+
+                    HttpStatus.BAD_GATEWAY,
+
+                    "Could not verify whether the prescription is AI-generated",
+
+                    exception
+            );
+
+
+        } catch (IOException exception) {
+
+            log.error(
+
+                    "Unable to parse AI detection response",
+
+                    exception
+            );
+
+
+            throw new ResponseStatusException(
+
+                    HttpStatus.BAD_GATEWAY,
+
+                    "Could not read AI image verification response",
+
+                    exception
+            );
+        }
+    }
+
+
+    // =====================================================
+    // FILE VALIDATION
+    // =====================================================
 
     private void validateFile(
             MultipartFile file
@@ -231,15 +860,21 @@ public class OCRServiceImpl implements OCRService {
 
         if (file == null) {
 
-            throw new IllegalArgumentException(
-                    "File cannot be null"
+            throw new ResponseStatusException(
+
+                    HttpStatus.BAD_REQUEST,
+
+                    "Please upload an image file"
             );
         }
 
 
         if (file.isEmpty()) {
 
-            throw new IllegalArgumentException(
+            throw new ResponseStatusException(
+
+                    HttpStatus.BAD_REQUEST,
+
                     "Uploaded file is empty"
             );
         }
@@ -267,10 +902,22 @@ public class OCRServiceImpl implements OCRService {
         );
 
 
-        if (contentType == null ||
-                !contentType.startsWith("image/")) {
+        if (
 
-            throw new IllegalArgumentException(
+                contentType == null
+
+                        ||
+
+                        !contentType.startsWith(
+                                "image/"
+                        )
+
+        ) {
+
+            throw new ResponseStatusException(
+
+                    HttpStatus.BAD_REQUEST,
+
                     "Only image files are supported"
             );
         }
@@ -282,25 +929,35 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
-    // READ IMAGE
-    // ==========================================
+    // =====================================================
+    // READ IMAGE FROM BYTES
+    // =====================================================
 
-    private BufferedImage readImage(
-            MultipartFile file
+    private BufferedImage readImageFromBytes(
+
+            byte[] imageBytes
+
     ) {
 
         try {
 
             BufferedImage image =
+
                     ImageIO.read(
-                            file.getInputStream()
+
+                            new ByteArrayInputStream(
+
+                                    imageBytes
+                            )
                     );
 
 
             if (image == null) {
 
-                throw new RuntimeException(
+                throw new ResponseStatusException(
+
+                        HttpStatus.BAD_REQUEST,
+
                         "Invalid or unsupported image"
                 );
             }
@@ -312,25 +969,35 @@ public class OCRServiceImpl implements OCRService {
         } catch (IOException exception) {
 
             log.error(
+
                     "Unable to read uploaded image",
+
                     exception
             );
 
 
-            throw new RuntimeException(
-                    "Unable to read uploaded image"
+            throw new ResponseStatusException(
+
+                    HttpStatus.BAD_REQUEST,
+
+                    "Unable to read uploaded image",
+
+                    exception
             );
         }
     }
 
 
-    // ==========================================
+    // =====================================================
     // IMAGE INFORMATION
-    // ==========================================
+    // =====================================================
 
     private void logImageInformation(
+
             MultipartFile file,
+
             BufferedImage image
+
     ) {
 
         log.info("");
@@ -338,44 +1005,57 @@ public class OCRServiceImpl implements OCRService {
         log.info("[IMAGE INFORMATION]");
         log.info("=================================================");
 
+
         log.info(
                 "File Name: {}",
                 file.getOriginalFilename()
         );
+
 
         log.info(
                 "Width: {} px",
                 image.getWidth()
         );
 
+
         log.info(
                 "Height: {} px",
                 image.getHeight()
         );
+
 
         log.info(
                 "Image Type: {}",
                 image.getType()
         );
 
+
         log.info("=================================================");
     }
 
 
-    // ==========================================
-    // PERFORM ALL OCR RESULTS
-    // ==========================================
+    // =====================================================
+    // PERFORM ALL OCR MODES
+    // =====================================================
 
     private List<OcrResult> performAllOcr(
+
             BufferedImage image,
+
             String imageName
+
     ) {
 
         int[] psmModes = {
+
                 3,
+
                 4,
+
                 6,
+
                 11,
+
                 12
         };
 
@@ -384,50 +1064,60 @@ public class OCRServiceImpl implements OCRService {
                 new ArrayList<>();
 
 
-        log.info("");
-        log.info("=================================================");
-        log.info(
-                "STARTING OCR FOR {}",
-                imageName
-        );
-        log.info("=================================================");
+        for (
 
+                int psmMode : psmModes
 
-        for (int psmMode : psmModes) {
+        ) {
 
             try {
 
                 String rawText =
+
                         executeOcr(
+
                                 image,
+
                                 psmMode
                         );
 
 
                 String cleanedText =
+
                         cleanText(
+
                                 rawText
                         );
 
 
                 OcrQuality quality =
+
                         analyzeTextQuality(
+
                                 cleanedText
                         );
 
 
                 int score =
+
                         calculateTextScore(
+
                                 quality
                         );
 
 
                 OcrResult result =
+
                         new OcrResult(
+
                                 cleanedText,
+
                                 score,
+
                                 imageName,
+
                                 psmMode,
+
                                 quality
                         );
 
@@ -445,9 +1135,13 @@ public class OCRServiceImpl implements OCRService {
             } catch (TesseractException exception) {
 
                 log.error(
+
                         "OCR FAILED | Image: {} | PSM: {}",
+
                         imageName,
+
                         psmMode,
+
                         exception
                 );
             }
@@ -458,13 +1152,16 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
+    // =====================================================
     // EXECUTE OCR
-    // ==========================================
+    // =====================================================
 
     private String executeOcr(
+
             BufferedImage image,
+
             int psmMode
+
     ) throws TesseractException {
 
         synchronized (tesseract) {
@@ -481,37 +1178,49 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
+    // =====================================================
     // CREATE GRAYSCALE IMAGE
-    // ==========================================
+    // =====================================================
 
     private BufferedImage createGrayscaleImage(
+
             BufferedImage originalImage
+
     ) {
 
         int width =
                 originalImage.getWidth();
+
 
         int height =
                 originalImage.getHeight();
 
 
         BufferedImage grayscaleImage =
+
                 new BufferedImage(
+
                         width,
+
                         height,
+
                         BufferedImage.TYPE_BYTE_GRAY
                 );
 
 
         Graphics2D graphics =
+
                 grayscaleImage.createGraphics();
 
 
         graphics.drawImage(
+
                 originalImage,
+
                 0,
+
                 0,
+
                 null
         );
 
@@ -523,12 +1232,14 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
-    // PREPROCESS IMAGE
-    // ==========================================
+    // =====================================================
+    // IMAGE PREPROCESSING
+    // =====================================================
 
     private BufferedImage preprocessImage(
+
             BufferedImage originalImage
+
     ) {
 
         log.info(
@@ -540,39 +1251,60 @@ public class OCRServiceImpl implements OCRService {
 
 
         int newWidth =
+
                 originalImage.getWidth()
-                        * scaleFactor;
+
+                        *
+
+                        scaleFactor;
 
 
         int newHeight =
+
                 originalImage.getHeight()
-                        * scaleFactor;
+
+                        *
+
+                        scaleFactor;
 
 
         BufferedImage scaledImage =
+
                 new BufferedImage(
+
                         newWidth,
+
                         newHeight,
+
                         BufferedImage.TYPE_INT_RGB
                 );
 
 
         Graphics2D graphics =
+
                 scaledImage.createGraphics();
 
 
         graphics.setRenderingHint(
+
                 RenderingHints.KEY_INTERPOLATION,
+
                 RenderingHints.VALUE_INTERPOLATION_BICUBIC
         );
 
 
         graphics.drawImage(
+
                 originalImage,
+
                 0,
+
                 0,
+
                 newWidth,
+
                 newHeight,
+
                 null
         );
 
@@ -581,39 +1313,73 @@ public class OCRServiceImpl implements OCRService {
 
 
         BufferedImage processedImage =
+
                 new BufferedImage(
+
                         newWidth,
+
                         newHeight,
+
                         BufferedImage.TYPE_BYTE_GRAY
                 );
 
 
-        for (int y = 0;
-             y < newHeight;
-             y++) {
+        for (
 
-            for (int x = 0;
-                 x < newWidth;
-                 x++) {
+                int y = 0;
+
+                y < newHeight;
+
+                y++
+
+        ) {
+
+            for (
+
+                    int x = 0;
+
+                    x < newWidth;
+
+                    x++
+
+            ) {
 
                 Color color =
+
                         new Color(
+
                                 scaledImage.getRGB(
+
                                         x,
+
                                         y
                                 )
                         );
 
 
                 int gray =
+
                         (
+
                                 color.getRed()
-                                        + color.getGreen()
-                                        + color.getBlue()
-                        ) / 3;
+
+                                        +
+
+                                        color.getGreen()
+
+                                        +
+
+                                        color.getBlue()
+
+                        )
+
+                                /
+
+                                3;
 
 
                 int value;
+
 
                 if (gray > 180) {
 
@@ -626,16 +1392,23 @@ public class OCRServiceImpl implements OCRService {
 
 
                 Color processedColor =
+
                         new Color(
+
                                 value,
+
                                 value,
+
                                 value
                         );
 
 
                 processedImage.setRGB(
+
                         x,
+
                         y,
+
                         processedColor.getRGB()
                 );
             }
@@ -646,10 +1419,9 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
-    // CLEAN TEXT
-    // IMPORTANT: PRESERVE LINE STRUCTURE
-    // ==========================================
+    // =====================================================
+    // CLEAN OCR TEXT
+    // =====================================================
 
     private String cleanText(
             String text
@@ -684,19 +1456,15 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
-    // MERGE BEST RESULTS
-    // ==========================================
+    // =====================================================
+    // MERGE BEST OCR RESULTS
+    // =====================================================
 
     private String mergeBestResults(
+
             List<OcrResult> results
+
     ) {
-
-        log.info("");
-        log.info("=================================================");
-        log.info("          MULTI-RESULT OCR MERGING");
-        log.info("=================================================");
-
 
         if (results.isEmpty()) {
 
@@ -704,43 +1472,37 @@ public class OCRServiceImpl implements OCRService {
         }
 
 
-        /*
-         * LinkedHashSet preserves insertion order.
-         *
-         * The best OCR result is processed first.
-         * Additional unique lines from other OCR results
-         * are then added.
-         */
-
         Set<String> uniqueLines =
                 new LinkedHashSet<>();
 
 
         int maxResultsToMerge =
+
                 Math.min(
+
                         6,
+
                         results.size()
                 );
 
 
-        for (int i = 0;
-             i < maxResultsToMerge;
-             i++) {
+        for (
+
+                int i = 0;
+
+                i < maxResultsToMerge;
+
+                i++
+
+        ) {
 
             OcrResult result =
+
                     results.get(i);
 
 
-            log.info(
-                    "Merging Result {} | Image: {} | PSM: {} | Score: {}",
-                    i + 1,
-                    result.imageName,
-                    result.psmMode,
-                    result.score
-            );
-
-
             String[] lines =
+
                     result.text.split(
                             "\\n"
                     );
@@ -749,67 +1511,33 @@ public class OCRServiceImpl implements OCRService {
             for (String line : lines) {
 
                 String cleanedLine =
+
                         normalizeLine(
                                 line
                         );
 
 
-                if (shouldKeepLine(
-                        cleanedLine
-                )) {
+                if (
 
-                    if (!containsSimilarLine(
-                            uniqueLines,
-                            cleanedLine
-                    )) {
+                        shouldKeepLine(
+                                cleanedLine
+                        )
+
+                ) {
+
+                    if (
+
+                            !containsSimilarLine(
+
+                                    uniqueLines,
+
+                                    cleanedLine
+                            )
+
+                    ) {
 
                         uniqueLines.add(
                                 cleanedLine
-                        );
-
-
-                        log.info(
-                                "ADDED UNIQUE LINE: {}",
-                                cleanedLine
-                        );
-                    }
-                }
-            }
-        }
-
-
-        /*
-         * Sometimes OCR does not return line breaks.
-         * In that case, add meaningful full text
-         * from other results as a fallback.
-         */
-
-        if (uniqueLines.size() <= 1) {
-
-            log.info(
-                    "Few lines detected. Applying fallback text merge."
-            );
-
-
-            for (OcrResult result : results) {
-
-                String normalizedText =
-                        normalizeLine(
-                                result.text
-                        );
-
-
-                if (shouldKeepLine(
-                        normalizedText
-                )) {
-
-                    if (!containsSimilarLine(
-                            uniqueLines,
-                            normalizedText
-                    )) {
-
-                        uniqueLines.add(
-                                normalizedText
                         );
                     }
                 }
@@ -824,31 +1552,24 @@ public class OCRServiceImpl implements OCRService {
         for (String line : uniqueLines) {
 
             mergedText
+
                     .append(line)
+
                     .append("\n");
         }
 
 
-        String finalText =
-                mergedText
-                        .toString()
-                        .trim();
+        return mergedText
 
+                .toString()
 
-        log.info("");
-        log.info("MERGED UNIQUE LINES: {}", uniqueLines.size());
-        log.info("FINAL MERGED TEXT:");
-        log.info("");
-        log.info("{}", finalText);
-
-
-        return finalText;
+                .trim();
     }
 
 
-    // ==========================================
-    // NORMALIZE LINE FOR COMPARISON
-    // ==========================================
+    // =====================================================
+    // NORMALIZE LINE
+    // =====================================================
 
     private String normalizeLine(
             String text
@@ -871,49 +1592,56 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
-    // SHOULD KEEP OCR LINE
-    // ==========================================
+    // =====================================================
+    // SHOULD KEEP LINE
+    // =====================================================
 
     private boolean shouldKeepLine(
             String line
     ) {
 
-        if (line == null ||
-                line.isBlank()) {
+        if (
+
+                line == null
+
+                        ||
+
+                        line.isBlank()
+
+        ) {
 
             return false;
         }
 
 
         String letters =
+
                 line.replaceAll(
+
                         "[^A-Za-z]",
+
                         ""
                 );
 
-
-        /*
-         * Avoid adding meaningless OCR noise.
-         *
-         * But we should not be too strict because
-         * medicine names can be short.
-         */
 
         return letters.length() >= 3;
     }
 
 
-    // ==========================================
+    // =====================================================
     // DETECT SIMILAR LINES
-    // ==========================================
+    // =====================================================
 
     private boolean containsSimilarLine(
+
             Set<String> existingLines,
+
             String newLine
+
     ) {
 
         String normalizedNewLine =
+
                 normalizeForComparison(
                         newLine
                 );
@@ -922,38 +1650,48 @@ public class OCRServiceImpl implements OCRService {
         for (String existingLine : existingLines) {
 
             String normalizedExisting =
+
                     normalizeForComparison(
                             existingLine
                     );
 
 
-            if (normalizedExisting.equals(
-                    normalizedNewLine
-            )) {
+            if (
+
+                    normalizedExisting.equals(
+                            normalizedNewLine
+                    )
+
+            ) {
 
                 return true;
             }
 
 
-            /*
-             * Prevent duplicate results where OCR
-             * changes only a few spaces or symbols.
-             */
+            if (
 
-            if (normalizedExisting.contains(
-                    normalizedNewLine
-            ) ||
-                    normalizedNewLine.contains(
-                            normalizedExisting
-                    )) {
+                    normalizedExisting.contains(
+                            normalizedNewLine
+                    )
+
+                            ||
+
+                            normalizedNewLine.contains(
+                                    normalizedExisting
+                            )
+
+            ) {
 
                 return true;
             }
 
 
             double similarity =
+
                     calculateSimilarity(
+
                             normalizedExisting,
+
                             normalizedNewLine
                     );
 
@@ -969,97 +1707,158 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
+    // =====================================================
     // STRING SIMILARITY
-    // ==========================================
+    // =====================================================
 
     private double calculateSimilarity(
+
             String first,
+
             String second
+
     ) {
 
-        if (first.isEmpty() ||
-                second.isEmpty()) {
+        if (
+
+                first.isEmpty()
+
+                        ||
+
+                        second.isEmpty()
+
+        ) {
 
             return 0;
         }
 
 
         int distance =
+
                 levenshteinDistance(
+
                         first,
+
                         second
                 );
 
 
         int maxLength =
+
                 Math.max(
+
                         first.length(),
+
                         second.length()
                 );
 
 
-        return 1.0 -
+        return 1.0
+
+                -
+
                 (
+
                         (double) distance
-                                / maxLength
+
+                                /
+
+                                maxLength
                 );
     }
 
 
-    // ==========================================
+    // =====================================================
     // LEVENSHTEIN DISTANCE
-    // ==========================================
+    // =====================================================
 
     private int levenshteinDistance(
+
             String first,
+
             String second
+
     ) {
 
         int[] previous =
+
                 new int[
                         second.length() + 1
                 ];
 
 
         int[] current =
+
                 new int[
                         second.length() + 1
                 ];
 
 
-        for (int j = 0;
-             j <= second.length();
-             j++) {
+        for (
+
+                int j = 0;
+
+                j <= second.length();
+
+                j++
+
+        ) {
 
             previous[j] = j;
         }
 
 
-        for (int i = 1;
-             i <= first.length();
-             i++) {
+        for (
+
+                int i = 1;
+
+                i <= first.length();
+
+                i++
+
+        ) {
 
             current[0] = i;
 
 
-            for (int j = 1;
-                 j <= second.length();
-                 j++) {
+            for (
+
+                    int j = 1;
+
+                    j <= second.length();
+
+                    j++
+
+            ) {
 
                 int cost =
+
                         first.charAt(i - 1)
-                                == second.charAt(j - 1)
-                                ? 0
-                                : 1;
+
+                                ==
+
+                                second.charAt(j - 1)
+
+                                ?
+
+                                0
+
+                                :
+
+                                1;
 
 
                 current[j] =
+
                         Math.min(
+
                                 Math.min(
+
                                         current[j - 1] + 1,
+
                                         previous[j] + 1
                                 ),
+
                                 previous[j - 1] + cost
                         );
             }
@@ -1068,8 +1867,10 @@ public class OCRServiceImpl implements OCRService {
             int[] temporary =
                     previous;
 
+
             previous =
                     current;
+
 
             current =
                     temporary;
@@ -1078,16 +1879,18 @@ public class OCRServiceImpl implements OCRService {
 
         return previous[
                 second.length()
-                ];
+        ];
     }
 
 
-    // ==========================================
+    // =====================================================
     // NORMALIZE FOR COMPARISON
-    // ==========================================
+    // =====================================================
 
     private String normalizeForComparison(
+
             String text
+
     ) {
 
         return text
@@ -1095,7 +1898,9 @@ public class OCRServiceImpl implements OCRService {
                 .toLowerCase()
 
                 .replaceAll(
+
                         "[^a-z0-9]",
+
                         ""
                 )
 
@@ -1103,20 +1908,29 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
-    // ANALYZE TEXT QUALITY
-    // ==========================================
+    // =====================================================
+    // ANALYZE OCR TEXT QUALITY
+    // =====================================================
 
     private OcrQuality analyzeTextQuality(
+
             String text
+
     ) {
 
         OcrQuality quality =
                 new OcrQuality();
 
 
-        if (text == null ||
-                text.isBlank()) {
+        if (
+
+                text == null
+
+                        ||
+
+                        text.isBlank()
+
+        ) {
 
             return quality;
         }
@@ -1127,6 +1941,7 @@ public class OCRServiceImpl implements OCRService {
 
 
         String[] words =
+
                 text.split(
                         "\\s+"
                 );
@@ -1136,21 +1951,40 @@ public class OCRServiceImpl implements OCRService {
                 words.length;
 
 
-        for (char character :
-                text.toCharArray()) {
+        for (
 
-            if (Character.isLetter(character)) {
+                char character :
+
+                text.toCharArray()
+
+        ) {
+
+            if (
+
+                    Character.isLetter(
+                            character
+                    )
+
+            ) {
 
                 quality.letters++;
 
             } else if (
-                    Character.isDigit(character)
+
+                    Character.isDigit(
+                            character
+                    )
+
             ) {
 
                 quality.digits++;
 
             } else if (
-                    Character.isWhitespace(character)
+
+                    Character.isWhitespace(
+                            character
+                    )
+
             ) {
 
                 quality.spaces++;
@@ -1165,7 +1999,9 @@ public class OCRServiceImpl implements OCRService {
         for (String word : words) {
 
             analyzeWord(
+
                     word,
+
                     quality
             );
         }
@@ -1180,18 +2016,24 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
+    // =====================================================
     // ANALYZE WORD
-    // ==========================================
+    // =====================================================
 
     private void analyzeWord(
+
             String word,
+
             OcrQuality quality
+
     ) {
 
         String lettersOnly =
+
                 word.replaceAll(
+
                         "[^A-Za-z]",
+
                         ""
                 );
 
@@ -1204,11 +2046,6 @@ public class OCRServiceImpl implements OCRService {
         }
 
 
-        /*
-         * Short medicine names should not be
-         * automatically considered garbage.
-         */
-
         if (lettersOnly.length() <= 2) {
 
             quality.shortWords++;
@@ -1217,10 +2054,16 @@ public class OCRServiceImpl implements OCRService {
         }
 
 
-        if (isSuspiciousWord(
-                word,
-                lettersOnly
-        )) {
+        if (
+
+                isSuspiciousWord(
+
+                        word,
+
+                        lettersOnly
+                )
+
+        ) {
 
             quality.suspiciousWords++;
 
@@ -1232,22 +2075,36 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
+    // =====================================================
     // SUSPICIOUS WORD DETECTION
-    // ==========================================
+    // =====================================================
 
     private boolean isSuspiciousWord(
+
             String originalWord,
+
             String lettersOnly
+
     ) {
 
         int symbolCount =
+
                 originalWord.length()
-                        - lettersOnly.length();
+
+                        -
+
+                        lettersOnly.length();
 
 
-        if (symbolCount >
-                lettersOnly.length()) {
+        if (
+
+                symbolCount
+
+                        >
+
+                        lettersOnly.length()
+
+        ) {
 
             return true;
         }
@@ -1257,16 +2114,31 @@ public class OCRServiceImpl implements OCRService {
                 new int[26];
 
 
-        for (char character :
-                lettersOnly.toLowerCase()
-                        .toCharArray()) {
+        for (
 
-            if (character >= 'a' &&
-                    character <= 'z') {
+                char character :
+
+                lettersOnly
+
+                        .toLowerCase()
+
+                        .toCharArray()
+
+        ) {
+
+            if (
+
+                    character >= 'a'
+
+                            &&
+
+                            character <= 'z'
+
+            ) {
 
                 frequency[
                         character - 'a'
-                        ]++;
+                ]++;
             }
         }
 
@@ -1284,64 +2156,88 @@ public class OCRServiceImpl implements OCRService {
         }
 
 
-        return highestFrequency >
+        return highestFrequency
+
+                >
+
                 lettersOnly.length() * 0.75;
     }
 
 
-    // ==========================================
+    // =====================================================
     // CALCULATE RATIOS
-    // ==========================================
+    // =====================================================
 
     private void calculateRatios(
             OcrQuality quality
     ) {
 
-        if (quality.totalCharacters > 0) {
+        if (
+                quality.totalCharacters > 0
+        ) {
 
             quality.alphabeticRatio =
+
                     percentage(
+
                             quality.letters,
+
                             quality.totalCharacters
                     );
 
 
             quality.symbolRatio =
+
                     percentage(
+
                             quality.symbols,
+
                             quality.totalCharacters
                     );
         }
 
 
-        if (quality.totalWords > 0) {
+        if (
+                quality.totalWords > 0
+        ) {
 
             quality.meaningfulWordRatio =
+
                     percentage(
+
                             quality.meaningfulWords,
+
                             quality.totalWords
                     );
 
 
             quality.garbageWordRatio =
+
                     percentage(
+
                             quality.garbageWords
-                                    + quality.suspiciousWords,
+
+                                    +
+
+                                    quality.suspiciousWords,
+
                             quality.totalWords
                     );
         }
     }
 
 
-    // ==========================================
-    // OCR SCORING
-    // ==========================================
+    // =====================================================
+    // OCR QUALITY SCORING
+    // =====================================================
 
     private int calculateTextScore(
             OcrQuality quality
     ) {
 
-        if (quality.totalCharacters == 0) {
+        if (
+                quality.totalCharacters == 0
+        ) {
 
             return -1000;
         }
@@ -1358,7 +2254,9 @@ public class OCRServiceImpl implements OCRService {
                 quality.digits * 3;
 
 
-        if (quality.alphabeticRatio >= 70) {
+        if (
+                quality.alphabeticRatio >= 70
+        ) {
 
             score += 40;
 
@@ -1370,7 +2268,9 @@ public class OCRServiceImpl implements OCRService {
         }
 
 
-        if (quality.meaningfulWordRatio >= 60) {
+        if (
+                quality.meaningfulWordRatio >= 60
+        ) {
 
             score += 60;
 
@@ -1400,7 +2300,9 @@ public class OCRServiceImpl implements OCRService {
                 quality.symbols * 4;
 
 
-        if (quality.garbageWordRatio >= 50) {
+        if (
+                quality.garbageWordRatio >= 50
+        ) {
 
             score -= 80;
 
@@ -1412,7 +2314,9 @@ public class OCRServiceImpl implements OCRService {
         }
 
 
-        if (quality.symbolRatio >= 20) {
+        if (
+                quality.symbolRatio >= 20
+        ) {
 
             score -= 50;
         }
@@ -1422,58 +2326,29 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
+    // =====================================================
     // LOG OCR RESULT
-    // ==========================================
+    // =====================================================
 
     private void logOcrResult(
             OcrResult result
     ) {
 
-        log.info("");
-        log.info("========== OCR QUALITY REPORT ==========");
-
         log.info(
-                "Image: {}",
-                result.imageName
-        );
+                "OCR | Image: {} | PSM: {} | Score: {}",
 
-        log.info(
-                "PSM Mode: {}",
-                result.psmMode
-        );
+                result.imageName,
 
-        log.info(
-                "Score: {}",
+                result.psmMode,
+
                 result.score
         );
-
-        log.info(
-                "Meaningful Words: {}",
-                result.quality.meaningfulWords
-        );
-
-        log.info(
-                "Garbage Words: {}",
-                result.quality.garbageWords
-        );
-
-        log.info(
-                "OCR TEXT:"
-        );
-
-        log.info(
-                "{}",
-                result.text
-        );
-
-        log.info("=========================================");
     }
 
 
-    // ==========================================
+    // =====================================================
     // FINAL RESULT LOGGING
-    // ==========================================
+    // =====================================================
 
     private void logFinalResult(
             OcrResult result
@@ -1484,36 +2359,41 @@ public class OCRServiceImpl implements OCRService {
         log.info("              FINAL OCR RESULT");
         log.info("=================================================");
 
+
         log.info(
                 "Result Type: {}",
                 result.imageName
         );
+
 
         log.info(
                 "Final Score: {}",
                 result.score
         );
 
+
         log.info(
                 "Meaningful Words: {}",
                 result.quality.meaningfulWords
         );
+
 
         log.info(
                 "Garbage Words: {}",
                 result.quality.garbageWords
         );
 
+
         log.info(
                 "Final OCR Text:"
         );
 
-        log.info("");
 
         log.info(
                 "{}",
                 result.text
         );
+
 
         log.info("=================================================");
         log.info("OCR REQUEST COMPLETED");
@@ -1521,13 +2401,16 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
+    // =====================================================
     // PERCENTAGE HELPER
-    // ==========================================
+    // =====================================================
 
     private double percentage(
+
             int value,
+
             int total
+
     ) {
 
         if (total == 0) {
@@ -1537,20 +2420,34 @@ public class OCRServiceImpl implements OCRService {
 
 
         return Math.round(
+
                 (
+
                         (double) value
-                                / total
-                                * 10000
+
+                                /
+
+                                total
+
+                                *
+
+                                10000
                 )
-        ) / 100.0;
+
+        )
+
+                /
+
+                100.0;
     }
 
 
-    // ==========================================
-    // OCR RESULT
-    // ==========================================
+    // =====================================================
+    // OCR RESULT DATA CLASS
+    // =====================================================
 
     private static class OcrResult {
+
 
         private final String text;
 
@@ -1564,11 +2461,17 @@ public class OCRServiceImpl implements OCRService {
 
 
         public OcrResult(
+
                 String text,
+
                 int score,
+
                 String imageName,
+
                 int psmMode,
+
                 OcrQuality quality
+
         ) {
 
             this.text =
@@ -1589,11 +2492,12 @@ public class OCRServiceImpl implements OCRService {
     }
 
 
-    // ==========================================
-    // OCR QUALITY DATA
-    // ==========================================
+    // =====================================================
+    // OCR QUALITY DATA CLASS
+    // =====================================================
 
     private static class OcrQuality {
+
 
         private int totalCharacters;
 
@@ -1624,3 +2528,4 @@ public class OCRServiceImpl implements OCRService {
         private double symbolRatio;
     }
 }
+
