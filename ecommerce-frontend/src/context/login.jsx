@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
+import OAuth2Redirect from "../pages/OAuth2Redirect";
 
 import {
     loginUser,
@@ -201,6 +202,8 @@ const Login = () => {
         console.log(
             "GOOGLE LOGIN STARTED"
         );
+        window.location.href =
+            "https://accounts.google.com/oauth2/authorization/google";
 
         loginWithGoogle();
     };

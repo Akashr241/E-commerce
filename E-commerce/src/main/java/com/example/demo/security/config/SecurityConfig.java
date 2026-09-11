@@ -332,13 +332,32 @@ private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHand
                 // ==========================================
                 // GOOGLE OAUTH2 LOGIN
                 // ==========================================
+.oauth2Login(oauth2 -> oauth2
 
-                .oauth2Login(oauth2 -> oauth2
         .successHandler(
                 oAuth2AuthenticationSuccessHandler
-        ))
+        )
 
+        .failureHandler((request, response, exception) -> {
 
+            System.out.println("========================================");
+            System.out.println("GOOGLE OAUTH LOGIN FAILED");
+            System.out.println(
+                    "Exception: "
+                    + exception.getClass().getName()
+            );
+            System.out.println(
+                    "Message: "
+                    + exception.getMessage()
+            );
+            System.out.println("========================================");
+
+            response.sendRedirect(
+                    "http://localhost:3000/login?oauth2Error=true"
+            );
+        })
+)
+                
 
 
                 // ==========================================

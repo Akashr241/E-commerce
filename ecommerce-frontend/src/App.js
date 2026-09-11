@@ -23,7 +23,7 @@ import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import Prescription from "./components/Prescription";
 import "./App.css";
-
+import OAuth2Redirect from "./pages/OAuth2Redirect";
 import Payment from "./pages/Payment";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFailure from "./pages/PaymentFailure";
@@ -78,6 +78,10 @@ function App() {
                         </ProtectedPage>
                     }
                 />
+                <Route
+    path="/oauth2/redirect"
+    element={<OAuth2Redirect />}
+/>
 
                 <Route
                     path="/products"
