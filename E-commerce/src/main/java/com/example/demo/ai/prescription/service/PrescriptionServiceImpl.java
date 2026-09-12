@@ -1,8 +1,12 @@
 package com.example.demo.ai.prescription.service;
 
 import com.example.demo.ai.chatbot.client.GeminiClient;
+import com.example.demo.ai.prescription.dto.MedicineResponseDto;
 import com.example.demo.ai.prescription.dto.PrescriptionResponseDto;
 import com.example.demo.ai.prescription.util.MedicineNameNormalizer;
+import com.example.demo.product.entity.Product;
+import com.example.demo.product.repository.ProductRepository;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -18,17 +22,21 @@ public class PrescriptionServiceImpl
     private final GeminiClient geminiClient;
     private final ObjectMapper objectMapper;
     private final MedicineService medicineService;
+    private final ProductRepository productRepository;
     private final MedicineNameNormalizer normalizer;
+
 
     public PrescriptionServiceImpl(
             GeminiClient geminiClient,
             ObjectMapper objectMapper,
             MedicineService medicineService,
+            ProductRepository productRepository,
             MedicineNameNormalizer normalizer) {
 
         this.geminiClient = geminiClient;
         this.objectMapper = objectMapper;
         this.medicineService = medicineService;
+        this.productRepository = productRepository;
         this.normalizer = normalizer;
     }
 
@@ -214,94 +222,186 @@ public class PrescriptionServiceImpl
 
 
                 // ======================================
-                // STEP 5: SEARCH DATABASE
+                // STEP 5: EXISTING MEDICINE SEARCH
+                // ======================================
+                //
+                // We reuse your existing:
+                //
+                // MedicineService
+                // MedicineRepository
+                // MedicineSearchRanker
+                //
+                // This part is responsible for
+                // finding the best medicine match.
                 // ======================================
 
-                var results =
+                List<MedicineResponseDto> medicineResults =
                         medicineService.searchMedicine(
                                 normalizedName
                         );
 
 
                 System.out.println(
-                        "Database Matches: "
-                                + results.size()
+                        "Medicine Matches: "
+                                + medicineResults.size()
                 );
 
 
                 // ======================================
-                // STEP 6: BEST MATCH
+                // STEP 6: GET BEST MEDICINE
                 // ======================================
 
-                if (!results.isEmpty()) {
+                if (!medicineResults.isEmpty()) {
 
-                    var bestMedicine =
-                            results.get(0);
-
-
-                    PrescriptionResponseDto dto =
-                            new PrescriptionResponseDto();
-
-
-                    // AI information
-                    dto.setMedicineName(
-                            medicineName
-                    );
-
-                    dto.setDosage(
-                            dosage
-                    );
-
-                    dto.setFrequency(
-                            frequency
-                    );
-
-                    dto.setDuration(
-                            duration
-                    );
-
-
-                    // Database information
-                    dto.setProductId(
-                            bestMedicine.getId()
-                    );
-
-                    dto.setProductName(
-                            bestMedicine.getName()
-                    );
-
-                    dto.setPrice(
-                            bestMedicine.getPrice()
-                    );
-
-                    dto.setManufacturerName(
-                            bestMedicine.getManufacturerName()
-                    );
-
-                    dto.setType(
-                            bestMedicine.getType()
-                    );
-
-                    dto.setPackSizeLabel(
-                            bestMedicine.getPackSizeLabel()
-                    );
-
-                    dto.setShortComposition1(
-                            bestMedicine.getShortComposition1()
-                    );
-
-                    dto.setShortComposition2(
-                            bestMedicine.getShortComposition2()
-                    );
-
-
-                    finalResults.add(dto);
+                    MedicineResponseDto bestMedicine =
+                            medicineResults.get(0);
 
 
                     System.out.println(
-                            "BEST MATCH: "
+                            "BEST MEDICINE: "
                                     + bestMedicine.getName()
                     );
+
+
+                    // ==================================
+                    // STEP 7: SEARCH PRODUCT TABLE
+                    // ==================================
+                    //
+                    // IMPORTANT:
+                    //
+                    // We do NOT use Medicine ID.
+                    //
+                    // We search the products table
+                    // using the matched medicine name.
+                    //
+                    // The Product ID obtained here
+                    // is the ID that Cart needs.
+                    // ==================================
+
+                    List<Product> products =
+                            productRepository
+                                    .findByNameContainingIgnoreCase(
+                                            bestMedicine.getName()
+                                    );
+
+
+                    System.out.println(
+                            "Product Matches: "
+                                    + products.size()
+                    );
+
+
+                    // ==================================
+                    // STEP 8: BEST PRODUCT
+                    // ==================================
+
+                    if (!products.isEmpty()) {
+
+                        Product bestProduct =
+                                products.get(0);
+
+
+                        PrescriptionResponseDto dto =
+                                new PrescriptionResponseDto();
+
+
+                        // ==================================
+                        // AI / PRESCRIPTION INFORMATION
+                        // ==================================
+
+                        dto.setMedicineName(
+                                medicineName
+                        );
+
+                        dto.setDosage(
+                                dosage
+                        );
+
+                        dto.setFrequency(
+                                frequency
+                        );
+
+                        dto.setDuration(
+                                duration
+                        );
+
+
+                        // ==================================
+                        // PRODUCT INFORMATION
+                        // ==================================
+
+                        dto.setProductId(
+                                bestProduct.getId()
+                        );
+
+                        dto.setProductName(
+                                bestProduct.getName()
+                        );
+
+                        dto.setPrice(
+                                bestProduct.getPrice()
+                        );
+
+
+                        finalResults.add(dto);
+
+
+                        // ==================================
+                        // DEBUG OUTPUT
+                        // ==================================
+
+                        System.out.println(
+                                "========== FINAL PRODUCT =========="
+                        );
+
+                        System.out.println(
+                                "Medicine: "
+                                        + medicineName
+                        );
+
+                        System.out.println(
+                                "Product Name: "
+                                        + bestProduct.getName()
+                        );
+
+                        System.out.println(
+                                "Product ID: "
+                                        + bestProduct.getId()
+                        );
+
+                        System.out.println(
+                                "Product Price: ₹"
+                                        + bestProduct.getPrice()
+                        );
+
+                        System.out.println(
+                                "Dosage: "
+                                        + dosage
+                        );
+
+                        System.out.println(
+                                "Frequency: "
+                                        + frequency
+                        );
+
+                        System.out.println(
+                                "Duration: "
+                                        + duration
+                        );
+
+                        System.out.println(
+                                "==================================="
+                        );
+
+
+                    } else {
+
+                        System.out.println(
+                                "NO PRODUCT FOUND FOR MEDICINE: "
+                                        + bestMedicine.getName()
+                        );
+                    }
+
 
                 } else {
 

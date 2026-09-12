@@ -9,16 +9,21 @@ import com.example.demo.product.mapper.ProductMapper;
 import com.example.demo.product.repository.ProductRepository;
 
 import org.springframework.stereotype.Service;
-
+import com.example.demo.ai.prescription.util.MedicineSearchRanker;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
         private final ProductRepository productRepository;
+        private final MedicineSearchRanker medicineSearchRanker;
 
-        public ProductServiceImpl(ProductRepository productRepository) {
+        public ProductServiceImpl(ProductRepository productRepository,
+                MedicineSearchRanker medicineSearchRanker
+        ) {
             this.productRepository = productRepository;
+            this.medicineSearchRanker = medicineSearchRanker;
         }
 
 
@@ -79,6 +84,11 @@ public class ProductServiceImpl implements ProductService {
         return ProductMapper
                 .mapToResponseDto(updatedProduct);
     }
+
+
+
+
+
 
     @Override
     public void deleteProduct(Long id) {

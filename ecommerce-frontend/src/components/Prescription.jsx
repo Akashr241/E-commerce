@@ -1,15 +1,22 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { analyzePrescription } from "../services/prescriptionService";
-import { addToCart } from "../services/cartService";
 
 
 function Prescription() {
+
+    const navigate = useNavigate();
 
     const [file, setFile] = useState(null);
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+
+
+    // ==========================================
+    // FILE CHANGE
+    // ==========================================
 
     const handleFileChange = (e) => {
 
@@ -26,10 +33,18 @@ function Prescription() {
     };
 
 
+    // ==========================================
+    // ANALYZE PRESCRIPTION
+    // ==========================================
+
     const handleUpload = async () => {
 
         if (!file) {
-            setError("Please select a prescription image.");
+
+            setError(
+                "Please select a prescription image."
+            );
+
             return;
         }
 
@@ -40,11 +55,18 @@ function Prescription() {
             setSuccess("");
             setResults([]);
 
-            const data = await analyzePrescription(file);
+            const data =
+                await analyzePrescription(file);
 
-            console.log("========== PRESCRIPTION AI RESULT ==========");
+            console.log(
+                "========== PRESCRIPTION AI RESULT =========="
+            );
+
             console.log(data);
-            console.log("============================================");
+
+            console.log(
+                "============================================"
+            );
 
             setResults(data);
 
@@ -67,32 +89,68 @@ function Prescription() {
     };
 
 
-    const handleAddToCart = async (productId) => {
+    // ==========================================
+    // VIEW PRODUCT
+    // ==========================================
 
-        try {
+    const handleViewMedicine = (medicine) => {
 
-            console.log(
-                "Adding product to cart:",
-                productId
-            );
+        console.log(
+            "========== VIEW MEDICINE =========="
+        );
 
-            await addToCart(productId, 1);
+        console.log(
+            "Medicine:",
+            medicine.medicineName
+        );
 
-            setSuccess(
-                "Medicine added to your cart successfully."
-            );
+        console.log(
+            "Product:",
+            medicine.productName
+        );
 
-        } catch (err) {
+        console.log(
+            "Product ID:",
+            medicine.productId
+        );
 
-            console.error(
-                "Add to cart error:",
-                err
-            );
+        console.log(
+            "Dosage:",
+            medicine.dosage
+        );
 
-            setError(
-                "Unable to add medicine to cart."
-            );
-        }
+        console.log(
+            "Frequency:",
+            medicine.frequency
+        );
+
+        console.log(
+            "Duration:",
+            medicine.duration
+        );
+
+        console.log(
+            "==================================="
+        );
+
+
+        /*
+         * Navigate to the real product page.
+         *
+         * We are NOT adding the product to cart here.
+         */
+
+        navigate(
+            `/products/${medicine.productId}`,
+            {
+                state: {
+                    dosage: medicine.dosage,
+                    frequency: medicine.frequency,
+                    duration: medicine.duration,
+                    medicineName: medicine.medicineName
+                }
+            }
+        );
     };
 
 
@@ -102,7 +160,10 @@ function Prescription() {
 
             <div className="container py-5">
 
-                {/* HEADER */}
+
+                {/* ==========================================
+                    HEADER
+                ========================================== */}
 
                 <div className="text-center mb-5">
 
@@ -111,14 +172,18 @@ function Prescription() {
                     </h1>
 
                     <p className="text-muted fs-5">
+
                         Upload your prescription and let
                         MediAI understand your medicines.
+
                     </p>
 
                 </div>
 
 
-                {/* UPLOAD CARD */}
+                {/* ==========================================
+                    UPLOAD CARD
+                ========================================== */}
 
                 <div className="row justify-content-center">
 
@@ -128,46 +193,65 @@ function Prescription() {
 
                             <div className="card-body p-5 text-center">
 
+
                                 <div
                                     className="mb-4"
-                                    style={{ fontSize: "55px" }}
+                                    style={{
+                                        fontSize: "55px"
+                                    }}
                                 >
                                     📄
                                 </div>
 
 
                                 <h3 className="fw-bold">
+
                                     Upload Prescription
+
                                 </h3>
 
+
                                 <p className="text-muted">
+
                                     Upload a prescription image and
                                     our AI will extract the medicine
                                     information.
+
                                 </p>
 
+
+                                {/* FILE INPUT */}
 
                                 <input
                                     type="file"
                                     accept="image/*"
                                     className="form-control mt-4"
-                                    onChange={handleFileChange}
+                                    onChange={
+                                        handleFileChange
+                                    }
                                 />
 
+
+                                {/* SELECTED FILE */}
 
                                 {file && (
 
                                     <div className="mt-3 text-muted">
 
                                         Selected:
+
                                         <strong className="ms-1">
+
                                             {file.name}
+
                                         </strong>
 
                                     </div>
 
                                 )}
 
+
+                                {/* ANALYZE BUTTON */}
 
                                 <button
                                     className="btn btn-success w-100 mt-4"
@@ -176,25 +260,37 @@ function Prescription() {
                                 >
 
                                     {loading
+
                                         ? "🤖 AI Analyzing..."
-                                        : "🔍 Analyze Prescription"}
+
+                                        : "🔍 Analyze Prescription"
+
+                                    }
 
                                 </button>
 
 
+                                {/* ERROR */}
+
                                 {error && (
 
                                     <div className="alert alert-danger mt-4">
+
                                         {error}
+
                                     </div>
 
                                 )}
 
 
+                                {/* SUCCESS */}
+
                                 {success && (
 
                                     <div className="alert alert-success mt-4">
+
                                         {success}
+
                                     </div>
 
                                 )}
@@ -208,26 +304,40 @@ function Prescription() {
                 </div>
 
 
-                {/* AI RESULTS */}
+                {/* ==========================================
+                    AI RESULTS
+                ========================================== */}
 
                 {results.length > 0 && (
 
                     <div className="mt-5">
 
+
+                        {/* RESULT HEADER */}
+
                         <div className="text-center mb-4">
 
                             <h2 className="fw-bold">
+
                                 🤖 AI Prescription Results
+
                             </h2>
 
+
                             <p className="text-muted">
+
                                 We found {results.length} medicine
-                                {results.length > 1 ? "s" : ""} in your
-                                prescription.
+                                {results.length > 1
+                                    ? "s"
+                                    : ""
+                                } in your prescription.
+
                             </p>
 
                         </div>
 
+
+                        {/* RESULT CARDS */}
 
                         <div className="row g-4">
 
@@ -243,16 +353,22 @@ function Prescription() {
                                         <div className="card-body p-4">
 
 
-                                            {/* AI MEDICINE */}
+                                            {/* ==================================
+                                                AI DETECTED
+                                            ================================== */}
 
                                             <div className="mb-3">
 
                                                 <span className="badge bg-success-subtle text-success">
+
                                                     AI Detected
+
                                                 </span>
 
                                             </div>
 
+
+                                            {/* MEDICINE NAME */}
 
                                             <h4 className="fw-bold">
 
@@ -261,42 +377,60 @@ function Prescription() {
                                             </h4>
 
 
-                                            {/* DOSAGE */}
+                                            {/* ==================================
+                                                PRESCRIPTION INFORMATION
+                                            ================================== */}
 
                                             <div className="mt-3">
+
+
+                                                {/* DOSAGE */}
 
                                                 <p className="mb-2">
 
                                                     💊
+
                                                     <strong>
                                                         Dosage:
                                                     </strong>{" "}
 
-                                                    {medicine.dosage || "Not specified"}
+                                                    {medicine.dosage ||
+                                                        "Not specified"
+                                                    }
 
                                                 </p>
 
+
+                                                {/* FREQUENCY */}
 
                                                 <p className="mb-2">
 
                                                     🕐
+
                                                     <strong>
                                                         Frequency:
                                                     </strong>{" "}
 
-                                                    {medicine.frequency || "Not specified"}
+                                                    {medicine.frequency ||
+                                                        "Not specified"
+                                                    }
 
                                                 </p>
 
 
+                                                {/* DURATION */}
+
                                                 <p className="mb-2">
 
                                                     📅
+
                                                     <strong>
                                                         Duration:
                                                     </strong>{" "}
 
-                                                    {medicine.duration || "Not specified"}
+                                                    {medicine.duration ||
+                                                        "Not specified"
+                                                    }
 
                                                 </p>
 
@@ -306,10 +440,14 @@ function Prescription() {
                                             <hr />
 
 
-                                            {/* DATABASE PRODUCT */}
+                                            {/* ==================================
+                                                MATCHED PRODUCT
+                                            ================================== */}
 
                                             <small className="text-muted">
+
                                                 Matched Product
+
                                             </small>
 
 
@@ -320,28 +458,55 @@ function Prescription() {
                                             </h5>
 
 
-                                            <p className="text-muted mb-2">
+                                            {/* MANUFACTURER */}
 
-                                                {medicine.manufacturerName}
+                                            {medicine.manufacturerName && (
 
-                                            </p>
+                                                <p className="text-muted mb-2">
+
+                                                    {medicine.manufacturerName}
+
+                                                </p>
+
+                                            )}
 
 
-                                            <p className="small">
+                                            {/* COMPOSITION */}
 
-                                                {medicine.shortComposition1}
+                                            {(medicine.shortComposition1 ||
+                                                medicine.shortComposition2) && (
 
-                                                {medicine.shortComposition2 && (
-                                                    <>
-                                                        <br />
-                                                        {medicine.shortComposition2}
-                                                    </>
-                                                )}
+                                                <p className="small">
 
-                                            </p>
+                                                    {medicine.shortComposition1}
 
+                                                    {medicine.shortComposition2 && (
+
+                                                        <>
+
+                                                            <br />
+
+                                                            {
+                                                                medicine.shortComposition2
+                                                            }
+
+                                                        </>
+
+                                                    )}
+
+                                                </p>
+
+                                            )}
+
+
+                                            {/* ==================================
+                                                PRICE + VIEW BUTTON
+                                            ================================== */}
 
                                             <div className="d-flex justify-content-between align-items-center mt-3">
+
+
+                                                {/* PRICE */}
 
                                                 <span className="fs-4 fw-bold">
 
@@ -350,16 +515,18 @@ function Prescription() {
                                                 </span>
 
 
+                                                {/* VIEW MEDICINE */}
+
                                                 <button
                                                     className="btn btn-success rounded-pill px-4"
                                                     onClick={() =>
-                                                        handleAddToCart(
-                                                            medicine.productId
+                                                        handleViewMedicine(
+                                                            medicine
                                                         )
                                                     }
                                                 >
 
-                                                    🛒 Add to Cart
+                                                    View Medicine
 
                                                 </button>
 
@@ -384,5 +551,6 @@ function Prescription() {
         </div>
     );
 }
+
 
 export default Prescription;

@@ -18,4 +18,7 @@ public interface ProductService {
             ProductRequestDto dto);
 
     void deleteProduct(Long id);
+
+        
+
 }
