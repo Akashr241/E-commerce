@@ -97,6 +97,7 @@ private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHand
                                 HttpMethod.DELETE,
                                 "/products"
                         ).hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/products/import").permitAll()
 
 
                         // ----------------------------------

@@ -4,7 +4,7 @@ import com.example.demo.product.dto.ProductResponseDto;
 import com.example.demo.product.service.ProductService;
 
 import jakarta.validation.Valid;
-
+import com.example.demo.product.service.ProductExcelImportService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +17,10 @@ public class ProductController {
 
     
 private final ProductService productService;
-
-public ProductController(ProductService productService) {
+private final ProductExcelImportService productExcelImportService;
+public ProductController(ProductService productService, ProductExcelImportService productExcelImportService) {
         this.productService = productService;
+        this.productExcelImportService = productExcelImportService;
 }
 
     @PostMapping
@@ -32,6 +33,18 @@ public ProductController(ProductService productService) {
                 HttpStatus.CREATED
         );
     }
+
+
+@PostMapping("/import")
+public ResponseEntity<String> importProducts() {
+
+    int count = productExcelImportService.importProducts();
+
+    return ResponseEntity.ok(
+            count + " products imported successfully"
+    );
+}
+
 
     @GetMapping
     public ResponseEntity<List<ProductResponseDto>>
