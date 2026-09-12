@@ -238,22 +238,61 @@ function AdminProducts() {
                   <svg className="field-icon" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                   </svg>
+
                   <select
                     name="category"
                     value={form.category}
                     onChange={handleChange}
                     required
                   >
-                    <option value="">Select Category</option>
-                    <option value="Pain Relief">Pain Relief</option>
-                    <option value="Cold & Cough">Cold & Cough</option>
-                    <option value="Vitamins & Supplements">Vitamins & Supplements</option>
-                    <option value="Digestive Health">Digestive Health</option>
-                    <option value="Allergy">Allergy</option>
-                    <option value="Skin Care">Skin Care</option>
-                    <option value="Diabetes Care">Diabetes Care</option>
-                    <option value="First Aid">First Aid</option>
+                   
+<option value="General Medicine">General Medicine</option>
+
+<option value="Cardiology">Heart / Cardiology</option>
+<option value="Diabetes">Diabetes / Diabetology</option>
+<option value="Blood Pressure">BP / Hypertension</option>
+
+<option value="Neurology">Brain & Nerves / Neurology</option>
+<option value="Orthopedics">Bones & Joints / Orthopedics</option>
+<option value="Dermatology">Skin / Dermatology</option>
+<option value="Pediatrics">Children / Pediatrics</option>
+
+<option value="Women's Health">Women's Health / Gynecology</option>
+<option value="Men's Health">Men's Health / Andrology</option>
+
+<option value="Digestive Health">Stomach & Digestion / Gastroenterology</option>
+<option value="Liver Care">Liver / Hepatology</option>
+<option value="Kidney Care">Kidneys / Nephrology</option>
+<option value="Urinary Care">Urinary / Urology</option>
+
+<option value="Respiratory">Lungs & Breathing / Pulmonology</option>
+<option value="ENT">Ear, Nose & Throat / ENT</option>
+<option value="Eye Care">Eyes / Ophthalmology</option>
+<option value="Dental Care">Teeth & Oral Care / Dentistry</option>
+
+<option value="Mental Wellness">Mental Wellness / Psychiatry</option>
+<option value="Blood Disorders">Blood / Hematology</option>
+<option value="Immune Health">Immune System / Immunology</option>
+
+
+<option value="Infections">Infections / Infectious Disease</option>
+<option value="Arthritis">Arthritis / Rheumatology</option>
+<option value="Pain Management">Pain / Pain Management</option>
+
+<option value="Fever">Fever</option>
+<option value="Cold & Cough">Cold & Cough</option>
+
+<option value="First Aid">First Aid / Wound Care</option>
+
+<option value="Vitamins">Vitamins & Minerals</option>
+
+<option value="Prescription">Prescription Medicines</option>
+
+
                   </select>
+
+
+
                 </div>
               </div>
 

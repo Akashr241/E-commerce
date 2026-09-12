@@ -358,8 +358,6 @@ private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHand
         })
 )
                 
-
-
                 // ==========================================
                 // EXCEPTION HANDLING
                 // ==========================================
