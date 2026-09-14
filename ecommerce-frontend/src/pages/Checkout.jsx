@@ -154,15 +154,6 @@ const cartItems = cart?.cartItems || [];
 // CALCULATE TOTAL PRODUCTS
 // ==========================================
 
-const totalProducts = cartItems.reduce(
-
-    (total, item) =>
-
-        total + Number(item.quantity || 0),
-
-    0
-
-);
 
 
 // ==========================================
