@@ -9,7 +9,7 @@ import com.google.genai.types.GenerateContentResponse;
 @Component
 public class GeminiClient {
 
-    @Value("${GEMINI_API_KEY}")
+    @Value("${gemini.api.key}")
     private String apiKey;
 
     public String askGemini(String prompt) {
