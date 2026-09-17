@@ -66,7 +66,7 @@ public class SecurityConfig {
                 // AUTHORIZATION
                 // =================================================
 
-                .authorizeHttpRequests(auth -> auth)
+                .authorizeHttpRequests(auth -> auth
 
 
                 // -------------------------------------------------
@@ -389,14 +389,14 @@ public class SecurityConfig {
                 // EVERYTHING ELSE
                 // =================================================
 
-                .anyRequest().authenticated()
+                .anyRequest().authenticated())
 
 
                 // =================================================
                 // END AUTHORIZATION
                 // =================================================
 
-                )
+                
 
 
                 // =================================================
