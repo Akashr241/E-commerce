@@ -101,16 +101,16 @@ public class OCRServiceImpl implements OCRService {
 
             ITesseract tesseract,
 
-            @Value("${sightengine.api-user:}")
+            @Value("${sightengine.api.user:}")
             String sightengineApiUser,
 
-            @Value("${sightengine.api-secret:}")
+            @Value("${sightengine.api.secret:}")
             String sightengineApiSecret,
 
-            @Value("${prescription.ai-reject-threshold:0.90}")
+            @Value("${prescription.ai-reject-threshold}")
             double aiRejectThreshold,
 
-            @Value("${prescription.ai-detection.enabled:true}")
+            @Value("${prescription.ai-detection.enabled}")
             boolean aiDetectionEnabled
 
     ) {
