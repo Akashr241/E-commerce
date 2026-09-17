@@ -9,7 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.example.demo.security.config.OAuth2AuthenticationSuccessHandler;
+
 import com.example.demo.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.demo.security.jwt.JwtFilter;
 
@@ -17,381 +17,459 @@ import com.example.demo.security.jwt.JwtFilter;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+
+    // =====================================================
+    // CONSTRUCTOR
+    // =====================================================
 
     public SecurityConfig(
             JwtFilter jwtFilter,
             OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint
     ) {
-        this.jwtFilter = jwtFilter;
-        this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
-        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+
+        this.jwtFilter =
+                jwtFilter;
+
+        this.oAuth2AuthenticationSuccessHandler =
+                oAuth2AuthenticationSuccessHandler;
+
+        this.jwtAuthenticationEntryPoint =
+                jwtAuthenticationEntryPoint;
     }
 
 
+    // =====================================================
+    // SECURITY FILTER CHAIN
+    // =====================================================
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
 
         http
 
-                // ==========================================
+                // =================================================
                 // CSRF
-                // ==========================================
+                // =================================================
 
                 .csrf(csrf -> csrf.disable())
 
 
-                // ==========================================
-                // AUTHORIZE REQUESTS
-                // ==========================================
+                // =================================================
+                // AUTHORIZATION
+                // =================================================
 
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> auth)
 
-                        // ----------------------------------
-                        // NORMAL AUTHENTICATION
-                        // ----------------------------------
 
-                        .requestMatchers("/auth/**").permitAll()
+                // -------------------------------------------------
+                // PUBLIC AUTHENTICATION APIs
+                // -------------------------------------------------
 
+                .requestMatchers(
+                        "/auth/**"
+                ).permitAll()
 
-                        // ----------------------------------
-                        // GOOGLE OAUTH2
-                        // ----------------------------------
 
-                        .requestMatchers(
-                                "/oauth2/**",
-                                "/login/**"
-                        ).permitAll()
+                // -------------------------------------------------
+                // GOOGLE OAUTH2
+                // -------------------------------------------------
 
+                .requestMatchers(
+                        "/oauth2/**",
+                        "/login/**"
+                ).permitAll()
 
-                        // ----------------------------------
-                        // SWAGGER
-                        // ----------------------------------
 
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
+                // -------------------------------------------------
+                // SWAGGER
+                // -------------------------------------------------
 
+                .requestMatchers(
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html"
+                ).permitAll()
 
-                        // ----------------------------------
-                        // PRODUCT API
-                        // ADMIN ACCESS
-                        // ----------------------------------
 
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/products"
-                        ).hasAuthority("ADMIN")
+                // -------------------------------------------------
+                // HEALTH CHECK
+                // -------------------------------------------------
 
-                        .requestMatchers(
-                                HttpMethod.PUT,
-                                "/products"
-                        ).hasAuthority("ADMIN")
+                .requestMatchers(
+                        "/health"
+                ).permitAll()
 
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/products"
-                        ).hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/products/import").permitAll()
 
+                // =================================================
+                // PRODUCTS
+                // =================================================
 
-                        // ----------------------------------
-                        // PRODUCT API
-                        // PUBLIC ACCESS
-                        // ----------------------------------
+                // ADMIN - CREATE PRODUCT
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/products"
+                ).hasAuthority("ADMIN")
 
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/products"
-                        ).permitAll()
 
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/products/{id}"
-                        ).permitAll()
+                // ADMIN - UPDATE PRODUCT
+                .requestMatchers(
+                        HttpMethod.PUT,
+                        "/products"
+                ).hasAuthority("ADMIN")
 
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/products/**"
-                        ).permitAll()
 
+                // ADMIN - DELETE PRODUCT
+                .requestMatchers(
+                        HttpMethod.DELETE,
+                        "/products"
+                ).hasAuthority("ADMIN")
 
-                        // ----------------------------------
-                        // USERS
-                        // ADMIN ACCESS
-                        // ----------------------------------
 
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/users"
-                        ).hasAuthority("ADMIN")
+                // PRODUCT IMPORT
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/products/import"
+                ).permitAll()
 
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/users/**"
-                        ).hasAuthority("ADMIN")
 
+                // PUBLIC - VIEW PRODUCTS
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/products"
+                ).permitAll()
 
-                        // ----------------------------------
-                        // CHECKOUT
-                        // ----------------------------------
 
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/checkout/**"
-                        ).permitAll()
-
-
-                        // ----------------------------------
-                        // CART
-                        // USER ACCESS
-                        // ----------------------------------
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/cart/**"
-                        ).hasAuthority("USER")
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/cart/all"
-                        ).hasAuthority("ADMIN")
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/cart/my-cart"
-                        ).hasAuthority("USER")
-
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/cart/remove/{cartItemId}"
-                        ).hasAuthority("USER")
-
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/cart/remove/**"
-                        ).hasAuthority("USER")
-
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/cart/items/{id}"
-                        ).hasAuthority("USER")
-
-                        .requestMatchers(
-                                HttpMethod.PUT,
-                                "/cart/**"
-                        ).hasAuthority("USER")
-
-
-                        // ----------------------------------
-                        // ORDERS
-                        // ADMIN ACCESS
-                        // ----------------------------------
-
-                        .requestMatchers(
-                                HttpMethod.PUT,
-                                "/orders/*/status"
-                        ).hasAuthority("ADMIN")
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/orders/status"
-                        ).hasAuthority("ADMIN")
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/orders"
-                        ).hasAuthority("ADMIN")
-
-
-                        // ----------------------------------
-                        // ORDERS
-                        // USER ACCESS
-                        // ----------------------------------
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/orders/my-orders"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.DELETE,
-                                "/orders/*/cancel"
-                        ).hasAuthority("USER")
-
-
-                        // ----------------------------------
-                        // PAYMENT
-                        // ----------------------------------
-
-                        .requestMatchers(
-                                "/api/payments/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/payments/create*"
-                        ).hasAuthority("USER")
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/payments/verify"
-                        ).hasAuthority("USER")
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/payments/**"
-                        ).hasAnyAuthority(
-                                "USER",
-                                "ADMIN"
-                        )
-
-
-                        // ----------------------------------
-                        // RAZORPAY
-                        // ----------------------------------
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/razorpay/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/razorpay/**"
-                        ).permitAll()
-
-
-                        // ----------------------------------
-                        // AI
-                        // ----------------------------------
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/ai/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/ai/chat/**"
-                        ).permitAll()
-
-
-                        // ----------------------------------
-                        // PRESCRIPTION
-                        // ----------------------------------
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/prescription/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/prescription/ocr"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/prescription/analyze"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/prescription/fda/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/prescription/fda/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/medicines/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/medicines/**"
-                        ).permitAll()
-
-
-                        // ----------------------------------
-                        // ALL OTHER REQUESTS
-                        // ----------------------------------
-
-                        .anyRequest().authenticated()
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/products/{id}"
+                ).permitAll()
+
+
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/products/**"
+                ).permitAll()
+
+
+                // =================================================
+                // USERS
+                // =================================================
+
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/users"
+                ).hasAuthority("ADMIN")
+
+
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/users/**"
+                ).hasAuthority("ADMIN")
+
+
+                // =================================================
+                // CHECKOUT
+                // =================================================
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/checkout/**"
+                ).permitAll()
+
+
+                // =================================================
+                // CART
+                // =================================================
+
+                // ADD CART ITEM
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/cart/**"
+                ).hasAuthority("USER")
+
+
+                // ADMIN - VIEW ALL CARTS
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/cart/all"
+                ).hasAuthority("ADMIN")
+
+
+                // USER - VIEW OWN CART
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/cart/my-cart"
+                ).hasAuthority("USER")
+
+
+                // USER - REMOVE CART ITEM
+                .requestMatchers(
+                        HttpMethod.DELETE,
+                        "/cart/remove/{cartItemId}"
+                ).hasAuthority("USER")
+
+
+                .requestMatchers(
+                        HttpMethod.DELETE,
+                        "/cart/remove/**"
+                ).hasAuthority("USER")
+
+
+                .requestMatchers(
+                        HttpMethod.DELETE,
+                        "/cart/items/{id}"
+                ).hasAuthority("USER")
+
+
+                // USER - UPDATE CART
+                .requestMatchers(
+                        HttpMethod.PUT,
+                        "/cart/**"
+                ).hasAuthority("USER")
+
+
+                // =================================================
+                // ORDERS
+                // =================================================
+
+                // ADMIN - UPDATE ORDER STATUS
+                .requestMatchers(
+                        HttpMethod.PUT,
+                        "/orders/*/status"
+                ).hasAuthority("ADMIN")
+
+
+                // ADMIN - ORDER STATUS
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/orders/status"
+                ).hasAuthority("ADMIN")
+
+
+                // ADMIN - ALL ORDERS
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/orders"
+                ).hasAuthority("ADMIN")
+
+
+                // USER - OWN ORDERS
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/orders/my-orders"
+                ).permitAll()
+
+
+                // USER - CANCEL ORDER
+                .requestMatchers(
+                        HttpMethod.DELETE,
+                        "/orders/*/cancel"
+                ).hasAuthority("USER")
+
+
+                // =================================================
+                // PAYMENTS
+                // =================================================
+
+                .requestMatchers(
+                        "/api/payments/**"
+                ).permitAll()
+
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/payments/create*"
+                ).hasAuthority("USER")
+
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/payments/verify"
+                ).hasAuthority("USER")
+
+
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/payments/**"
+                ).hasAnyAuthority(
+                        "USER",
+                        "ADMIN"
                 )
 
 
-                // ==========================================
-                // GOOGLE OAUTH2 LOGIN
-                // ==========================================
-.oauth2Login(oauth2 -> oauth2
+                // =================================================
+                // RAZORPAY
+                // =================================================
 
-        .successHandler(
-                oAuth2AuthenticationSuccessHandler
-        )
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/api/razorpay/**"
+                ).permitAll()
 
-        .failureHandler((request, response, exception) -> {
 
-            System.out.println("========================================");
-            System.out.println("GOOGLE OAUTH LOGIN FAILED");
-            System.out.println(
-                    "Exception: "
-                    + exception.getClass().getName()
-            );
-            System.out.println(
-                    "Message: "
-                    + exception.getMessage()
-            );
-            System.out.println("========================================");
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/api/razorpay/**"
+                ).permitAll()
 
-            response.sendRedirect(
-                    "http://localhost:3000/login?oauth2Error=true"
-            );
-        })
-)
 
-//=============================================
-// testing
-//========================
-.requestMatchers("/health").permitAll()
-                
-                // ==========================================
+                // =================================================
+                // AI CHATBOT
+                // =================================================
+
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/api/ai/**"
+                ).permitAll()
+
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/api/ai/chat/**"
+                ).permitAll()
+
+
+                // =================================================
+                // PRESCRIPTION
+                // =================================================
+
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/prescription/**"
+                ).permitAll()
+
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/api/prescription/ocr"
+                ).permitAll()
+
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/api/prescription/analyze"
+                ).permitAll()
+
+
+                // FDA
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/api/prescription/fda/**"
+                ).permitAll()
+
+
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/api/prescription/fda/**"
+                ).permitAll()
+
+
+                // MEDICINES
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/api/medicines/**"
+                ).permitAll()
+
+
+                .requestMatchers(
+                        HttpMethod.POST,
+                        "/api/medicines/**"
+                ).permitAll()
+
+
+                // =================================================
+                // EVERYTHING ELSE
+                // =================================================
+
+                .anyRequest().authenticated()
+
+
+                // =================================================
+                // END AUTHORIZATION
+                // =================================================
+
+                )
+
+
+                // =================================================
+                // GOOGLE LOGIN
+                // =================================================
+
+                .oauth2Login(oauth2 -> oauth2
+
+                        .successHandler(
+                                oAuth2AuthenticationSuccessHandler
+                        )
+
+                        .failureHandler(
+                                (request, response, exception) -> {
+
+                                    System.out.println(
+                                            "========================================"
+                                    );
+
+                                    System.out.println(
+                                            "GOOGLE OAUTH LOGIN FAILED"
+                                    );
+
+                                    System.out.println(
+                                            "Exception: "
+                                                    + exception
+                                                            .getClass()
+                                                            .getName()
+                                    );
+
+                                    System.out.println(
+                                            "Message: "
+                                                    + exception.getMessage()
+                                    );
+
+                                    System.out.println(
+                                            "========================================"
+                                    );
+
+
+                                    response.sendRedirect(
+                                            "http://localhost:3000/login?oauth2Error=true"
+                                    );
+                                }
+                        )
+                )
+
+
+                // =================================================
                 // EXCEPTION HANDLING
-                // ==========================================
+                // =================================================
 
-                .exceptionHandling(ex -> ex
-
-                        .authenticationEntryPoint(
+                .exceptionHandling(
+                        ex -> ex.authenticationEntryPoint(
                                 jwtAuthenticationEntryPoint
                         )
                 )
 
 
-                // ==========================================
+                // =================================================
                 // SESSION MANAGEMENT
-                // GOOGLE OAUTH NEEDS SESSION
-                // ==========================================
+                // =================================================
 
-                .sessionManagement(session -> session
-
-                        .sessionCreationPolicy(
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(
                                 SessionCreationPolicy.IF_REQUIRED
                         )
                 )
 
 
-                // ==========================================
+                // =================================================
                 // JWT FILTER
-                // ==========================================
+                // =================================================
 
                 .addFilterBefore(
                         jwtFilter,
@@ -403,9 +481,9 @@ private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHand
     }
 
 
-    // ==========================================
+    // =====================================================
     // PASSWORD ENCODER
-    // ==========================================
+    // =====================================================
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -413,4 +491,3 @@ private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHand
         return new BCryptPasswordEncoder();
     }
 }
-
