@@ -7,15 +7,15 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,46 +39,54 @@ public class MedicineCsvImporter {
         System.out.println("MEDICINE CSV IMPORT STARTED");
         System.out.println("======================================");
 
-        // CSV file location
+        // =================================================
+        // CSV FILE FROM RESOURCES
+        // =================================================
 
-        String filePath = "C:\\Users\\Akash\\OneDrive\\Documents\\indian_medicine_data1.csv"; 
-        Path path = Paths.get( filePath);
+        ClassPathResource resource =
+                new ClassPathResource(
+                        "indian_medicine_data1.csv"
+                );
 
-        // Check file
+
+        // =================================================
+        // CHECK CSV FILE
+        // =================================================
+
         System.out.println("CSV FILE TEST");
-        System.out.println("Path: " + path);
-        System.out.println("Exists: " + Files.exists(path));
-        System.out.println("Is File: " + Files.isRegularFile(path));
-        System.out.println("Readable: " + Files.isReadable(path));
+        System.out.println(
+                "File: indian_medicine_data1.csv"
+        );
+
+        System.out.println(
+                "Exists: " + resource.exists()
+        );
+
         System.out.println("======================================");
 
-        // Stop if file doesn't exist
-        if (!Files.exists(path)) {
+
+        if (!resource.exists()) {
 
             throw new RuntimeException(
-                    "CSV file not found: " + path
+                    "CSV file not found in resources: "
+                            + "indian_medicine_data1.csv"
             );
         }
 
-        if (!Files.isRegularFile(path)) {
 
-            throw new RuntimeException(
-                    "Path is not a file: " + path
-            );
-        }
-
-        if (!Files.isReadable(path)) {
-
-            throw new RuntimeException(
-                    "CSV file is not readable: " + path
-            );
-        }
+        // =================================================
+        // READ CSV FROM CLASSPATH
+        // =================================================
 
         try (
+
+                InputStream inputStream =
+                        resource.getInputStream();
+
                 Reader reader =
                         new BufferedReader(
-                                Files.newBufferedReader(
-                                        path,
+                                new InputStreamReader(
+                                        inputStream,
                                         StandardCharsets.UTF_8
                                 )
                         );
@@ -90,6 +98,7 @@ public class MedicineCsvImporter {
                                 .setSkipHeaderRecord(true)
                                 .build()
                                 .parse(reader)
+
         ) {
 
             List<Medicine> batch =
@@ -97,10 +106,20 @@ public class MedicineCsvImporter {
 
             int count = 0;
 
+
+            // =================================================
+            // READ EACH CSV RECORD
+            // =================================================
+
             for (CSVRecord record : csvParser) {
 
                 Medicine medicine =
                         new Medicine();
+
+
+                // =================================================
+                // ID
+                // =================================================
 
                 medicine.setId(
                         Long.valueOf(
@@ -108,26 +127,51 @@ public class MedicineCsvImporter {
                         )
                 );
 
+
+                // =================================================
+                // NAME
+                // =================================================
+
                 medicine.setName(
                         record.get("name")
                 );
 
+
+                // =================================================
+                // PRICE
+                // =================================================
+
                 String price =
                         record.get("price");
 
-                if (price != null &&
-                        !price.isBlank()) {
+                if (
+                        price != null
+                                &&
+                        !price.isBlank()
+                ) {
 
                     medicine.setPrice(
-                            Double.valueOf(price)
+                            Double.valueOf(
+                                    price
+                            )
                     );
                 }
 
-                String discontinued =
-                        record.get("Is_discontinued");
 
-                if (discontinued != null &&
-                        !discontinued.isBlank()) {
+                // =================================================
+                // DISCONTINUED
+                // =================================================
+
+                String discontinued =
+                        record.get(
+                                "Is_discontinued"
+                        );
+
+                if (
+                        discontinued != null
+                                &&
+                        !discontinued.isBlank()
+                ) {
 
                     medicine.setDiscontinued(
                             Boolean.valueOf(
@@ -136,62 +180,131 @@ public class MedicineCsvImporter {
                     );
                 }
 
+
+                // =================================================
+                // MANUFACTURER
+                // =================================================
+
                 medicine.setManufacturerName(
-                        record.get("manufacturer_name")
+                        record.get(
+                                "manufacturer_name"
+                        )
                 );
+
+
+                // =================================================
+                // TYPE
+                // =================================================
 
                 medicine.setType(
                         record.get("type")
                 );
 
+
+                // =================================================
+                // PACK SIZE
+                // =================================================
+
                 medicine.setPackSizeLabel(
-                        record.get("pack_size_label")
+                        record.get(
+                                "pack_size_label"
+                        )
                 );
+
+
+                // =================================================
+                // COMPOSITION 1
+                // =================================================
 
                 medicine.setShortComposition1(
-                        record.get("short_composition1")
+                        record.get(
+                                "short_composition1"
+                        )
                 );
+
+
+                // =================================================
+                // COMPOSITION 2
+                // =================================================
 
                 medicine.setShortComposition2(
-                        record.get("short_composition2")
+                        record.get(
+                                "short_composition2"
+                        )
                 );
 
-                batch.add(medicine);
 
-                // Save every 1000 records
-                if (batch.size() >= BATCH_SIZE) {
+                // =================================================
+                // ADD TO BATCH
+                // =================================================
+
+                batch.add(
+                        medicine
+                );
+
+
+                // =================================================
+                // SAVE EVERY 1000 RECORDS
+                // =================================================
+
+                if (
+                        batch.size()
+                                >=
+                        BATCH_SIZE
+                ) {
 
                     medicineRepository.saveAll(
                             batch
                     );
 
-                    count += batch.size();
+                    count +=
+                            batch.size();
+
 
                     System.out.println(
                             "Imported medicines: "
-                                    + count
+                                    +
+                                    count
                     );
+
 
                     batch.clear();
                 }
             }
 
-            // Save remaining records
+
+            // =================================================
+            // SAVE REMAINING RECORDS
+            // =================================================
+
             if (!batch.isEmpty()) {
 
                 medicineRepository.saveAll(
                         batch
                 );
 
-                count += batch.size();
+                count +=
+                        batch.size();
             }
 
-            System.out.println("======================================");
+
+            // =================================================
+            // IMPORT COMPLETE
+            // =================================================
+
+            System.out.println(
+                    "======================================"
+            );
+
             System.out.println(
                     "TOTAL MEDICINES IMPORTED: "
-                            + count
+                            +
+                            count
             );
-            System.out.println("======================================");
+
+            System.out.println(
+                    "======================================"
+            );
         }
     }
 }
