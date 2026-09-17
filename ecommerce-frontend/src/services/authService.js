@@ -1,5 +1,6 @@
 import api from "./api";
 
+
 export const registerUser = async (userData) => {
 
     try {
@@ -32,7 +33,8 @@ export const loginWithGoogle = () => {
     // Redirect user to Spring Boot
     // Google OAuth2 authorization endpoint
     window.location.href =
-        "http://localhost:8080/oauth2/authorization/google";
+    `${process.env.REACT_APP_API_URL}/oauth2/authorization/google`;
+
 };
 
 export const loginUser = async (credentials) => {

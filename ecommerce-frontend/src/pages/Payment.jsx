@@ -50,7 +50,8 @@ function Payment() {
 
     const options = {
 
-        key: "rzp_test_TEdwiuvXS4duTr",
+        
+        key: process.env.REACT_APP_RAZORPAY_KEY,
 
     
         
@@ -58,7 +59,7 @@ function Payment() {
 
         currency: response.data.currency,
 
-        name: "Akash E-Commerce",
+        name: "Medi Pharm",
 
         description: "Order Payment",
 
