@@ -3,7 +3,7 @@ package com.example.demo.ai.chatbot.client;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.context.annotation.Configuration;
-
+import org.springframework.context.annotation.Bean;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 
@@ -13,6 +13,7 @@ public class GeminiClient {
     @Value("${gemini.api.key}")
     private String apiKey;
 
+    
     public String askGemini(String prompt) {
 
         Client client = Client.builder()
