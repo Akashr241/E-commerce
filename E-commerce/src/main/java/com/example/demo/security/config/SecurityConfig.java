@@ -358,6 +358,11 @@ private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHand
             );
         })
 )
+
+//=============================================
+// testing
+//========================
+.requestMatchers("/health").permitAll()
                 
                 // ==========================================
                 // EXCEPTION HANDLING

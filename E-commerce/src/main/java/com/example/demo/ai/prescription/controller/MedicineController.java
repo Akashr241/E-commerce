@@ -54,4 +54,9 @@ public ResponseEntity<String> importMedicines() {
 
         return ResponseEntity.ok(medicines);
     }
+
+    @GetMapping("/health")
+    public String health() {
+    return "MediPharm Backend is running";
+}
 }
