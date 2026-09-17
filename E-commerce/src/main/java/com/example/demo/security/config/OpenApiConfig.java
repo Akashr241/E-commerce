@@ -9,9 +9,9 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 @Configuration
 @OpenAPIDefinition(
     info = @Info(
-        title = "E-commerce API",
+        title = "Medipharm API",
         version = "1.0",
-        description = " E-commerce application Backend API"
+        description = " pharmae application Backend API"
     ),
     security = @SecurityRequirement(name = "bearerAuth")
 )

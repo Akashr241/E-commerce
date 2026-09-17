@@ -14,11 +14,14 @@ import com.example.demo.security.jwt.JwtService;
 import com.example.demo.security.user.entity.Role;
 import com.example.demo.security.user.entity.User;
 import com.example.demo.security.user.repository.UserRepository;
-
+import org.springframework.beans.factory.annotation.Value;
 
 @Component
 public class OAuth2AuthenticationSuccessHandler
         implements AuthenticationSuccessHandler {
+        
+@Value("${app.frontend.url}")
+private String frontendUrl;
 
     private final UserRepository userRepository;
 
@@ -138,7 +141,7 @@ public class OAuth2AuthenticationSuccessHandler
         // ==========================================
 
         String redirectUrl =
-                "http://localhost:3000/oauth2/redirect"
+                frontendUrl + "/oauth2/redirect"
                         + "?token="
                         + token;
 
