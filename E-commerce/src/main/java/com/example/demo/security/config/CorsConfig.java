@@ -10,7 +10,7 @@ import com.google.api.client.util.Value;
 
 @Configuration
 public class CorsConfig {
-        @Value("${app.frontend.url}")
+        @Value("${app.frontend.url:http://localhost:3000}")
         private String frontendUrl;
 
     @Bean
