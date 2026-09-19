@@ -1,6 +1,4 @@
-import api from "./api";
-
-const API_URL = process.env.REACT_APP_API_URL;
+import API from "./api";
 
 
 // ==========================================
@@ -22,7 +20,7 @@ export const removeFromCart = async (cartItemId) => {
 
         console.log(
             "Request URL:",
-            `${API_URL}/cart/remove/${cartItemId}`
+            `/cart/remove/${cartItemId}`
         );
 
 
@@ -31,8 +29,8 @@ export const removeFromCart = async (cartItemId) => {
         // JWT IS AUTOMATICALLY ADDED BY api.js
         // ==================================
 
-        const response = await api.delete(
-            `${API_URL}/cart/remove/${cartItemId}`
+        const response = await API.delete(
+            `/cart/remove/${cartItemId}`
         );
 
 
@@ -129,8 +127,10 @@ export const clearCart = async () => {
             "========== CLEAR CART =========="
         );
 
-        const response =
-            await api.delete(`${API_URL}/cart/clear`);
+
+        const response = await API.delete(
+            "/cart/clear"
+        );
 
 
         console.log(
@@ -147,7 +147,26 @@ export const clearCart = async () => {
             "========== CLEAR CART FAILED =========="
         );
 
-        console.error(error);
+        console.error(
+            "Full Error:",
+            error
+        );
+
+
+        if (error.response) {
+
+            console.error(
+                "Backend Status:",
+                error.response.status
+            );
+
+            console.error(
+                "Backend Data:",
+                error.response.data
+            );
+
+        }
+
 
         throw error;
 
@@ -167,34 +186,29 @@ export const myCart = async () => {
         console.log(
             "========== FETCH MY CART =========="
         );
-  
+
 
         console.log(
-            `Request URL: ${API_URL}/cart/my-cart`
+            "Request URL:",
+            "/cart/my-cart"
         );
 
 
-        const response =
-            await api.get(`${API_URL}/cart/my-cart`);
+        const response = await API.get(
+            "/cart/my-cart"
+        );
 
 
         console.log(
             "========== CART FETCH SUCCESS =========="
         );
 
+
         console.log(
             "Cart Status:",
             response.status
         );
 
-        console.log(
-            "Cart Data:",
-            response.data
-        );
-
-        // ==================================
-        // NORMAL OBJECT LOG
-        // ==================================
 
         console.log(
             "Cart Data:",
@@ -224,12 +238,16 @@ export const myCart = async () => {
             "========== FETCH CART FAILED =========="
         );
 
-        console.error(error);
+        console.error(
+            "Full Error:",
+            error
+        );
+
 
         if (error.response) {
 
             console.error(
-                "Status:",
+                "Backend Status:",
                 error.response.status
             );
 
@@ -239,6 +257,7 @@ export const myCart = async () => {
             );
 
         }
+
 
         throw error;
 
@@ -259,14 +278,15 @@ export const addToCart = async (productId) => {
             "========== ADD PRODUCT TO CART =========="
         );
 
+
         console.log(
             "Product ID:",
             productId
         );
 
 
-        const response = await api.post(
-            `${API_URL}/cart/add-product`,
+        const response = await API.post(
+            "/cart/add-product",
             {
                 productId: productId,
                 quantity: 1
@@ -277,6 +297,7 @@ export const addToCart = async (productId) => {
         console.log(
             "========== PRODUCT ADDED SUCCESSFULLY =========="
         );
+
 
         console.log(
             "Response:",
@@ -292,12 +313,17 @@ export const addToCart = async (productId) => {
             "========== ADD TO CART FAILED =========="
         );
 
-        console.error(error);
+
+        console.error(
+            "Full Error:",
+            error
+        );
+
 
         if (error.response) {
 
             console.error(
-                "Status:",
+                "Backend Status:",
                 error.response.status
             );
 
@@ -307,6 +333,7 @@ export const addToCart = async (productId) => {
             );
 
         }
+
 
         throw error;
 
