@@ -1,5 +1,6 @@
 package com.example.demo.security.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -9,15 +10,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Value;
+
 import com.example.demo.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.demo.security.jwt.JwtFilter;
+
 
 @Configuration
 public class SecurityConfig {
 
-        @Value("${app.frontend.url}")
-        private String frontendUrl;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
 
     private final JwtFilter jwtFilter;
@@ -58,6 +61,14 @@ public class SecurityConfig {
     ) throws Exception {
 
         http
+
+
+                // =================================================
+                // CORS
+                // =================================================
+
+                .cors(cors -> {})
+
 
                 // =================================================
                 // CSRF
@@ -396,7 +407,6 @@ public class SecurityConfig {
                 .anyRequest().authenticated())
 
 
-
                 // =================================================
                 // GOOGLE LOGIN
                 // =================================================
@@ -436,7 +446,8 @@ public class SecurityConfig {
 
 
                                     response.sendRedirect(
-                                            frontendUrl + "/login?oauth2Error=true"
+                                            frontendUrl
+                                                    + "/login?oauth2Error=true"
                                     );
                                 }
                         )
