@@ -6,9 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MedicineSearchRanker {
 
-    public int calculateScore(
-            String searchName,
-            Medicine medicine) {
+    public int calculateScore(String searchName, Medicine medicine) {
 
         if (searchName == null || medicine == null) {
             return 0;
@@ -30,46 +28,23 @@ public class MedicineSearchRanker {
 
         int score = 0;
 
-
-        // =====================================
-        // 1. EXACT NAME
-        // =====================================
-
+        // Exact match
         if (medicineName.equals(search)) {
-
-            score += 100;
-
+            return 100;
         }
 
-
-        // =====================================
-        // 2. STARTS WITH SEARCH
-        // =====================================
-
-        else if (medicineName.startsWith(search)) {
-
+        // Medicine name starts with search
+        if (medicineName.startsWith(search)) {
             score += 70;
-
         }
 
-
-        // =====================================
-        // 3. CONTAINS SEARCH
-        // =====================================
-
+        // Medicine name contains search
         else if (medicineName.contains(search)) {
-
             score += 50;
-
         }
 
-
-        // =====================================
-        // 4. WORD MATCHING
-        // =====================================
-
-        String[] searchWords =
-                search.split("\\s+");
+        // Word matching
+        String[] searchWords = search.split("\\s+");
 
         for (String word : searchWords) {
 
@@ -77,53 +52,46 @@ public class MedicineSearchRanker {
                 continue;
             }
 
-            if (medicineName.contains(word)) {
+            // Ignore common dosage/form words
+            if (word.equals("syp")
+                    || word.equals("syrup")
+                    || word.equals("tab")
+                    || word.equals("tablet")
+                    || word.equals("cap")
+                    || word.equals("capsule")) {
+                continue;
+            }
 
+            if (medicineName.contains(word)) {
                 score += 10;
             }
         }
 
-
-        // =====================================
-        // 5. DOSAGE FORM MATCHING
-        // =====================================
-
+        // Dosage form
         if (search.contains("syrup")
                 && medicineName.contains("syrup")) {
-
             score += 20;
         }
 
         if (search.contains("tablet")
                 && medicineName.contains("tablet")) {
-
-            score += 20;
-        }
-
-        if (search.contains("inhaler")
-                && medicineName.contains("inhaler")) {
-
-            score += 20;
-        }
-
-        if (search.contains("respules")
-                && medicineName.contains("respules")) {
-
             score += 20;
         }
 
         if (search.contains("capsule")
                 && medicineName.contains("capsule")) {
+            score += 20;
+        }
 
+        if (search.contains("inhaler")
+                && medicineName.contains("inhaler")) {
             score += 20;
         }
 
         if (search.contains("drops")
                 && medicineName.contains("drops")) {
-
             score += 20;
         }
-
 
         return score;
     }

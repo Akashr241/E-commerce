@@ -21,13 +21,17 @@ public class MedicineNameNormalizer {
         name = name.replaceFirst("(?i)^cap\\.?\\s+", "");
         name = name.replaceFirst("(?i)^capsule\\.?\\s+", "");
 
-        // Remove dosage
+        // Remove dosage like:
+        // 250mg
+        // 5ml
+        // 500 mg
+        // 10 mcg
         name = name.replaceAll(
-                "(?i)\\s+\\d+(\\.\\d+)?\\s*(ml|mg|g|mcg)\\b.*$",
+                "(?i)\\s+\\d+(\\.\\d+)?\\s*(mg|ml|mcg|g)\\b.*$",
                 ""
         );
 
-        // Remove punctuation
+        // Remove punctuation at the end
         name = name.replaceAll("[,;:]+$", "");
 
         // Remove extra spaces
