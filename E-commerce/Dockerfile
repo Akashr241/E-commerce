@@ -20,6 +20,17 @@ FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
+# Install Tesseract OCR and Leptonica
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    libtesseract-dev \
+    libleptonica-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+    
+
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
