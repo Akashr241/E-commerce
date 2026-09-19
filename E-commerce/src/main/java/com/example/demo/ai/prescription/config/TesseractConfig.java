@@ -1,8 +1,9 @@
-
 package com.example.demo.ai.prescription.config;
+
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,20 +11,16 @@ import org.springframework.context.annotation.Configuration;
 public class TesseractConfig {
 
     @Bean
-    public ITesseract tesseract() {
+    public ITesseract tesseract(
+            @Value("${tesseract.datapath}") String datapath) {
 
-        Tesseract tesseract =
-                new Tesseract();
+        Tesseract tesseract = new Tesseract();
 
-        // Tesseract installation tessdata folder
-        tesseract.setDatapath(
-                "C:\\Program Files\\Tesseract-OCR\\tessdata"
-        );
+        // Tesseract tessdata folder
+        tesseract.setDatapath(datapath);
 
         // English language
-        tesseract.setLanguage(
-                "eng"
-        );
+        tesseract.setLanguage("eng");
 
         return tesseract;
     }
