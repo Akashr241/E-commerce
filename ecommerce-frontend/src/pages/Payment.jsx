@@ -59,7 +59,7 @@ function Payment() {
 
         currency: response.data.currency,
 
-        name: "Medi Pharm",
+        name: "MediPharm",
 
         description: "Order Payment",
 

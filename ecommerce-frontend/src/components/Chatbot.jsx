@@ -7,7 +7,7 @@ const Chatbot = () => {
     const [messages, setMessages] = useState([
         {
             sender: "ai",
-            text: "Hello! 👋 I'm MediAI. How can I help you today?"
+            text: "Hello! 👋 I'm MediPharm AI. How can I help you today?"
         }
     ]);
     const [loading, setLoading] = useState(false);
@@ -66,7 +66,7 @@ const Chatbot = () => {
                 ...previousMessages,
                 {
                     sender: "ai",
-                    text: "Sorry, I couldn't connect to MediAI right now."
+                    text: "Sorry, I couldn't connect to MediPharm right now."
                 }
             ]);
         } finally {
@@ -118,7 +118,7 @@ const Chatbot = () => {
                             </div>
                             <div>
                                 <div className="fw-semibold text-white lh-1 mb-1" style={{ fontSize: "16px" }}>
-                                    MediAI Assistant
+                                    MediPharm Assistant
                                 </div>
                                 <div className="d-flex align-items-center gap-1">
                                     <span
