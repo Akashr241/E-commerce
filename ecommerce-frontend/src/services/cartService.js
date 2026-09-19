@@ -1,5 +1,7 @@
 import api from "./api";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 
 // ==========================================
 // REMOVE CART ITEM
@@ -20,7 +22,7 @@ export const removeFromCart = async (cartItemId) => {
 
         console.log(
             "Request URL:",
-            `/cart/remove/${cartItemId}`
+            `${API_URL}/cart/remove/${cartItemId}`
         );
 
 
@@ -30,7 +32,7 @@ export const removeFromCart = async (cartItemId) => {
         // ==================================
 
         const response = await api.delete(
-            `/cart/remove/${cartItemId}`
+            `${API_URL}/cart/remove/${cartItemId}`
         );
 
 
@@ -128,7 +130,7 @@ export const clearCart = async () => {
         );
 
         const response =
-            await api.delete("/cart/clear");
+            await api.delete(`${API_URL}/cart/clear`);
 
 
         console.log(
@@ -168,12 +170,12 @@ export const myCart = async () => {
   
 
         console.log(
-            "Request URL: /cart/my-cart"
+            `Request URL: ${API_URL}/cart/my-cart`
         );
 
 
         const response =
-            await api.get("/cart/my-cart");
+            await api.get(`${API_URL}/cart/my-cart`);
 
 
         console.log(
@@ -264,7 +266,7 @@ export const addToCart = async (productId) => {
 
 
         const response = await api.post(
-            "/cart/add-product",
+            `${API_URL}/cart/add-product`,
             {
                 productId: productId,
                 quantity: 1
